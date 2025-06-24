@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت مرزبان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Vazir', sans-serif !important;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .loading {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #5D5CDE;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .glass {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark .glass {
+            background: rgba(0, 0, 0, 0.2);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#CC9B50'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    <!-- Clear Service Workers Script -->
+    <script>
+        // Clear any existing service workers to prevent errors
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+        
+        // Clear cache storage
+        if ('caches' in window) {
+            caches.keys().then(function(cacheNames) {
+                return Promise.all(
+                    cacheNames.map(function(cacheName) {
+                        return caches.delete(cacheName);
+                    })
+                );
+            });
+        }
+    </script>
+
+    <!-- Dark Mode Detection -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto p-4">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 slide-in">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <i class="fas fa-shield-alt text-3xl text-primary"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">پنل مدیریت مرزبان</h1>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm">مدیریت کاربران و سرویس‌های VPN</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="connectionStatus" class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500" id="statusDot"></div>
+                        <span class="text-sm text-gray-600 dark:text-gray-300" id="statusText">قطع شده</span>
+                    </div>
+                    <button onclick="clearCache()" class="text-sm bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">
+                        پاک کردن Cache
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Connection Form -->
+        <div id="connectionForm" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 slide-in">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fas fa-plug text-primary"></i>
+                اتصال به پنل مرزبان
+            </h2>
+            <form id="connectForm" class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        آدرس پنل مرزبان
+                    </label>
+                    <input 
+                        type="url" 
+                        id="panelUrl" 
+                        placeholder="https://your-panel.com"
+                        class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                        required
+                    >
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        نام کاربری
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        placeholder="admin"
+                        class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                        required
+                    >
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        رمز عبور
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        placeholder="••••••••"
+                        class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                        required
+                    >
+                </div>
+                <div class="flex items-end">
+                    <button 
+                        type="submit" 
+                        id="connectBtn"
+                        class="w-full bg-primary hover:bg-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-link"></i>
+                        اتصال
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-6 slide-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm">کل کاربران</p>
+                            <p class="text-3xl font-bold" id="totalUsers">0</p>
+                        </div>
+                        <i class="fas fa-users text-4xl text-blue-200"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-6 slide-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm">کاربران فعال</p>
+                            <p class="text-3xl font-bold" id="activeUsers">0</p>
+                        </div>
+                        <i class="fas fa-user-check text-4xl text-green-200"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg p-6 slide-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-yellow-100 text-sm">کاربران محدود</p>
+                            <p class="text-3xl font-bold" id="limitedUsers">0</p>
+                        </div>
+                        <i class="fas fa-user-clock text-4xl text-yellow-200"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg p-6 slide-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-red-100 text-sm">کاربران غیرفعال</p>
+                            <p class="text-3xl font-bold" id="expiredUsers">0</p>
+                        </div>
+                        <i class="fas fa-user-times text-4xl text-red-200"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Panel -->
+            <div class="grid lg:grid-cols-3 gap-6 mb-6">
+                <!-- Create User -->
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 slide-in">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                        <i class="fas fa-user-plus text-primary"></i>
+                        ایجاد کاربر جدید
+                    </h2>
+                    <form id="createUserForm" class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                نام کاربری
+                            </label>
+                            <input 
+                                type="text" 
+                                id="newUsername" 
+                                placeholder="user123"
+                                class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                                required
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                پروکسی
+                            </label>
+                            <select 
+                                id="proxy" 
+                                class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                                required
+                            >
+                                <option value="vmess">VMess</option>
+                                <option value="vless">VLESS</option>
+                                <option value="trojan">Trojan</option>
+                                <option value="shadowsocks">Shadowsocks</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                محدودیت ترافیک (GB)
+                            </label>
+                            <input 
+                                type="number" 
+                                id="dataLimit" 
+                                placeholder="50"
+                                min="1"
+                                class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                تاریخ انقضا (روز)
+                            </label>
+                            <input 
+                                type="number" 
+                                id="expireDays" 
+                                placeholder="30"
+                                min="1"
+                                class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                        </div>
+                        <div class="md:col-span-2">
+                            <button 
+                                type="submit" 
+                                id="createUserBtn"
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                            >
+                                <i class="fas fa-plus"></i>
+                                ایجاد کاربر
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 slide-in">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                        <i class="fas fa-bolt text-secondary"></i>
+                        عملیات سریع
+                    </h2>
+                    <div class="space-y-3">
+                        <button 
+                            onclick="refreshUsers()"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                        >
+                            <i class="fas fa-sync-alt"></i>
+                            بروزرسانی لیست
+                        </button>
+                        <button 
+                            onclick="exportUsers()"
+                            class="w-full bg-secondary hover:bg-yellow-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                        >
+                            <i class="fas fa-download"></i>
+                            دانلود کاربران
+                        </button>
+                        <button 
+                            onclick="clearExpiredUsers()"
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                        >
+                            <i class="fas fa-trash"></i>
+                            حذف منقضی‌ها
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden slide-in">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                            <i class="fas fa-list text-primary"></i>
+                            لیست کاربران
+                        </h2>
+                        <div class="flex items-center gap-4">
+                            <input 
+                                type="text" 
+                                id="searchUsers" 
+                                placeholder="جستجوی کاربر..."
+                                class="px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                            <select 
+                                id="filterStatus"
+                                class="px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                                <option value="">همه کاربران</option>
+                                <option value="active">فعال</option>
+                                <option value="limited">محدود</option>
+                                <option value="expired">منقضی</option>
+                                <option value="disabled">غیرفعال</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">کاربر</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">وضعیت</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ترافیک</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">انقضا</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <!-- Users will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="loadingUsers" class="flex justify-center items-center py-8 hidden">
+                    <div class="loading"></div>
+                    <span class="mr-3 text-gray-600 dark:text-gray-300">در حال بارگذاری...</span>
+                </div>
+                <div id="noUsers" class="text-center py-8 text-gray-500 dark:text-gray-400 hidden">
+                    <i class="fas fa-users text-4xl mb-4"></i>
+                    <p>هیچ کاربری یافت نشد</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications" class="fixed top-4 left-4 z-50 space-y-2"></div>
+
+        <!-- User Details Modal -->
+        <div id="userModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800 dark:text-white">جزئیات کاربر</h3>
+                        <button onclick="closeUserModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div id="userModalContent">
+                        <!-- User details will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let apiToken = '';
+        let panelBaseUrl = '';
+        let users = [];
+
+        // Clear cache function
+        function clearCache() {
+            // Clear service workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+            
+            // Clear cache storage
+            if ('caches' in window) {
+                caches.keys().then(function(cacheNames) {
+                    return Promise.all(
+                        cacheNames.map(function(cacheName) {
+                            return caches.delete(cacheName);
+                        })
+                    );
+                });
+            }
+            
+            // Clear session storage
+            sessionStorage.clear();
+            
+            showNotification('Cache پاک شد - صفحه را رفرش کنید', 'success');
+            
+            // Reload page after 2 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            
+            // Check if connection data exists in sessionStorage
+            try {
+                const savedConnection = sessionStorage.getItem('marzbanConnection');
+                if (savedConnection) {
+                    const connectionData = JSON.parse(savedConnection);
+                    document.getElementById('panelUrl').value = connectionData.url || '';
+                    document.getElementById('username').value = connectionData.username || '';
+                }
+            } catch (error) {
+                console.log('No saved connection data');
+            }
+        });
+
+        function setupEventListeners() {
+            // Connection form
+            document.getElementById('connectForm').addEventListener('submit', handleConnect);
+            
+            // Create user form
+            document.getElementById('createUserForm').addEventListener('submit', handleCreateUser);
+            
+            // Search and filter
+            document.getElementById('searchUsers').addEventListener('input', filterUsers);
+            document.getElementById('filterStatus').addEventListener('change', filterUsers);
+        }
+
+        async function handleConnect(e) {
+            e.preventDefault();
+            
+            const url = document.getElementById('panelUrl').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            const connectBtn = document.getElementById('connectBtn');
+            const originalText = connectBtn.innerHTML;
+            
+            try {
+                connectBtn.innerHTML = '<div class="loading"></div> در حال اتصال...';
+                connectBtn.disabled = true;
+                
+                // Remove trailing slash from URL
+                panelBaseUrl = url.replace(/\/$/, '');
+                
+                // Make login request
+                const response = await fetch(`${panelBaseUrl}/api/admin/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`خطا در اتصال: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                apiToken = data.access_token;
+                
+                // Save connection data (without password) in sessionStorage for security
+                sessionStorage.setItem('marzbanConnection', JSON.stringify({
+                    url: panelBaseUrl,
+                    username: username
+                }));
+                
+                updateConnectionStatus(true);
+                showNotification('اتصال با موفقیت برقرار شد!', 'success');
+                
+                // Hide connection form and show dashboard
+                document.getElementById('connectionForm').style.display = 'none';
+                document.getElementById('dashboard').classList.remove('hidden');
+                
+                // Load initial data
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                showNotification('خطا در اتصال: ' + error.message, 'error');
+                updateConnectionStatus(false);
+            } finally {
+                connectBtn.innerHTML = originalText;
+                connectBtn.disabled = false;
+            }
+        }
+
+        async function handleCreateUser(e) {
+            e.preventDefault();
+            
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const proxy = document.getElementById('proxy').value;
+            const dataLimit = document.getElementById('dataLimit').value;
+            const expireDays = document.getElementById('expireDays').value;
+            
+            const createBtn = document.getElementById('createUserBtn');
+            const originalText = createBtn.innerHTML;
+            
+            try {
+                createBtn.innerHTML = '<div class="loading"></div> در حال ایجاد...';
+                createBtn.disabled = true;
+                
+                const userData = {
+                    username: newUsername,
+                    proxies: {
+                        [proxy]: {}
+                    },
+                    data_limit: dataLimit ? parseInt(dataLimit) * 1024 * 1024 * 1024 : null, // Convert GB to bytes
+                    expire: expireDays ? Math.floor(Date.now() / 1000) + (parseInt(expireDays) * 24 * 60 * 60) : null
+                };
+                
+                const response = await fetch(`${panelBaseUrl}/api/user`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `خطا: ${response.status}`);
+                }
+                
+                showNotification(`کاربر ${newUsername} با موفقیت ایجاد شد!`, 'success');
+                
+                // Clear form
+                document.getElementById('createUserForm').reset();
+                
+                // Reload users
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Create user error:', error);
+                showNotification('خطا در ایجاد کاربر: ' + error.message, 'error');
+            } finally {
+                createBtn.innerHTML = originalText;
+                createBtn.disabled = false;
+            }
+        }
+
+        async function loadUsers() {
+            const loadingEl = document.getElementById('loadingUsers');
+            const tableEl = document.getElementById('usersTable');
+            const noUsersEl = document.getElementById('noUsers');
+            
+            try {
+                loadingEl.classList.remove('hidden');
+                tableEl.innerHTML = '';
+                noUsersEl.classList.add('hidden');
+                
+                const response = await fetch(`${panelBaseUrl}/api/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`خطا در دریافت کاربران: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                users = data.users || [];
+                
+                updateStats();
+                renderUsers(users);
+                
+            } catch (error) {
+                console.error('Load users error:', error);
+                showNotification('خطا در دریافت کاربران: ' + error.message, 'error');
+                noUsersEl.classList.remove('hidden');
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        function updateStats() {
+            const stats = {
+                total: users.length,
+                active: 0,
+                limited: 0,
+                expired: 0
+            };
+            
+            const now = Math.floor(Date.now() / 1000);
+            
+            users.forEach(user => {
+                const status = getUserStatus(user, now);
+                switch (status) {
+                    case 'active':
+                        stats.active++;
+                        break;
+                    case 'limited':
+                        stats.limited++;
+                        break;
+                    case 'expired':
+                        stats.expired++;
+                        break;
+                }
+            });
+            
+            document.getElementById('totalUsers').textContent = stats.total;
+            document.getElementById('activeUsers').textContent = stats.active;
+            document.getElementById('limitedUsers').textContent = stats.limited;
+            document.getElementById('expiredUsers').textContent = stats.expired;
+        }
+
+        function renderUsers(usersToRender) {
+            const tableEl = document.getElementById('usersTable');
+            const noUsersEl = document.getElementById('noUsers');
+            
+            if (!usersToRender.length) {
+                noUsersEl.classList.remove('hidden');
+                return;
+            }
+            
+            noUsersEl.classList.add('hidden');
+            
+            const now = Math.floor(Date.now() / 1000);
+            
+            tableEl.innerHTML = usersToRender.map(user => {
+                const status = getUserStatus(user, now);
+                const statusConfig = getStatusConfig(status);
+                
+                const usedTraffic = (user.used_traffic || 0) / (1024 * 1024 * 1024); // Convert to GB
+                const totalTraffic = user.data_limit ? user.data_limit / (1024 * 1024 * 1024) : null;
+                
+                const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
+                
+                return `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-gradient-to-r ${statusConfig.gradient} flex items-center justify-center">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="mr-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">${user.username}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">${Object.keys(user.proxies || {}).join(', ')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusConfig.badge}">
+                                ${statusConfig.text}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                            <div class="flex items-center">
+                                <div class="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2 mr-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: ${totalTraffic ? Math.min((usedTraffic / totalTraffic) * 100, 100) : 0}%"></div>
+                                </div>
+                                <span class="text-xs">
+                                    ${usedTraffic.toFixed(2)} ${totalTraffic ? `/ ${totalTraffic.toFixed(0)} GB` : 'GB'}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                            ${expireDate}
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium">
+                            <div class="flex items-center gap-2">
+                                <button onclick="showUserDetails('${user.username}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="editUser('${user.username}')" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteUser('${user.username}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                ${user.status === 'disabled' ? 
+                                    `<button onclick="enableUser('${user.username}')" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
+                                        <i class="fas fa-play"></i>
+                                    </button>` :
+                                    `<button onclick="disableUser('${user.username}')" class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
+                                        <i class="fas fa-pause"></i>
+                                    </button>`
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function getUserStatus(user, now) {
+            if (user.status === 'disabled') return 'disabled';
+            if (user.expire && user.expire < now) return 'expired';
+            if (user.data_limit && user.used_traffic >= user.data_limit) return 'limited';
+            return 'active';
+        }
+
+        function getStatusConfig(status) {
+            const configs = {
+                active: {
+                    text: 'فعال',
+                    badge: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
+                    gradient: 'from-green-400 to-green-600'
+                },
+                limited: {
+                    text: 'محدود',
+                    badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
+                    gradient: 'from-yellow-400 to-yellow-600'
+                },
+                expired: {
+                    text: 'منقضی',
+                    badge: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
+                    gradient: 'from-red-400 to-red-600'
+                },
+                disabled: {
+                    text: 'غیرفعال',
+                    badge: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100',
+                    gradient: 'from-gray-400 to-gray-600'
+                }
+            };
+            return configs[status] || configs.active;
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchUsers').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            
+            const now = Math.floor(Date.now() / 1000);
+            
+            let filteredUsers = users.filter(user => {
+                const matchesSearch = user.username.toLowerCase().includes(searchTerm);
+                const userStatus = getUserStatus(user, now);
+                const matchesStatus = !statusFilter || userStatus === statusFilter;
+                
+                return matchesSearch && matchesStatus;
+            });
+            
+            renderUsers(filteredUsers);
+        }
+
+        async function deleteUser(username) {
+            if (!confirm(`آیا از حذف کاربر ${username} اطمینان دارید؟`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${panelBaseUrl}/api/user/${username}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`خطا: ${response.status}`);
+                }
+                
+                showNotification(`کاربر ${username} حذف شد`, 'success');
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Delete user error:', error);
+                showNotification('خطا در حذف کاربر: ' + error.message, 'error');
+            }
+        }
+
+        async function disableUser(username) {
+            try {
+                const response = await fetch(`${panelBaseUrl}/api/user/${username}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'disabled' })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`خطا: ${response.status}`);
+                }
+                
+                showNotification(`کاربر ${username} غیرفعال شد`, 'success');
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Disable user error:', error);
+                showNotification('خطا در غیرفعال کردن کاربر: ' + error.message, 'error');
+            }
+        }
+
+        async function enableUser(username) {
+            try {
+                const response = await fetch(`${panelBaseUrl}/api/user/${username}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'active' })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`خطا: ${response.status}`);
+                }
+                
+                showNotification(`کاربر ${username} فعال شد`, 'success');
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Enable user error:', error);
+                showNotification('خطا در فعال کردن کاربر: ' + error.message, 'error');
+            }
+        }
+
+        async function refreshUsers() {
+            showNotification('در حال بروزرسانی...', 'info');
+            await loadUsers();
+            showNotification('لیست کاربران بروزرسانی شد', 'success');
+        }
+
+        function exportUsers() {
+            const now = Math.floor(Date.now() / 1000);
+            const csvContent = "نام کاربری,وضعیت,ترافیک استفاده شده (GB),محدودیت ترافیک (GB),تاریخ انقضا\n" + 
+                users.map(user => {
+                    const status = getUserStatus(user, now);
+                    const statusConfig = getStatusConfig(status);
+                    const usedTraffic = (user.used_traffic || 0) / (1024 * 1024 * 1024);
+                    const totalTraffic = user.data_limit ? user.data_limit / (1024 * 1024 * 1024) : 'نامحدود';
+                    const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
+                    
+                    return `${user.username},${statusConfig.text},${usedTraffic.toFixed(2)},${totalTraffic},${expireDate}`;
+                }).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `marzban_users_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showNotification('فایل کاربران دانلود شد', 'success');
+        }
+
+        async function clearExpiredUsers() {
+            const now = Math.floor(Date.now() / 1000);
+            const expiredUsers = users.filter(user => getUserStatus(user, now) === 'expired');
+            
+            if (!expiredUsers.length) {
+                showNotification('هیچ کاربر منقضی یافت نشد', 'info');
+                return;
+            }
+            
+            if (!confirm(`آیا از حذف ${expiredUsers.length} کاربر منقضی اطمینان دارید؟`)) {
+                return;
+            }
+            
+            let deleted = 0;
+            for (const user of expiredUsers) {
+                try {
+                    const response = await fetch(`${panelBaseUrl}/api/user/${user.username}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${apiToken}`
+                        }
+                    });
+                    if (response.ok) deleted++;
+                } catch (error) {
+                    console.error(`Error deleting ${user.username}:`, error);
+                }
+            }
+            
+            showNotification(`${deleted} کاربر منقضی حذف شد`, 'success');
+            await loadUsers();
+        }
+
+        function showUserDetails(username) {
+            const user = users.find(u => u.username === username);
+            if (!user) return;
+            
+            const now = Math.floor(Date.now() / 1000);
+            const status = getUserStatus(user, now);
+            const statusConfig = getStatusConfig(status);
+            
+            const usedTraffic = (user.used_traffic || 0) / (1024 * 1024 * 1024);
+            const totalTraffic = user.data_limit ? user.data_limit / (1024 * 1024 * 1024) : null;
+            const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleString('fa-IR') : 'نامحدود';
+            
+            const modalContent = document.getElementById('userModalContent');
+            modalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">اطلاعات اصلی</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">نام کاربری:</span>
+                                <span class="font-medium text-gray-900 dark:text-white">${user.username}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">وضعیت:</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusConfig.badge}">
+                                    ${statusConfig.text}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">ترافیک</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500 dark:text-gray-400">استفاده شده:</span>
+                                <span class="font-medium text-gray-900 dark:text-white">${usedTraffic.toFixed(2)} GB</span>
+                            </div>
+                            ${totalTraffic ? `
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500 dark:text-gray-400">محدودیت:</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">${totalTraffic.toFixed(0)} GB</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: ${Math.min((usedTraffic / totalTraffic) * 100, 100)}%"></div>
+                                </div>
+                            ` : '<div class="text-sm text-gray-500 dark:text-gray-400">نامحدود</div>'}
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">تاریخ انقضا</h4>
+                        <div class="text-sm text-gray-900 dark:text-white">${expireDate}</div>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">پروکسی‌ها</h4>
+                        <div class="space-y-2">
+                            ${Object.keys(user.proxies || {}).map(proxy => `
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                                        ${proxy.toUpperCase()}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
+        }
+
+        function editUser(username) {
+            showNotification('قابلیت ویرایش به زودی اضافه خواهد شد', 'info');
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            if (connected) {
+                statusDot.className = 'w-3 h-3 rounded-full bg-green-500';
+                statusText.textContent = 'متصل';
+            } else {
+                statusDot.className = 'w-3 h-3 rounded-full bg-red-500';
+                statusText.textContent = 'قطع شده';
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notificationsContainer = document.getElementById('notifications');
+            
+            const notification = document.createElement('div');
+            notification.className = `max-w-sm w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 slide-in`;
+            
+            const colors = {
+                success: 'text-green-500',
+                error: 'text-red-500',
+                warning: 'text-yellow-500',
+                info: 'text-blue-500'
+            };
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            notification.innerHTML = `
+                <div class="flex-1 w-0 p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="${icons[type] || icons.info} ${colors[type] || colors.info}"></i>
+                        </div>
+                        <div class="mr-3 flex-1">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                ${message}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex border-r border-gray-200 dark:border-gray-600">
+                    <button onclick="this.parentElement.parentElement.remove()" class="w-full border border-transparent rounded-none rounded-l-lg p-4 flex items-center justify-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            notificationsContainer.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('userModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeUserModal();
+            }
+        });
+    </script>
+</body>
+</html>
