@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پنل نمایندگی مرزبان VPN</title>
+    <title>پنل نمایندگان آزادی VPN</title>
     <link href="https://v1.fontapi.ir/css/Vazir" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
@@ -38,7 +38,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            background: #fff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         .login-form {
@@ -47,121 +47,135 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background: #f4f6f9;
         }
         
         .login-card {
-            background: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.08);
             width: 100%;
             max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
         
         .login-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         
         .login-logo {
-            width: 80px;
-            height: 80px;
-            background: #1a3c5e;
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #1a3c5e, #2d5aa0);
             border-radius: 50%;
-            margin: 0 auto 20px;
+            margin: 0 auto 25px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 35px;
             color: #fff;
+            box-shadow: 0 10px 25px rgba(26, 60, 94, 0.3);
         }
         
         .login-title {
-            color: #1a3c5e;
-            font-size: 28px;
+            background: linear-gradient(135deg, #1a3c5e, #2d5aa0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 32px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .login-subtitle {
             color: #4a5b6e;
-            font-size: 14px;
+            font-size: 16px;
+            opacity: 0.8;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .form-label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            margin-bottom: 10px;
+            font-weight: 600;
             color: #4a5b6e;
-            font-size: 14px;
+            font-size: 15px;
         }
         
         .form-input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d9e0;
-            border-radius: 6px;
+            padding: 15px 20px;
+            border: 2px solid rgba(209, 217, 224, 0.5);
+            border-radius: 12px;
             font-size: 16px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
         }
         
         .form-input:focus {
             outline: none;
             border-color: #CC9B50;
-            box-shadow: 0 0 0 2px rgba(204, 155, 80, 0.2);
+            box-shadow: 0 0 0 4px rgba(204, 155, 80, 0.15);
+            transform: translateY(-2px);
         }
         
         .form-input:disabled,
         .form-input[readonly] {
-            background: #f5f5f5;
+            background: rgba(245, 245, 245, 0.8);
             cursor: not-allowed;
         }
         
         .login-btn {
             width: 100%;
-            background: #CC9B50;
+            background: linear-gradient(135deg, #CC9B50, #b5893f);
             color: #fff;
             border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(204, 155, 80, 0.3);
         }
         
         .login-btn:hover {
-            background: #b5893f;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(204, 155, 80, 0.4);
         }
         
         .login-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .error-message {
-            background: #f8d7da;
+            background: rgba(248, 215, 218, 0.9);
             color: #721c24;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 14px;
             text-align: center;
+            border: 1px solid rgba(114, 28, 36, 0.2);
         }
         
         .success-message {
-            background: #e6f4ea;
+            background: rgba(230, 244, 234, 0.9);
             color: #2e7d32;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 14px;
             text-align: center;
+            border: 1px solid rgba(46, 125, 50, 0.2);
         }
         
         /* Panel Styles */
@@ -255,6 +269,13 @@
             border-top: 1px solid rgba(255,255,255,0.1);
             padding-top: 20px;
             text-align: center;
+        }
+        
+        .nav-copyright {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-bottom: 15px;
+            line-height: 1.4;
         }
         
         .logout-btn {
@@ -685,7 +706,7 @@
             <div class="login-card">
                 <div class="login-header">
                     <div class="login-logo">🛡️</div>
-                    <h1 class="login-title">پنل نمایندگی مرزبان</h1>
+                    <h1 class="login-title">پنل نمایندگان آزادی VPN</h1>
                     <p class="login-subtitle">برای ادامه وارد حساب کاربری خود شوید</p>
                 </div>
                 
@@ -720,7 +741,7 @@
     <div id="panelSection" class="panel-container hidden">
         <!-- Mobile Header -->
         <div class="mobile-header">
-            پنل نمایندگی مرزبان
+            پنل نمایندگان آزادی VPN
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         </div>
         
@@ -750,7 +771,7 @@
         <div class="panel-nav">
             <div class="nav-header">
                 <div class="nav-logo">🛡️</div>
-                <div class="nav-title">پنل نمایندگی مرزبان</div>
+                <div class="nav-title">پنل نمایندگان آزادی VPN</div>
                 <div class="nav-subtitle" id="navWelcome">خوش آمدید</div>
             </div>
             
@@ -776,6 +797,9 @@
             </div>
             
             <div class="nav-footer">
+                <div class="nav-copyright">
+                    تمامی حقوق برای<br>آزادی وی پی ان محفوظ است
+                </div>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> خروج
                 </button>
@@ -784,7 +808,7 @@
 
         <!-- Content -->
         <div class="panel-content">
-            <h1 class="content-header">پنل نمایندگی مرزبان VPN</h1>
+            <h1 class="content-header">پنل نمایندگان آزادی VPN</h1>
             
             <!-- Dashboard Section -->
             <div id="dashboardSection" class="content-section active">
@@ -963,9 +987,6 @@
                 <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 20px;">
                     <h4 style="color: #1a3c5e; margin-bottom: 15px;">عملیات گروهی</h4>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button onclick="resetAllTraffic()" class="form-button danger">
-                            <i class="fas fa-redo"></i> ریست کل ترافیک
-                        </button>
                         <button onclick="addTrafficToAll()" class="form-button success">
                             <i class="fas fa-plus"></i> افزودن ترافیک به همه
                         </button>
@@ -1604,21 +1625,19 @@
         // QR Code Functions
         async function showQRCode(username) {
             try {
-                // First get user details
                 const userData = await apiCall(`/user/${username}`);
-                if (!userData || !userData.links || userData.links.length === 0) {
+                if (!userData || !userData.subscription_url) {
                     showNotification('هیچ کانفیگی برای این کاربر یافت نشد', 'error');
                     return;
                 }
                 
-                const configLink = userData.links[0]; // Use first config
-                currentQRConfig = configLink;
+                currentQRConfig = userData.subscription_url;
                 
                 document.getElementById('qrUsername').textContent = `کاربر: ${username}`;
                 
                 // Generate QR code
                 const canvas = document.getElementById('qrCanvas');
-                QRCode.toCanvas(canvas, configLink, { width: 256 }, function (error) {
+                QRCode.toCanvas(canvas, currentQRConfig, { width: 256 }, function (error) {
                     if (error) {
                         showNotification('خطا در تولید QR کد', 'error');
                         return;
@@ -1646,19 +1665,23 @@
         // Config Functions
         async function showConfigs(username) {
             try {
-                // Get user details which includes configs
                 const userData = await apiCall(`/user/${username}`);
-                if (!userData || !userData.links) {
+                if (!userData) {
                     showNotification('خطا در دریافت کانفیگ‌ها', 'error');
                     return;
                 }
                 
-                currentConfigs = userData.links;
                 document.getElementById('configUsername').textContent = `کاربر: ${username}`;
                 
-                // Generate subscription link
-                const subLink = `${serverUrl}/sub/${username}`;
+                // Set subscription link
+                const subLink = userData.subscription_url || '';
                 document.getElementById('subLink').value = subLink;
+                
+                // Get individual configs
+                currentConfigs = [];
+                if (userData.links && userData.links.length > 0) {
+                    currentConfigs = userData.links;
+                }
                 
                 // Display configs
                 const configList = document.getElementById('configList');
@@ -1906,28 +1929,6 @@
                     }
                 }
             });
-        }
-
-        async function resetAllTraffic() {
-            if (!confirm('آیا از ریست کردن ترافیک همه کاربران اطمینان دارید؟')) {
-                return;
-            }
-            
-            showLoadingOverlay(true);
-            
-            try {
-                for (const user of users) {
-                    await apiCall(`/user/${user.username}`, 'PUT', { used_traffic: 0 });
-                }
-                
-                loadUsers();
-                loadDashboardData();
-                showNotification('ترافیک همه کاربران ریست شد', 'success');
-            } catch (error) {
-                showNotification('خطا در ریست ترافیک', 'error');
-            }
-            
-            showLoadingOverlay(false);
         }
 
         async function addTrafficToAll() {
