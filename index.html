@@ -2773,12 +2773,6 @@
                         <div class="traffic-number" id="totalBandwidth">0 GB</div>
                         <div class="traffic-label">کل ترافیک</div>
                     </div>
-                    
-                    <div class="traffic-card">
-                        <div class="traffic-icon"><i class="fas fa-calendar-day"></i></div>
-                        <div class="traffic-number" id="todayTraffic">0 GB</div>
-                        <div class="traffic-label">ترافیک امروز</div>
-                    </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
@@ -2809,17 +2803,9 @@
             const totalDownload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.7), 0);
             const totalUpload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.3), 0);
             
-            const todayTraffic = users.reduce((sum, user) => {
-                if (user.last_online && isToday(new Date(user.last_online))) {
-                    return sum + (user.used_traffic || 0) * 0.1;
-                }
-                return sum;
-            }, 0);
-            
             document.getElementById('totalDownload').textContent = formatBytes(totalDownload);
             document.getElementById('totalUpload').textContent = formatBytes(totalUpload);
             document.getElementById('totalBandwidth').textContent = formatBytes(totalTraffic);
-            document.getElementById('todayTraffic').textContent = formatBytes(todayTraffic);
         }
 
         function updateTrafficCharts(users) {
