@@ -378,17 +378,18 @@
             width: 100%;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
             transition: all 0.3s ease;
             font-weight: 500;
             direction: rtl;
         }
         
         .nav-item i {
-            margin-left: 12px;
+            margin-right: 12px;
             width: 18px;
             text-align: center;
             font-size: 16px;
+            flex-shrink: 0;
         }
         
         .nav-item:hover {
@@ -985,6 +986,14 @@
             font-size: 14px;
             color: var(--text-primary);
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-header-title i {
+            margin-right: 8px;
+            color: var(--primary-color);
         }
         
         .mobile-menu-btn {
@@ -1139,7 +1148,7 @@
         /* Responsive Design */
         @media (max-width: 768px) {
             .theme-toggle {
-                top: 12px;
+                top: 70px;
                 left: 12px;
                 padding: 6px;
                 min-width: 44px;
@@ -1157,7 +1166,7 @@
             .login-card {
                 padding: 20px;
                 border-radius: 16px;
-                max-width: 340px;
+                max-width: calc(100vw - 24px);
             }
 
             .login-logo {
@@ -1203,6 +1212,9 @@
                 margin-right: 0 !important;
                 padding: 12px;
                 padding-top: 75px; /* فضا برای هدر ثابت */
+                width: 100vw;
+                max-width: 100vw;
+                overflow-x: hidden;
             }
             
             .content-header {
@@ -1210,39 +1222,49 @@
                 margin-bottom: 16px;
             }
             
-            /* Mobile Cards - کوچکتر و شیک‌تر */
+            /* Mobile Cards - هم‌اندازه با صفحه */
             .stats-grid, .traffic-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 12px;
+                gap: 8px;
+                width: 100%;
+                max-width: calc(100vw - 24px);
             }
 
             .stats-card, .traffic-card {
-                padding: 16px;
+                padding: 14px;
+                min-height: 120px;
+                width: 100%;
+                box-sizing: border-box;
             }
 
             .stats-number, .traffic-number {
-                font-size: 20px;
+                font-size: 18px;
             }
 
             .stats-icon, .traffic-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-                margin-bottom: 12px;
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+                margin-bottom: 8px;
             }
 
             .stats-label, .traffic-label {
-                font-size: 12px;
+                font-size: 11px;
             }
             
             .form-grid {
                 grid-template-columns: 1fr !important;
                 gap: 12px;
+                width: 100%;
+                max-width: calc(100vw - 24px);
             }
 
             .content-section {
                 padding: 16px;
                 margin-bottom: 16px;
+                width: 100%;
+                max-width: calc(100vw - 24px);
+                box-sizing: border-box;
             }
 
             .section-title {
@@ -1260,10 +1282,14 @@
                 display: grid !important;
                 grid-template-columns: 1fr !important;
                 gap: 12px !important;
+                width: 100%;
+                max-width: calc(100vw - 24px);
             }
 
             .chart-container {
                 padding: 16px;
+                width: 100%;
+                box-sizing: border-box;
             }
 
             .chart-title {
@@ -1274,15 +1300,17 @@
             /* Mobile Tables */
             .data-table {
                 font-size: 12px;
-                overflow-x: auto;
+                width: 100%;
+                max-width: calc(100vw - 24px);
                 display: block;
+                overflow-x: auto;
                 white-space: nowrap;
             }
             
             .data-table th,
             .data-table td {
-                padding: 10px 8px;
-                min-width: 100px;
+                padding: 8px 6px;
+                min-width: 80px;
             }
 
             /* Mobile Modals */
@@ -1293,11 +1321,15 @@
             .modal-content {
                 padding: 20px;
                 max-width: calc(100vw - 24px);
+                width: 100%;
             }
 
             .payment-card {
                 padding: 20px;
                 margin-bottom: 16px;
+                width: 100%;
+                max-width: calc(100vw - 24px);
+                box-sizing: border-box;
             }
 
             .payment-title {
@@ -1319,6 +1351,8 @@
             .config-display {
                 padding: 12px;
                 margin: 12px 0;
+                width: 100%;
+                box-sizing: border-box;
             }
 
             .config-info {
@@ -1337,18 +1371,22 @@
                 margin-bottom: 12px;
                 font-size: 14px;
                 padding: 10px 12px;
+                width: 100%;
+                max-width: calc(100vw - 24px);
+                box-sizing: border-box;
             }
 
             /* Mobile Action Buttons */
             div[style*="display: flex"] {
                 flex-wrap: wrap;
                 gap: 6px;
+                width: 100%;
             }
 
             .notification {
                 right: 12px;
                 top: 75px;
-                max-width: 280px;
+                max-width: calc(100vw - 24px);
             }
         }
 
@@ -1370,21 +1408,25 @@
         @media (max-width: 480px) {
             .stats-grid, .traffic-grid {
                 grid-template-columns: 1fr !important;
-                gap: 10px;
+                gap: 8px;
+                width: 100%;
+                max-width: calc(100vw - 24px);
             }
             
             .stats-card, .traffic-card {
-                padding: 14px;
+                padding: 12px;
+                width: 100%;
+                box-sizing: border-box;
             }
             
             .stats-number, .traffic-number {
-                font-size: 18px;
+                font-size: 16px;
             }
 
             .stats-icon, .traffic-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 14px;
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
             }
 
             .form-button {
@@ -1394,19 +1436,20 @@
 
             .data-table th,
             .data-table td {
-                padding: 8px 6px;
+                padding: 6px 4px;
                 font-size: 11px;
-                min-width: 80px;
+                min-width: 70px;
             }
 
             .notification {
-                max-width: 250px;
+                max-width: calc(100vw - 20px);
                 right: 10px;
                 top: 75px;
             }
 
             .mobile-nav {
-                width: 260px;
+                width: calc(100vw - 40px);
+                max-width: 260px;
             }
 
             .mobile-header-title {
@@ -1470,7 +1513,10 @@
     <div id="panelSection" class="panel-container hidden">
         <!-- Mobile Header -->
         <div class="mobile-header">
-            <div class="mobile-header-title">پنل نمایندگان آزادی VPN</div>
+            <div class="mobile-header-title">
+                <i class="fas fa-shield-alt"></i>
+                پنل نمایندگان آزادی VPN
+            </div>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars"></i>
             </button>
@@ -1489,25 +1535,25 @@
             
             <div class="nav-menu">
                 <button class="nav-item active" onclick="showSection('dashboard'); toggleMobileMenu()">
-                    داشبورد<i class="fas fa-tachometer-alt"></i>
+                    <span>داشبورد</span><i class="fas fa-tachometer-alt"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('users'); toggleMobileMenu()">
-                    کاربران<i class="fas fa-users"></i>
+                    <span>کاربران</span><i class="fas fa-users"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('addUser'); toggleMobileMenu()">
-                    افزودن کاربر<i class="fas fa-user-plus"></i>
+                    <span>افزودن کاربر</span><i class="fas fa-user-plus"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('traffic'); toggleMobileMenu()">
-                    ترافیک<i class="fas fa-chart-area"></i>
+                    <span>ترافیک</span><i class="fas fa-chart-area"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('payment'); toggleMobileMenu()">
-                    پرداخت<i class="fas fa-credit-card"></i>
+                    <span>پرداخت</span><i class="fas fa-credit-card"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('analytics'); toggleMobileMenu()">
-                    آمار<i class="fas fa-chart-bar"></i>
+                    <span>آمار</span><i class="fas fa-chart-bar"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('settings'); toggleMobileMenu()">
-                    تنظیمات<i class="fas fa-cog"></i>
+                    <span>تنظیمات</span><i class="fas fa-cog"></i>
                 </button>
             </div>
             
@@ -1529,25 +1575,25 @@
             
             <div class="nav-menu">
                 <button class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">
-                    داشبورد<i class="fas fa-tachometer-alt"></i>
+                    <span>داشبورد</span><i class="fas fa-tachometer-alt"></i>
                 </button>
                 <button class="nav-item" data-section="users" onclick="showSection('users')">
-                    کاربران<i class="fas fa-users"></i>
+                    <span>کاربران</span><i class="fas fa-users"></i>
                 </button>
                 <button class="nav-item" data-section="addUser" onclick="showSection('addUser')">
-                    افزودن کاربر<i class="fas fa-user-plus"></i>
+                    <span>افزودن کاربر</span><i class="fas fa-user-plus"></i>
                 </button>
                 <button class="nav-item" data-section="traffic" onclick="showSection('traffic')">
-                    ترافیک<i class="fas fa-chart-area"></i>
+                    <span>ترافیک</span><i class="fas fa-chart-area"></i>
                 </button>
                 <button class="nav-item" data-section="payment" onclick="showSection('payment')">
-                    پرداخت<i class="fas fa-credit-card"></i>
+                    <span>پرداخت</span><i class="fas fa-credit-card"></i>
                 </button>
                 <button class="nav-item" data-section="analytics" onclick="showSection('analytics')">
-                    آمار<i class="fas fa-chart-bar"></i>
+                    <span>آمار</span><i class="fas fa-chart-bar"></i>
                 </button>
                 <button class="nav-item" data-section="settings" onclick="showSection('settings')">
-                    تنظیمات<i class="fas fa-cog"></i>
+                    <span>تنظیمات</span><i class="fas fa-cog"></i>
                 </button>
             </div>
             
@@ -1822,46 +1868,6 @@
         </div>
     </div>
 
-    <!-- Edit User Modal -->
-    <div id="editUserModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    <i class="fas fa-edit"></i>
-                    ویرایش کاربر
-                </h3>
-                <button class="modal-close" onclick="closeEditModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="editUserForm">
-                <div class="form-group">
-                    <label class="form-label">نام کاربری</label>
-                    <input type="text" id="editUsername" class="form-input" readonly>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">حجم ترافیک (GB)</label>
-                    <input type="number" id="editDataLimit" class="form-input" min="1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">تاریخ انقضا</label>
-                    <input type="date" id="editExpireDate" class="form-input">
-                </div>
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap;">
-                    <button type="button" onclick="resetUserTraffic()" class="form-button warning">
-                        <i class="fas fa-undo"></i> ریست ترافیک
-                    </button>
-                    <button type="submit" class="form-button success">
-                        <i class="fas fa-save"></i> ذخیره
-                    </button>
-                    <button type="button" onclick="closeEditModal()" class="form-button secondary">
-                        <i class="fas fa-times"></i> انصراف
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Config Modal -->
     <div id="configModal" class="modal hidden">
         <div class="modal-content">
@@ -1931,7 +1937,6 @@
         let currentUsername = '';
         let users = [];
         let updateInterval;
-        let currentEditUser = null;
 
         // Chart instances
         let userStatusChartInstance = null;
@@ -1977,7 +1982,6 @@
         function setupEventListeners() {
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('addUserForm').addEventListener('submit', handleAddUser);
-            document.getElementById('editUserForm').addEventListener('submit', handleEditUser);
             document.getElementById('userSearch').addEventListener('input', filterUsers);
         }
 
@@ -2542,14 +2546,8 @@
                             <button onclick="showUserConfigs('${user.username}')" class="form-button info" title="مشاهده کانفیگ‌ها">
                                 <i class="fas fa-cog"></i>
                             </button>
-                            <button onclick="editUser('${user.username}')" class="form-button" title="ویرایش کاربر">
-                                <i class="fas fa-edit"></i>
-                            </button>
                             <button onclick="toggleUserStatus('${user.username}', '${user.status}')" class="form-button ${user.status === 'active' ? 'danger' : 'success'}" title="${user.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن'}">
                                 ${user.status === 'active' ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'}
-                            </button>
-                            <button onclick="deleteUser('${user.username}')" class="form-button danger" title="حذف کاربر">
-                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -2583,115 +2581,6 @@
                 showNotification('خطا در تغییر وضعیت کاربر', 'error');
             }
             hideLoading();
-        }
-
-        async function deleteUser(username) {
-            if (!confirm(`آیا از حذف کاربر "${username}" اطمینان دارید؟\nاین عمل غیرقابل برگشت است!`)) {
-                return;
-            }
-            
-            showLoading('در حال حذف کاربر...');
-            
-            try {
-                const response = await fetch(`${serverUrl}/api/user/${username}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (response.ok) {
-                    loadUsers();
-                    showNotification(`کاربر ${username} حذف شد`, 'success');
-                } else {
-                    showNotification('خطا در حذف کاربر', 'error');
-                }
-            } catch (error) {
-                showNotification('خطا در حذف کاربر', 'error');
-            }
-            hideLoading();
-        }
-
-        // Edit User Functions
-        function editUser(username) {
-            const user = users.find(u => u.username === username);
-            if (!user) return;
-            
-            currentEditUser = user;
-            
-            document.getElementById('editUsername').value = user.username;
-            document.getElementById('editDataLimit').value = (user.data_limit || 0) / (1024 * 1024 * 1024);
-            
-            if (user.expire) {
-                const expireDate = new Date(user.expire * 1000);
-                document.getElementById('editExpireDate').value = expireDate.toISOString().split('T')[0];
-            }
-            
-            document.getElementById('editUserModal').classList.remove('hidden');
-        }
-
-        async function handleEditUser(e) {
-            e.preventDefault();
-            
-            if (!currentEditUser) return;
-            
-            showLoading('در حال ویرایش کاربر...');
-            
-            const dataLimit = parseFloat(document.getElementById('editDataLimit').value) * 1024 * 1024 * 1024;
-            const expireDateStr = document.getElementById('editExpireDate').value;
-            const expire = expireDateStr ? Math.floor(new Date(expireDateStr).getTime() / 1000) : null;
-            
-            try {
-                const updateData = {
-                    data_limit: dataLimit
-                };
-                
-                if (expire) {
-                    updateData.expire = expire;
-                }
-                
-                const result = await apiCall(`/user/${currentEditUser.username}`, 'PUT', updateData);
-                
-                if (result) {
-                    closeEditModal();
-                    loadUsers();
-                    showNotification(`کاربر ${currentEditUser.username} ویرایش شد`, 'success');
-                } else {
-                    showNotification('خطا در ویرایش کاربر', 'error');
-                }
-            } catch (error) {
-                showNotification('خطا در ویرایش کاربر', 'error');
-            }
-            hideLoading();
-        }
-
-        async function resetUserTraffic() {
-            if (!currentEditUser) return;
-            
-            if (!confirm(`آیا از ریست ترافیک کاربر "${currentEditUser.username}" اطمینان دارید؟`)) {
-                return;
-            }
-            
-            showLoading('در حال ریست ترافیک...');
-            
-            try {
-                const result = await apiCall(`/user/${currentEditUser.username}/reset`, 'POST');
-                
-                if (result) {
-                    loadUsers();
-                    showNotification(`ترافیک کاربر ${currentEditUser.username} ریست شد`, 'success');
-                } else {
-                    showNotification('خطا در ریست ترافیک', 'error');
-                }
-            } catch (error) {
-                showNotification('خطا در ریست ترافیک', 'error');
-            }
-            hideLoading();
-        }
-
-        function closeEditModal() {
-            document.getElementById('editUserModal').classList.add('hidden');
-            currentEditUser = null;
         }
 
         // Add User Functions
