@@ -958,23 +958,23 @@
             margin-bottom: 4px;
         }
         
-        /* Mobile Styles */
+        /* Mobile Header */
         .mobile-header {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
+            width: 100%;
             background: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
             color: var(--text-primary);
-            padding: 16px 20px;
+            padding: 12px 16px;
             z-index: 1600;
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 600;
             box-shadow: var(--shadow-sm);
-            height: 70px;
-            display: flex;
+            height: 60px;
             align-items: center;
             justify-content: center;
         }
@@ -982,25 +982,26 @@
         .mobile-header-title {
             flex: 1;
             text-align: center;
-            font-size: 16px;
+            font-size: 14px;
             color: var(--text-primary);
+            font-weight: 600;
         }
         
         .mobile-menu-btn {
             position: absolute;
-            right: 20px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             color: var(--text-primary);
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1017,7 +1018,7 @@
             position: fixed;
             top: 0;
             right: -100%;
-            width: 300px;
+            width: 280px;
             height: 100vh;
             background: var(--card-bg);
             transition: right 0.3s ease;
@@ -1026,6 +1027,7 @@
             box-shadow: var(--shadow-xl);
             border-left: 1px solid var(--border-color);
             padding: 24px;
+            flex-direction: column;
         }
         
         .mobile-nav.active {
@@ -1078,248 +1080,6 @@
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .theme-toggle {
-                top: 12px;
-                left: 12px;
-                padding: 6px;
-                min-width: 48px;
-                z-index: 1800;
-            }
-
-            .theme-toggle i {
-                font-size: 16px;
-            }
-
-            .login-container {
-                padding: 12px;
-            }
-
-            .login-card {
-                padding: 24px;
-                border-radius: 16px;
-                max-width: 340px;
-            }
-
-            .login-logo {
-                width: 48px;
-                height: 48px;
-                font-size: 24px;
-                margin-bottom: 16px;
-            }
-
-            .login-title {
-                font-size: 20px;
-            }
-
-            .login-subtitle {
-                font-size: 13px;
-            }
-
-            .form-input {
-                padding: 12px 14px;
-                font-size: 16px;
-            }
-
-            .login-btn {
-                padding: 14px;
-                font-size: 15px;
-            }
-
-            /* Mobile Panel Layout */
-            .panel-nav {
-                display: none !important;
-            }
-            
-            .mobile-header {
-                display: flex !important;
-            }
-            
-            .mobile-nav {
-                display: flex !important;
-                flex-direction: column;
-            }
-            
-            .panel-content {
-                margin-right: 0 !important;
-                padding: 16px;
-                padding-top: 90px; /* Space for fixed header */
-            }
-            
-            .content-header {
-                font-size: 24px;
-                margin-bottom: 20px;
-            }
-            
-            /* Mobile Grids */
-            .stats-grid, .traffic-grid {
-                grid-template-columns: 1fr !important;
-                gap: 16px;
-            }
-
-            .stats-card, .traffic-card {
-                padding: 20px;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr !important;
-                gap: 16px;
-            }
-
-            /* Mobile Charts */
-            .chart-container {
-                padding: 16px;
-            }
-
-            /* Make chart grids single column on mobile */
-            div[style*="grid-template-columns: 1fr 1fr"] {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-                gap: 16px !important;
-            }
-            
-            /* Mobile Tables */
-            .data-table {
-                font-size: 12px;
-                overflow-x: auto;
-                display: block;
-                white-space: nowrap;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 12px 8px;
-                min-width: 120px;
-            }
-
-            .data-table tbody tr {
-                display: table-row;
-            }
-
-            /* Mobile Modals */
-            .modal-content {
-                margin: 16px;
-                padding: 20px;
-                max-width: calc(100vw - 32px);
-            }
-
-            .payment-card {
-                padding: 20px;
-                margin-bottom: 20px;
-            }
-
-            .payment-title {
-                font-size: 20px;
-            }
-
-            .section-title {
-                font-size: 18px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-
-            .section-title::before {
-                width: 100%;
-                height: 3px;
-            }
-
-            /* Mobile Navigation */
-            .mobile-menu-btn {
-                right: 20px;
-            }
-
-            .mobile-nav {
-                right: -100%;
-            }
-
-            .mobile-nav.active {
-                right: 0;
-            }
-
-            /* Mobile Form Actions */
-            .form-button {
-                padding: 8px 12px;
-                font-size: 12px;
-                margin: 1px;
-            }
-
-            /* Mobile Config Display */
-            .config-display {
-                padding: 12px;
-                margin: 12px 0;
-            }
-
-            .config-info {
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
-            }
-
-            .config-text {
-                font-size: 11px;
-                max-height: 60px;
-            }
-
-            /* Mobile Search */
-            .search-box {
-                margin-bottom: 16px;
-            }
-
-            /* Mobile Action Buttons */
-            div[style*="display: flex"] {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-
-            .notification {
-                right: 12px;
-                top: 80px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .form-button {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-            
-            .stats-card, .traffic-card {
-                padding: 16px;
-            }
-            
-            .stats-number, .traffic-number {
-                font-size: 20px;
-            }
-
-            .stats-icon, .traffic-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-
-            .data-table th,
-            .data-table td {
-                padding: 10px 6px;
-                font-size: 11px;
-            }
-
-            .notification {
-                max-width: 280px;
-                right: 12px;
-                top: 80px;
-            }
-
-            .mobile-nav {
-                width: 280px;
-            }
-
-            .mobile-header-title {
-                font-size: 14px;
-            }
         }
 
         /* Chart containers */
@@ -1374,6 +1134,292 @@
             color: var(--text-primary);
             font-weight: 600;
             font-size: 16px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .theme-toggle {
+                top: 12px;
+                left: 12px;
+                padding: 6px;
+                min-width: 44px;
+                z-index: 1800;
+            }
+
+            .theme-toggle i {
+                font-size: 16px;
+            }
+
+            .login-container {
+                padding: 12px;
+            }
+
+            .login-card {
+                padding: 20px;
+                border-radius: 16px;
+                max-width: 340px;
+            }
+
+            .login-logo {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+
+            .login-title {
+                font-size: 18px;
+            }
+
+            .login-subtitle {
+                font-size: 13px;
+            }
+
+            .form-input {
+                padding: 12px 14px;
+                font-size: 16px;
+            }
+
+            .login-btn {
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            /* Mobile Panel Layout - هدر کناری حذف شود */
+            .panel-nav {
+                display: none !important;
+            }
+            
+            /* Mobile Header نمایش داده شود */
+            .mobile-header {
+                display: flex !important;
+            }
+            
+            .mobile-nav {
+                display: flex !important;
+            }
+            
+            .panel-content {
+                margin-right: 0 !important;
+                padding: 12px;
+                padding-top: 75px; /* فضا برای هدر ثابت */
+            }
+            
+            .content-header {
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+            
+            /* Mobile Cards - کوچکتر و شیک‌تر */
+            .stats-grid, .traffic-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px;
+            }
+
+            .stats-card, .traffic-card {
+                padding: 16px;
+            }
+
+            .stats-number, .traffic-number {
+                font-size: 20px;
+            }
+
+            .stats-icon, .traffic-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+                margin-bottom: 12px;
+            }
+
+            .stats-label, .traffic-label {
+                font-size: 12px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+            }
+
+            .content-section {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .section-title {
+                font-size: 16px;
+                margin-bottom: 16px;
+            }
+
+            .section-title::before {
+                width: 3px;
+                height: 18px;
+            }
+
+            /* Mobile Charts - تک ستونه */
+            div[style*="grid-template-columns: 1fr 1fr"] {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+
+            .chart-container {
+                padding: 16px;
+            }
+
+            .chart-title {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+            
+            /* Mobile Tables */
+            .data-table {
+                font-size: 12px;
+                overflow-x: auto;
+                display: block;
+                white-space: nowrap;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+                min-width: 100px;
+            }
+
+            /* Mobile Modals */
+            .modal {
+                padding: 12px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                max-width: calc(100vw - 24px);
+            }
+
+            .payment-card {
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+
+            .payment-title {
+                font-size: 18px;
+            }
+
+            .payment-text {
+                font-size: 14px;
+            }
+
+            /* Mobile Form Actions */
+            .form-button {
+                padding: 8px 12px;
+                font-size: 12px;
+                margin: 1px;
+            }
+
+            /* Mobile Config Display */
+            .config-display {
+                padding: 12px;
+                margin: 12px 0;
+            }
+
+            .config-info {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .config-text {
+                font-size: 11px;
+                max-height: 60px;
+            }
+
+            /* Mobile Search */
+            .search-box {
+                margin-bottom: 12px;
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+
+            /* Mobile Action Buttons */
+            div[style*="display: flex"] {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .notification {
+                right: 12px;
+                top: 75px;
+                max-width: 280px;
+            }
+        }
+
+        /* Tablet و Desktop - هدر موبایل حذف شود */
+        @media (min-width: 769px) {
+            .mobile-header {
+                display: none !important;
+            }
+            
+            .mobile-nav {
+                display: none !important;
+            }
+            
+            .mobile-overlay {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid, .traffic-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px;
+            }
+            
+            .stats-card, .traffic-card {
+                padding: 14px;
+            }
+            
+            .stats-number, .traffic-number {
+                font-size: 18px;
+            }
+
+            .stats-icon, .traffic-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .form-button {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+                font-size: 11px;
+                min-width: 80px;
+            }
+
+            .notification {
+                max-width: 250px;
+                right: 10px;
+                top: 75px;
+            }
+
+            .mobile-nav {
+                width: 260px;
+            }
+
+            .mobile-header-title {
+                font-size: 13px;
+            }
+
+            .content-header {
+                font-size: 18px;
+            }
+
+            .section-title {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
