@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://v1.fontapi.ir https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://kit.fontawesome.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://v1.fontapi.ir https://cdnjs.cloudflare.com https://kit.fontawesome.com; img-src 'self' data: https:; connect-src 'self' https:;">
     <title>پنل نمایندگان آزادی VPN</title>
     <link href="https://v1.fontapi.ir/css/Vazir" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -132,6 +133,38 @@
 
         .theme-toggle .fa-moon {
             color: #6366f1;
+        }
+        
+        /* Server URL Setting */
+        .server-setting {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 2000;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .server-setting:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: var(--primary-color);
+        }
+
+        .server-setting i {
+            font-size: 14px;
         }
         
         /* Login Styles */
@@ -1260,6 +1293,14 @@
                 font-size: 16px;
             }
 
+            .server-setting {
+                bottom: 70px;
+                left: 12px;
+                font-size: 10px;
+                padding: 6px;
+                min-width: 100px;
+            }
+
             .login-container {
                 padding: 12px;
             }
@@ -1600,6 +1641,12 @@
         <i class="fas fa-sun" id="themeIcon"></i>
     </div>
 
+    <!-- Server URL Setting -->
+    <div class="server-setting" onclick="changeServerUrl()">
+        <i class="fas fa-server"></i>
+        <span>تنظیم سرور</span>
+    </div>
+
     <!-- Login Section -->
     <div id="loginSection" class="login-container">
         <div class="login-background"></div>
@@ -1613,12 +1660,12 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label class="form-label">نام کاربری</label>
-                    <input type="text" id="username" class="form-input" placeholder="نام کاربری خود را وارد کنید" required>
+                    <input type="text" id="username" class="form-input" placeholder="نام کاربری خود را وارد کنید" required maxlength="50" pattern="[a-zA-Z0-9_]{3,20}">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">رمز عبور</label>
-                    <input type="password" id="password" class="form-input" placeholder="رمز عبور خود را وارد کنید" required>
+                    <input type="password" id="password" class="form-input" placeholder="رمز عبور خود را وارد کنید" required maxlength="100">
                 </div>
                 
                 <div id="loginError" class="error-message hidden"></div>
@@ -1825,12 +1872,12 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">نام کاربری</label>
-                            <input type="text" id="newUsername" class="form-input" placeholder="نام کاربری جدید" required>
+                            <input type="text" id="newUsername" class="form-input" placeholder="نام کاربری جدید" required maxlength="50" pattern="[a-zA-Z0-9_]{3,20}">
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">حجم ترافیک (GB)</label>
-                            <input type="number" id="newDataLimit" class="form-input" required min="1" value="30" placeholder="30">
+                            <input type="number" id="newDataLimit" class="form-input" required min="1" max="1000" value="30" placeholder="30">
                         </div>
                         
                         <div class="form-group">
@@ -1972,17 +2019,21 @@
                                 <i class="fas fa-wifi"></i> متصل
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="form-label">آدرس سرور</label>
+                            <input type="text" id="currentServerUrl" class="form-input" readonly>
+                        </div>
                     </div>
                     
                     <div class="chart-container">
                         <h4 class="chart-title">تنظیمات پیش‌فرض</h4>
                         <div class="form-group">
                             <label class="form-label">حجم پیش‌فرض (GB)</label>
-                            <input type="number" id="defaultDataLimit" class="form-input" value="30">
+                            <input type="number" id="defaultDataLimit" class="form-input" value="30" min="1" max="1000">
                         </div>
                         <div class="form-group">
                             <label class="form-label">مدت پیش‌فرض (روز)</label>
-                            <input type="number" id="defaultDuration" class="form-input" value="30">
+                            <input type="number" id="defaultDuration" class="form-input" value="30" min="1" max="365">
                         </div>
                         <button onclick="saveSettings()" class="form-button" style="width: 100%; padding: 12px;">
                             <i class="fas fa-save"></i> ذخیره تنظیمات
@@ -2035,7 +2086,7 @@
                 
                 <div class="form-group">
                     <label class="form-label">حجم ترافیک (GB)</label>
-                    <input type="number" id="editDataLimit" class="form-input" required min="1">
+                    <input type="number" id="editDataLimit" class="form-input" required min="1" max="1000">
                 </div>
                 
                 <div class="form-group">
@@ -2070,9 +2121,116 @@
     </div>
 
     <script>
+        // Security Configuration
+        const CONFIG = {
+            // آدرس پیش‌فرض سرور - همان آدرس کد اولیه شما
+            defaultServerUrl: 'https://admin.jozveraygan.xyz:8443',
+            maxLoginAttempts: 5,
+            sessionTimeout: 24 * 60 * 60 * 1000, // 24 hours
+            tokenKey: 'azadi_session',
+            serverUrlKey: 'azadi_server_url'
+        };
+
+        // Security Utilities
+        const Security = {
+            // Encrypt/Decrypt token for storage
+            encryptToken: (token) => {
+                try {
+                    return btoa(encodeURIComponent(token));
+                } catch (e) {
+                    return token;
+                }
+            },
+            
+            decryptToken: (encryptedToken) => {
+                try {
+                    return decodeURIComponent(atob(encryptedToken));
+                } catch (e) {
+                    return encryptedToken;
+                }
+            },
+            
+            // Sanitize HTML to prevent XSS
+            sanitizeHtml: (str) => {
+                const temp = document.createElement('div');
+                temp.textContent = str;
+                return temp.innerHTML;
+            },
+            
+            // Validate input
+            validateInput: (input, type = 'text') => {
+                if (!input || typeof input !== 'string') return false;
+                
+                switch (type) {
+                    case 'username':
+                        return /^[a-zA-Z0-9_]{3,20}$/.test(input);
+                    case 'number':
+                        return /^[0-9]+(\.[0-9]+)?$/.test(input);
+                    case 'email':
+                        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
+                    case 'url':
+                        try {
+                            new URL(input);
+                            return input.startsWith('https://');
+                        } catch {
+                            return false;
+                        }
+                    default:
+                        return input.length > 0 && input.length < 1000;
+                }
+            },
+            
+            // Safe DOM manipulation
+            safeSetContent: (element, content) => {
+                if (element && typeof content === 'string') {
+                    element.textContent = content;
+                }
+            },
+            
+            safeCreateElement: (tag, content, className) => {
+                const element = document.createElement(tag);
+                if (content) element.textContent = content;
+                if (className) element.className = className;
+                return element;
+            }
+        };
+
+        // Server URL Management
+        function getServerUrl() {
+            return sessionStorage.getItem(CONFIG.serverUrlKey) || CONFIG.defaultServerUrl;
+        }
+
+        function setServerUrl(url) {
+            if (Security.validateInput(url, 'url')) {
+                sessionStorage.setItem(CONFIG.serverUrlKey, url);
+                return true;
+            }
+            return false;
+        }
+
+        function changeServerUrl() {
+            const currentUrl = getServerUrl();
+            const newUrl = prompt('آدرس سرور جدید را وارد کنید:', currentUrl);
+            
+            if (newUrl && newUrl !== currentUrl) {
+                if (setServerUrl(newUrl)) {
+                    showNotification('آدرس سرور تغییر کرد! 🔄', 'success');
+                    document.getElementById('currentServerUrl').value = newUrl;
+                    
+                    // اگر لاگین هستیم، logout کنیم تا با سرور جدید وارد شوند
+                    if (authToken) {
+                        logout();
+                        showNotification('لطفاً مجدداً وارد شوید', 'info');
+                    }
+                } else {
+                    showNotification('آدرس سرور نامعتبر است', 'error');
+                }
+            }
+        }
+
         // Theme Management
         function initTheme() {
-            const savedTheme = localStorage.getItem('azadi_theme');
+            const savedTheme = sessionStorage.getItem('azadi_theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             
             if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
@@ -2089,7 +2247,7 @@
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             
             document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('azadi_theme', newTheme);
+            sessionStorage.setItem('azadi_theme', newTheme);
             
             const themeIcon = document.getElementById('themeIcon');
             themeIcon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
@@ -2097,7 +2255,7 @@
 
         // Auto theme detection
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (!localStorage.getItem('azadi_theme')) {
+            if (!sessionStorage.getItem('azadi_theme')) {
                 if (event.matches) {
                     document.documentElement.setAttribute('data-theme', 'dark');
                     document.getElementById('themeIcon').className = 'fas fa-moon';
@@ -2110,13 +2268,14 @@
 
         // Global Variables
         let authToken = '';
-        let serverUrl = 'https://admin.jozveraygan.xyz:8443';
+        let serverUrl = '';
         let currentUsername = '';
         let users = [];
         let updateInterval;
         let currentPage = 1;
         let usersPerPage = 20;
         let filteredUsers = [];
+        let loginAttempts = 0;
         let sectionsLoaded = {
             dashboard: false,
             users: false,
@@ -2134,7 +2293,7 @@
         // Loading Functions
         function showLoading(message = 'منتظر بمانید...') {
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.querySelector('.loading-text').textContent = message;
+            Security.safeSetContent(document.querySelector('.loading-text'), message);
         }
 
         function hideLoading() {
@@ -2193,7 +2352,8 @@
         }
 
         function refreshSettingsSection() {
-            document.getElementById('settingsUsername').value = currentUsername;
+            Security.safeSetContent(document.getElementById('settingsUsername'), currentUsername);
+            document.getElementById('currentServerUrl').value = getServerUrl();
             showNotification('تنظیمات بروزرسانی شد! 🔄', 'success');
         }
 
@@ -2202,16 +2362,29 @@
             initTheme();
             setupEventListeners();
             
-            // Check if already logged in
-            const storedToken = localStorage.getItem('azadi_token');
-            const storedUser = localStorage.getItem('azadi_username');
+            // Initialize server URL
+            serverUrl = getServerUrl();
             
-            if (storedToken && storedUser) {
-                authToken = storedToken;
-                currentUsername = storedUser;
-                showPanel();
-                loadDashboardData();
-                startAutoUpdate();
+            // Check if already logged in
+            const storedToken = sessionStorage.getItem(CONFIG.tokenKey);
+            const storedUser = sessionStorage.getItem('azadi_username');
+            const loginTime = sessionStorage.getItem('azadi_login_time');
+            
+            // Check session validity
+            if (storedToken && storedUser && loginTime) {
+                const currentTime = Date.now();
+                const sessionAge = currentTime - parseInt(loginTime);
+                
+                if (sessionAge < CONFIG.sessionTimeout) {
+                    authToken = Security.decryptToken(storedToken);
+                    currentUsername = storedUser;
+                    showPanel();
+                    loadDashboardData();
+                    startAutoUpdate();
+                } else {
+                    // Session expired
+                    logout();
+                }
             }
             
             // Set default expire date
@@ -2225,14 +2398,57 @@
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('addUserForm').addEventListener('submit', handleAddUser);
             document.getElementById('editUserForm').addEventListener('submit', handleEditUser);
+            
+            // Input validation listeners
+            document.getElementById('username').addEventListener('input', validateLoginInputs);
+            document.getElementById('newUsername').addEventListener('input', validateAddUserInputs);
+        }
+
+        function validateLoginInputs() {
+            const username = document.getElementById('username').value;
+            const isValid = Security.validateInput(username, 'username');
+            
+            if (!isValid && username.length > 0) {
+                document.getElementById('username').style.borderColor = 'var(--danger-color)';
+            } else {
+                document.getElementById('username').style.borderColor = 'var(--border-color)';
+            }
+        }
+
+        function validateAddUserInputs() {
+            const username = document.getElementById('newUsername').value;
+            const isValid = Security.validateInput(username, 'username');
+            
+            if (!isValid && username.length > 0) {
+                document.getElementById('newUsername').style.borderColor = 'var(--danger-color)';
+            } else {
+                document.getElementById('newUsername').style.borderColor = 'var(--border-color)';
+            }
         }
 
         // Authentication
         async function handleLogin(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
+            
+            // Validate inputs
+            if (!Security.validateInput(username, 'username')) {
+                showMessage('loginError', 'نام کاربری نامعتبر است');
+                return;
+            }
+            
+            if (password.length < 3) {
+                showMessage('loginError', 'رمز عبور بسیار کوتاه است');
+                return;
+            }
+            
+            // Check login attempts
+            if (loginAttempts >= CONFIG.maxLoginAttempts) {
+                showMessage('loginError', 'تعداد تلاش‌های ورود بیش از حد مجاز');
+                return;
+            }
             
             setLoadingState('loginBtn', 'loginBtnText', 'loginSpinner', true);
             hideMessage('loginError');
@@ -2255,18 +2471,30 @@
                     authToken = data.access_token;
                     currentUsername = username;
                     
-                    localStorage.setItem('azadi_token', authToken);
-                    localStorage.setItem('azadi_username', currentUsername);
+                    // Secure storage
+                    const encryptedToken = Security.encryptToken(authToken);
+                    sessionStorage.setItem(CONFIG.tokenKey, encryptedToken);
+                    sessionStorage.setItem('azadi_username', currentUsername);
+                    sessionStorage.setItem('azadi_login_time', Date.now().toString());
+                    
+                    loginAttempts = 0; // Reset attempts on successful login
                     
                     showPanel();
                     loadDashboardData();
                     startAutoUpdate();
                     showNotification('ورود موفقیت‌آمیز بود! 🎉', 'success');
                 } else {
-                    showMessage('loginError', 'نام کاربری یا رمز عبور اشتباه است');
+                    loginAttempts++;
+                    const remainingAttempts = CONFIG.maxLoginAttempts - loginAttempts;
+                    if (remainingAttempts > 0) {
+                        showMessage('loginError', `نام کاربری یا رمز عبور اشتباه است (${remainingAttempts} تلاش باقی مانده)`);
+                    } else {
+                        showMessage('loginError', 'تعداد تلاش‌های ورود به حد مجاز رسید');
+                    }
                 }
             } catch (error) {
-                showMessage('loginError', 'خطا در اتصال به سرور');
+                console.error('Login error:', error);
+                showMessage('loginError', 'خطا در اتصال به سرور - آدرس سرور را بررسی کنید');
             }
             
             setLoadingState('loginBtn', 'loginBtnText', 'loginSpinner', false);
@@ -2274,8 +2502,9 @@
         }
 
         function logout() {
-            localStorage.removeItem('azadi_token');
-            localStorage.removeItem('azadi_username');
+            sessionStorage.removeItem(CONFIG.tokenKey);
+            sessionStorage.removeItem('azadi_username');
+            sessionStorage.removeItem('azadi_login_time');
             
             if (updateInterval) {
                 clearInterval(updateInterval);
@@ -2306,9 +2535,10 @@
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('panelSection').classList.remove('hidden');
             
-            document.getElementById('navWelcome').textContent = `خوش آمدید، ${currentUsername}`;
-            document.getElementById('navWelcomeMobile').textContent = `خوش آمدید، ${currentUsername}`;
+            Security.safeSetContent(document.getElementById('navWelcome'), `خوش آمدید، ${currentUsername}`);
+            Security.safeSetContent(document.getElementById('navWelcomeMobile'), `خوش آمدید، ${currentUsername}`);
             document.getElementById('settingsUsername').value = currentUsername;
+            document.getElementById('currentServerUrl').value = getServerUrl();
         }
 
         function showSection(sectionName) {
@@ -2371,6 +2601,11 @@
 
         // API Functions
         async function apiCall(endpoint, method = 'GET', data = null) {
+            if (!authToken) {
+                logout();
+                return null;
+            }
+            
             const options = {
                 method,
                 headers: {
@@ -2426,10 +2661,10 @@
             const inactiveUsers = users.filter(user => user.status === 'disabled').length;
             const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
             
-            document.getElementById('totalUsers').textContent = totalUsers;
-            document.getElementById('activeUsers').textContent = activeUsers;
-            document.getElementById('inactiveUsers').textContent = inactiveUsers;
-            document.getElementById('totalTraffic').textContent = formatBytes(totalTraffic);
+            Security.safeSetContent(document.getElementById('totalUsers'), totalUsers.toString());
+            Security.safeSetContent(document.getElementById('activeUsers'), activeUsers.toString());
+            Security.safeSetContent(document.getElementById('inactiveUsers'), inactiveUsers.toString());
+            Security.safeSetContent(document.getElementById('totalTraffic'), formatBytes(totalTraffic));
         }
 
         function loadTopUsers(users) {
@@ -2442,7 +2677,9 @@
             container.innerHTML = '';
             
             if (topUsers.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px; font-style: italic;">هیچ داده‌ای یافت نشد</p>';
+                const noDataMsg = Security.safeCreateElement('p', 'هیچ داده‌ای یافت نشد');
+                noDataMsg.style.cssText = 'text-align: center; color: var(--text-muted); padding: 20px; font-style: italic;';
+                container.appendChild(noDataMsg);
                 return;
             }
             
@@ -2450,17 +2687,23 @@
                 const userElement = document.createElement('div');
                 userElement.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-secondary); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border-light); transition: all 0.3s ease;';
                 
-                userElement.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: bold; box-shadow: var(--shadow-sm);">
-                            ${index + 1}
-                        </div>
-                        <div>
-                            <div style="color: var(--text-primary); font-size: 14px; font-weight: 600;">${user.username}</div>
-                            <div style="color: var(--text-secondary); font-size: 12px;">${formatBytes(user.used_traffic || 0)}</div>
-                        </div>
-                    </div>
-                `;
+                const userInfo = document.createElement('div');
+                userInfo.style.cssText = 'display: flex; align-items: center; gap: 12px;';
+                
+                const rankBadge = Security.safeCreateElement('div', (index + 1).toString());
+                rankBadge.style.cssText = 'width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: bold; box-shadow: var(--shadow-sm);';
+                
+                const userDetails = document.createElement('div');
+                const usernameEl = Security.safeCreateElement('div', Security.sanitizeHtml(user.username));
+                usernameEl.style.cssText = 'color: var(--text-primary); font-size: 14px; font-weight: 600;';
+                const trafficEl = Security.safeCreateElement('div', formatBytes(user.used_traffic || 0));
+                trafficEl.style.cssText = 'color: var(--text-secondary); font-size: 12px;';
+                
+                userDetails.appendChild(usernameEl);
+                userDetails.appendChild(trafficEl);
+                userInfo.appendChild(rankBadge);
+                userInfo.appendChild(userDetails);
+                userElement.appendChild(userInfo);
                 container.appendChild(userElement);
             });
         }
@@ -2521,7 +2764,7 @@
                     
                     const searchValue = document.getElementById('userSearch')?.value || '';
                     filteredUsers = users.filter(user => 
-                        user.username.toLowerCase().includes(searchValue.toLowerCase())
+                        Security.sanitizeHtml(user.username).toLowerCase().includes(searchValue.toLowerCase())
                     );
                     
                     const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
@@ -2535,7 +2778,10 @@
                 }
             } catch (error) {
                 console.error('Users Error:', error);
-                usersContent.innerHTML = '<p style="text-align: center; color: var(--danger-color); padding: 40px;">خطا در بارگذاری کاربران</p>';
+                const errorMsg = Security.safeCreateElement('p', 'خطا در بارگذاری کاربران');
+                errorMsg.style.cssText = 'text-align: center; color: var(--danger-color); padding: 40px;';
+                usersContent.innerHTML = '';
+                usersContent.appendChild(errorMsg);
             }
         }
 
@@ -2544,7 +2790,7 @@
             
             usersContent.innerHTML = `
                 <div style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="userSearch" placeholder="جستجوی کاربر..." class="search-box" style="flex: 1; min-width: 250px;" value="">
+                    <input type="text" id="userSearch" placeholder="جستجوی کاربر..." class="search-box" style="flex: 1; min-width: 250px;" value="" maxlength="50">
                     <button onclick="refreshUsers()" class="form-button">
                         <i class="fas fa-sync-alt"></i> بروزرسانی
                     </button>
@@ -2575,63 +2821,114 @@
             const container = document.getElementById('usersTable');
             
             if (filteredUsers.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 60px; font-style: italic; font-size: 16px;">هیچ کاربری یافت نشد</p>';
+                const noUsersMsg = Security.safeCreateElement('p', 'هیچ کاربری یافت نشد');
+                noUsersMsg.style.cssText = 'text-align: center; color: var(--text-muted); padding: 60px; font-style: italic; font-size: 16px;';
+                container.innerHTML = '';
+                container.appendChild(noUsersMsg);
                 document.getElementById('usersPagination').innerHTML = '';
                 return;
             }
             
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-user"></i> نام کاربری</th>
-                            <th><i class="fas fa-info-circle"></i> وضعیت</th>
-                            <th><i class="fas fa-download"></i> ترافیک</th>
-                            <th><i class="fas fa-calendar"></i> انقضا</th>
-                            <th><i class="fas fa-tools"></i> عملیات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            const table = document.createElement('table');
+            table.className = 'data-table';
+            
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            const headers = [
+                { text: 'نام کاربری', icon: 'fas fa-user' },
+                { text: 'وضعیت', icon: 'fas fa-info-circle' },
+                { text: 'ترافیک', icon: 'fas fa-download' },
+                { text: 'انقضا', icon: 'fas fa-calendar' },
+                { text: 'عملیات', icon: 'fas fa-tools' }
+            ];
+            
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.innerHTML = `<i class="${header.icon}"></i> ${header.text}`;
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
             
             usersToShow.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Username cell
+                const usernameCell = document.createElement('td');
+                usernameCell.style.cssText = 'font-weight: 600; color: var(--text-primary);';
+                Security.safeSetContent(usernameCell, user.username);
+                
+                // Status cell
+                const statusCell = document.createElement('td');
                 const status = getUserStatus(user);
                 const statusClass = status === 'فعال' ? 'status-active' : 
                                  status === 'منقضی شده' ? 'status-expired' : 
                                  status === 'ترافیک تمام شده' ? 'status-limited' : 'status-inactive';
-                const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
-                const progressPercent = user.data_limit ? Math.min(((user.used_traffic || 0) / user.data_limit) * 100, 100) : 0;
+                const statusBadge = Security.safeCreateElement('span', status, `status-badge ${statusClass}`);
+                statusCell.appendChild(statusBadge);
                 
-                tableHTML += `
-                    <tr>
-                        <td style="font-weight: 600; color: var(--text-primary);">${user.username}</td>
-                        <td><span class="status-badge ${statusClass}">${status}</span></td>
-                        <td>
-                            <div style="margin-bottom: 6px;">
-                                ${formatBytes(user.used_traffic || 0)} / ${formatBytes(user.data_limit || 0)}
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progressPercent}%;"></div>
-                            </div>
-                        </td>
-                        <td style="color: var(--text-secondary);">${expireDate}</td>
-                        <td>
-                            <button onclick="showUserConfigs('${user.username}')" class="form-button info" title="مشاهده کانفیگ‌ها">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button onclick="editUser('${user.username}')" class="form-button warning" title="ویرایش کاربر">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="toggleUserStatus('${user.username}', '${user.status}')" class="form-button ${user.status === 'active' ? 'danger' : 'success'}" title="${user.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن'}">
-                                ${user.status === 'active' ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'}
-                            </button>
-                        </td>
-                    </tr>
-                `;
+                // Traffic cell
+                const trafficCell = document.createElement('td');
+                const trafficDiv = document.createElement('div');
+                trafficDiv.style.marginBottom = '6px';
+                Security.safeSetContent(trafficDiv, `${formatBytes(user.used_traffic || 0)} / ${formatBytes(user.data_limit || 0)}`);
+                
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'progress-bar';
+                const progressFill = document.createElement('div');
+                progressFill.className = 'progress-fill';
+                const progressPercent = user.data_limit ? Math.min(((user.used_traffic || 0) / user.data_limit) * 100, 100) : 0;
+                progressFill.style.width = `${progressPercent}%`;
+                progressDiv.appendChild(progressFill);
+                
+                trafficCell.appendChild(trafficDiv);
+                trafficCell.appendChild(progressDiv);
+                
+                // Expire cell
+                const expireCell = document.createElement('td');
+                expireCell.style.color = 'var(--text-secondary)';
+                const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
+                Security.safeSetContent(expireCell, expireDate);
+                
+                // Actions cell
+                const actionsCell = document.createElement('td');
+                
+                const configBtn = Security.safeCreateElement('button', '', 'form-button info');
+                configBtn.innerHTML = '<i class="fas fa-cog"></i>';
+                configBtn.title = 'مشاهده کانفیگ‌ها';
+                configBtn.onclick = () => showUserConfigs(user.username);
+                
+                const editBtn = Security.safeCreateElement('button', '', 'form-button warning');
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.title = 'ویرایش کاربر';
+                editBtn.onclick = () => editUser(user.username);
+                
+                const toggleBtn = Security.safeCreateElement('button', '', `form-button ${user.status === 'active' ? 'danger' : 'success'}`);
+                toggleBtn.innerHTML = user.status === 'active' ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+                toggleBtn.title = user.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن';
+                toggleBtn.onclick = () => toggleUserStatus(user.username, user.status);
+                
+                actionsCell.appendChild(configBtn);
+                actionsCell.appendChild(editBtn);
+                actionsCell.appendChild(toggleBtn);
+                
+                row.appendChild(usernameCell);
+                row.appendChild(statusCell);
+                row.appendChild(trafficCell);
+                row.appendChild(expireCell);
+                row.appendChild(actionsCell);
+                
+                tbody.appendChild(row);
             });
             
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
+            table.appendChild(tbody);
+            container.innerHTML = '';
+            container.appendChild(table);
             
             generatePagination();
         }
@@ -2645,59 +2942,57 @@
                 return;
             }
             
-            let paginationHTML = '';
+            paginationContainer.innerHTML = '';
             
-            paginationHTML += `
-                <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
-                        onclick="changePage(${currentPage - 1})" 
-                        ${currentPage === 1 ? 'disabled' : ''}>
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            `;
+            // Previous button
+            const prevBtn = Security.safeCreateElement('button', '', `pagination-btn ${currentPage === 1 ? 'disabled' : ''}`);
+            prevBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => changePage(currentPage - 1);
+            paginationContainer.appendChild(prevBtn);
             
             const startPage = Math.max(1, currentPage - 2);
             const endPage = Math.min(totalPages, currentPage + 2);
             
             if (startPage > 1) {
-                paginationHTML += `<button class="pagination-btn" onclick="changePage(1)">1</button>`;
+                const firstBtn = Security.safeCreateElement('button', '1', 'pagination-btn');
+                firstBtn.onclick = () => changePage(1);
+                paginationContainer.appendChild(firstBtn);
+                
                 if (startPage > 2) {
-                    paginationHTML += `<span class="pagination-btn disabled">...</span>`;
+                    const dots = Security.safeCreateElement('span', '...', 'pagination-btn disabled');
+                    paginationContainer.appendChild(dots);
                 }
             }
             
             for (let i = startPage; i <= endPage; i++) {
-                paginationHTML += `
-                    <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
-                            onclick="changePage(${i})">
-                        ${i}
-                    </button>
-                `;
+                const pageBtn = Security.safeCreateElement('button', i.toString(), `pagination-btn ${i === currentPage ? 'active' : ''}`);
+                pageBtn.onclick = () => changePage(i);
+                paginationContainer.appendChild(pageBtn);
             }
             
             if (endPage < totalPages) {
                 if (endPage < totalPages - 1) {
-                    paginationHTML += `<span class="pagination-btn disabled">...</span>`;
+                    const dots = Security.safeCreateElement('span', '...', 'pagination-btn disabled');
+                    paginationContainer.appendChild(dots);
                 }
-                paginationHTML += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+                const lastBtn = Security.safeCreateElement('button', totalPages.toString(), 'pagination-btn');
+                lastBtn.onclick = () => changePage(totalPages);
+                paginationContainer.appendChild(lastBtn);
             }
             
-            paginationHTML += `
-                <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
-                        onclick="changePage(${currentPage + 1})" 
-                        ${currentPage === totalPages ? 'disabled' : ''}>
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            `;
+            // Next button
+            const nextBtn = Security.safeCreateElement('button', '', `pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`);
+            nextBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => changePage(currentPage + 1);
+            paginationContainer.appendChild(nextBtn);
             
+            // Info
             const startItem = (currentPage - 1) * usersPerPage + 1;
             const endItem = Math.min(currentPage * usersPerPage, filteredUsers.length);
-            paginationHTML += `
-                <div class="pagination-info">
-                    ${startItem} تا ${endItem} از ${filteredUsers.length} کاربر
-                </div>
-            `;
-            
-            paginationContainer.innerHTML = paginationHTML;
+            const infoDiv = Security.safeCreateElement('div', `${startItem} تا ${endItem} از ${filteredUsers.length} کاربر`, 'pagination-info');
+            paginationContainer.appendChild(infoDiv);
         }
 
         function changePage(page) {
@@ -2709,15 +3004,24 @@
         }
 
         function filterUsers() {
-            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-            filteredUsers = users.filter(user => 
-                user.username.toLowerCase().includes(searchTerm)
-            );
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase().trim();
+            if (!Security.validateInput(searchTerm)) {
+                filteredUsers = users;
+            } else {
+                filteredUsers = users.filter(user => 
+                    Security.sanitizeHtml(user.username).toLowerCase().includes(searchTerm)
+                );
+            }
             currentPage = 1;
             displayUsers();
         }
 
         async function toggleUserStatus(username, currentStatus) {
+            if (!Security.validateInput(username, 'username')) {
+                showNotification('نام کاربری نامعتبر', 'error');
+                return;
+            }
+            
             const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
             showLoading('در حال تغییر وضعیت...');
             
@@ -2726,7 +3030,7 @@
                 
                 if (result) {
                     loadUsers();
-                    showNotification(`وضعیت کاربر ${username} تغییر کرد`, 'success');
+                    showNotification(`وضعیت کاربر ${Security.sanitizeHtml(username)} تغییر کرد`, 'success');
                 }
             } catch (error) {
                 showNotification('خطا در تغییر وضعیت کاربر', 'error');
@@ -2747,7 +3051,10 @@
                 }
             } catch (error) {
                 console.error('Traffic Error:', error);
-                trafficContent.innerHTML = '<p style="text-align: center; color: var(--danger-color); padding: 40px;">خطا در بارگذاری گزارش ترافیک</p>';
+                const errorMsg = Security.safeCreateElement('p', 'خطا در بارگذاری گزارش ترافیک');
+                errorMsg.style.cssText = 'text-align: center; color: var(--danger-color); padding: 40px;';
+                trafficContent.innerHTML = '';
+                trafficContent.appendChild(errorMsg);
             }
         }
 
@@ -2803,9 +3110,9 @@
             const totalDownload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.7), 0);
             const totalUpload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.3), 0);
             
-            document.getElementById('totalDownload').textContent = formatBytes(totalDownload);
-            document.getElementById('totalUpload').textContent = formatBytes(totalUpload);
-            document.getElementById('totalBandwidth').textContent = formatBytes(totalTraffic);
+            Security.safeSetContent(document.getElementById('totalDownload'), formatBytes(totalDownload));
+            Security.safeSetContent(document.getElementById('totalUpload'), formatBytes(totalUpload));
+            Security.safeSetContent(document.getElementById('totalBandwidth'), formatBytes(totalTraffic));
         }
 
         function updateTrafficCharts(users) {
@@ -2868,7 +3175,7 @@
             userTrafficChartInstance = new Chart(userTrafficCtx, {
                 type: 'bar',
                 data: {
-                    labels: topTrafficUsers.map(user => user.username),
+                    labels: topTrafficUsers.map(user => Security.sanitizeHtml(user.username)),
                     datasets: [{
                         label: 'مصرف (GB)',
                         data: topTrafficUsers.map(user => (user.used_traffic || 0) / (1024 * 1024 * 1024)),
@@ -2915,52 +3222,101 @@
             const sortedUsers = users
                 .sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0));
             
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-user"></i> کاربر</th>
-                            <th><i class="fas fa-download"></i> مصرف</th>
-                            <th><i class="fas fa-percentage"></i> درصد</th>
-                            <th><i class="fas fa-calendar"></i> آخرین فعالیت</th>
-                            <th><i class="fas fa-chart-line"></i> وضعیت</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            const table = document.createElement('table');
+            table.className = 'data-table';
             
+            // Create header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            const headers = [
+                { text: 'کاربر', icon: 'fas fa-user' },
+                { text: 'مصرف', icon: 'fas fa-download' },
+                { text: 'درصد', icon: 'fas fa-percentage' },
+                { text: 'آخرین فعالیت', icon: 'fas fa-calendar' },
+                { text: 'وضعیت', icon: 'fas fa-chart-line' }
+            ];
+            
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.innerHTML = `<i class="${header.icon}"></i> ${header.text}`;
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create body
+            const tbody = document.createElement('tbody');
             const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
             
             sortedUsers.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Username cell
+                const usernameCell = document.createElement('td');
+                usernameCell.style.cssText = 'font-weight: 600; color: var(--text-primary);';
+                Security.safeSetContent(usernameCell, user.username);
+                
+                // Usage cell
+                const usageCell = document.createElement('td');
+                Security.safeSetContent(usageCell, formatBytes(user.used_traffic || 0));
+                
+                // Percentage cell
+                const percentCell = document.createElement('td');
                 const usagePercent = totalTraffic > 0 ? ((user.used_traffic || 0) / totalTraffic * 100).toFixed(1) : 0;
+                
+                const percentDiv = document.createElement('div');
+                percentDiv.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+                
+                const percentText = Security.safeCreateElement('span', `${usagePercent}%`);
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                progressBar.style.cssText = 'width: 60px; height: 6px;';
+                
+                const progressFill = document.createElement('div');
+                progressFill.className = 'progress-fill';
+                progressFill.style.width = `${Math.min(usagePercent, 100)}%`;
+                progressBar.appendChild(progressFill);
+                
+                percentDiv.appendChild(percentText);
+                percentDiv.appendChild(progressBar);
+                percentCell.appendChild(percentDiv);
+                
+                // Last online cell
+                const lastOnlineCell = document.createElement('td');
+                lastOnlineCell.style.color = 'var(--text-secondary)';
                 const lastOnline = user.last_online ? new Date(user.last_online).toLocaleDateString('fa-IR') : 'نامشخص';
+                Security.safeSetContent(lastOnlineCell, lastOnline);
+                
+                // Status cell
+                const statusCell = document.createElement('td');
                 const limitPercent = user.data_limit ? Math.min(((user.used_traffic || 0) / user.data_limit) * 100, 100) : 0;
                 
-                tableHTML += `
-                    <tr>
-                        <td style="font-weight: 600; color: var(--text-primary);">${user.username}</td>
-                        <td>${formatBytes(user.used_traffic || 0)}</td>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span>${usagePercent}%</span>
-                                <div class="progress-bar" style="width: 60px; height: 6px;">
-                                    <div class="progress-fill" style="width: ${Math.min(usagePercent, 100)}%;"></div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="color: var(--text-secondary);">${lastOnline}</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${limitPercent}%;"></div>
-                            </div>
-                            <small style="color: var(--text-muted);">${limitPercent.toFixed(1)}% از حد مجاز</small>
-                        </td>
-                    </tr>
-                `;
+                const statusProgress = document.createElement('div');
+                statusProgress.className = 'progress-bar';
+                const statusFill = document.createElement('div');
+                statusFill.className = 'progress-fill';
+                statusFill.style.width = `${limitPercent}%`;
+                statusProgress.appendChild(statusFill);
+                
+                const statusText = Security.safeCreateElement('small', `${limitPercent.toFixed(1)}% از حد مجاز`);
+                statusText.style.color = 'var(--text-muted)';
+                
+                statusCell.appendChild(statusProgress);
+                statusCell.appendChild(statusText);
+                
+                row.appendChild(usernameCell);
+                row.appendChild(usageCell);
+                row.appendChild(percentCell);
+                row.appendChild(lastOnlineCell);
+                row.appendChild(statusCell);
+                
+                tbody.appendChild(row);
             });
             
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
+            table.appendChild(tbody);
+            container.innerHTML = '';
+            container.appendChild(table);
         }
 
         function generateDailyTrafficData(users) {
@@ -2980,11 +3336,6 @@
             }
             
             return { labels, data };
-        }
-
-        function isToday(date) {
-            const today = new Date();
-            return date.toDateString() === today.toDateString();
         }
 
         // Analytics Functions
@@ -3116,16 +3467,24 @@
                 
             } catch (error) {
                 console.error('Analytics Error:', error);
-                analyticsContent.innerHTML = '<p style="text-align: center; color: var(--danger-color); padding: 40px;">خطا در بارگذاری آمار</p>';
+                const errorMsg = Security.safeCreateElement('p', 'خطا در بارگذاری آمار');
+                errorMsg.style.cssText = 'text-align: center; color: var(--danger-color); padding: 40px;';
+                analyticsContent.innerHTML = '';
+                analyticsContent.appendChild(errorMsg);
             }
         }
 
         // Edit User Functions
         function editUser(username) {
+            if (!Security.validateInput(username, 'username')) {
+                showNotification('نام کاربری نامعتبر', 'error');
+                return;
+            }
+            
             const user = users.find(u => u.username === username);
             if (!user) return;
             
-            document.getElementById('editUsername').value = username;
+            document.getElementById('editUsername').value = Security.sanitizeHtml(username);
             document.getElementById('editDataLimit').value = user.data_limit ? (user.data_limit / (1024 * 1024 * 1024)).toFixed(0) : 30;
             
             if (user.expire) {
@@ -3145,9 +3504,28 @@
         async function handleEditUser(e) {
             e.preventDefault();
             
-            const username = document.getElementById('editUsername').value;
-            const dataLimit = parseFloat(document.getElementById('editDataLimit').value) * 1024 * 1024 * 1024;
-            const expireDate = new Date(document.getElementById('editExpireDate').value);
+            const username = document.getElementById('editUsername').value.trim();
+            const dataLimitGB = parseFloat(document.getElementById('editDataLimit').value);
+            const expireDateStr = document.getElementById('editExpireDate').value;
+            
+            // Validate inputs
+            if (!Security.validateInput(username, 'username')) {
+                showMessage('editUserError', 'نام کاربری نامعتبر است');
+                return;
+            }
+            
+            if (!Security.validateInput(dataLimitGB.toString(), 'number') || dataLimitGB < 1 || dataLimitGB > 1000) {
+                showMessage('editUserError', 'حجم ترافیک نامعتبر است');
+                return;
+            }
+            
+            if (!expireDateStr) {
+                showMessage('editUserError', 'تاریخ انقضا ضروری است');
+                return;
+            }
+            
+            const dataLimit = dataLimitGB * 1024 * 1024 * 1024;
+            const expireDate = new Date(expireDateStr);
             const expire = Math.floor(expireDate.getTime() / 1000);
             
             setLoadingState('editUserForm', 'editUserBtnText', 'editUserSpinner', true);
@@ -3162,9 +3540,9 @@
                 });
                 
                 if (result) {
-                    showMessage('editUserSuccess', `اطلاعات کاربر ${username} بروزرسانی شد`);
+                    showMessage('editUserSuccess', `اطلاعات کاربر ${Security.sanitizeHtml(username)} بروزرسانی شد`);
                     loadUsers();
-                    showNotification(`کاربر ${username} بروزرسانی شد`, 'success');
+                    showNotification(`کاربر ${Security.sanitizeHtml(username)} بروزرسانی شد`, 'success');
                     
                     setTimeout(() => {
                         closeEditModal();
@@ -3191,11 +3569,29 @@
         async function handleAddUser(e) {
             e.preventDefault();
             
-            const username = document.getElementById('newUsername').value;
-            const dataLimit = parseFloat(document.getElementById('newDataLimit').value) * 1024 * 1024 * 1024;
-            const expireDate = new Date(document.getElementById('newExpireDate').value);
+            const username = document.getElementById('newUsername').value.trim();
+            const dataLimitGB = parseFloat(document.getElementById('newDataLimit').value);
+            const expireDateStr = document.getElementById('newExpireDate').value;
             const protocol = document.getElementById('newProtocol').value;
             
+            // Validate inputs
+            if (!Security.validateInput(username, 'username')) {
+                showMessage('addUserError', 'نام کاربری نامعتبر است (فقط حروف انگلیسی، اعداد و _ مجاز است)');
+                return;
+            }
+            
+            if (!Security.validateInput(dataLimitGB.toString(), 'number') || dataLimitGB < 1 || dataLimitGB > 1000) {
+                showMessage('addUserError', 'حجم ترافیک باید بین 1 تا 1000 گیگابایت باشد');
+                return;
+            }
+            
+            if (!expireDateStr) {
+                showMessage('addUserError', 'تاریخ انقضا ضروری است');
+                return;
+            }
+            
+            const dataLimit = dataLimitGB * 1024 * 1024 * 1024;
+            const expireDate = new Date(expireDateStr);
             const expire = Math.floor(expireDate.getTime() / 1000);
             
             setLoadingState('addUserForm', 'addUserBtnText', 'addUserSpinner', true);
@@ -3217,7 +3613,7 @@
                 const result = await apiCall('/user', 'POST', userData);
                 
                 if (result) {
-                    showMessage('addUserSuccess', `کاربر ${username} با موفقیت اضافه شد`);
+                    showMessage('addUserSuccess', `کاربر ${Security.sanitizeHtml(username)} با موفقیت اضافه شد`);
                     document.getElementById('addUserForm').reset();
                     
                     const newExpireDate = new Date();
@@ -3226,7 +3622,7 @@
                     
                     await showNewUserConfigs(username);
                     
-                    showNotification(`کاربر ${username} اضافه شد`, 'success');
+                    showNotification(`کاربر ${Security.sanitizeHtml(username)} اضافه شد`, 'success');
                 } else {
                     showMessage('addUserError', 'خطا در افزودن کاربر');
                 }
@@ -3249,33 +3645,43 @@
                 if (userData.subscription_url) {
                     const subDiv = document.createElement('div');
                     subDiv.className = 'config-display';
-                    subDiv.innerHTML = `
-                        <div class="config-info">
-                            <strong><i class="fas fa-link"></i> لینک ساب (Subscription):</strong>
-                            <button onclick="copyText('${userData.subscription_url}')" class="form-button success">
-                                <i class="fas fa-copy"></i> کپی
-                            </button>
-                        </div>
-                        <div class="config-text">${userData.subscription_url}</div>
+                    
+                    const subInfo = document.createElement('div');
+                    subInfo.className = 'config-info';
+                    subInfo.innerHTML = `
+                        <strong><i class="fas fa-link"></i> لینک ساب (Subscription):</strong>
+                        <button onclick="copyText('${userData.subscription_url}')" class="form-button success">
+                            <i class="fas fa-copy"></i> کپی
+                        </button>
                     `;
+                    
+                    const subText = Security.safeCreateElement('div', userData.subscription_url, 'config-text');
+                    
+                    subDiv.appendChild(subInfo);
+                    subDiv.appendChild(subText);
                     configsContainer.appendChild(subDiv);
                 }
                 
                 if (userData.links && userData.links.length > 0) {
                     userData.links.forEach((config, index) => {
-                        const protocol = config.split('://')[0].toUpperCase();
+                        const protocol = Security.sanitizeHtml(config.split('://')[0].toUpperCase());
                         
                         const configDiv = document.createElement('div');
                         configDiv.className = 'config-display';
-                        configDiv.innerHTML = `
-                            <div class="config-info">
-                                <strong><i class="fas fa-cog"></i> کانفیگ ${protocol} #${index + 1}:</strong>
-                                <button onclick="copyText('${config}')" class="form-button success">
-                                    <i class="fas fa-copy"></i> کپی
-                                </button>
-                            </div>
-                            <div class="config-text">${config}</div>
+                        
+                        const configInfo = document.createElement('div');
+                        configInfo.className = 'config-info';
+                        configInfo.innerHTML = `
+                            <strong><i class="fas fa-cog"></i> کانفیگ ${protocol} #${index + 1}:</strong>
+                            <button onclick="copyText('${config}')" class="form-button success">
+                                <i class="fas fa-copy"></i> کپی
+                            </button>
                         `;
+                        
+                        const configText = Security.safeCreateElement('div', config, 'config-text');
+                        
+                        configDiv.appendChild(configInfo);
+                        configDiv.appendChild(configText);
                         configsContainer.appendChild(configDiv);
                     });
                 }
@@ -3289,6 +3695,11 @@
 
         // Config Functions
         async function showUserConfigs(username) {
+            if (!Security.validateInput(username, 'username')) {
+                showNotification('نام کاربری نامعتبر', 'error');
+                return;
+            }
+            
             showLoading('در حال دریافت کانفیگ‌ها...');
             
             try {
@@ -3300,48 +3711,63 @@
                 }
                 
                 const configContent = document.getElementById('configContent');
-                configContent.innerHTML = `
-                    <div style="margin-bottom: 20px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-light);">
-                        <strong style="color: var(--text-primary); font-size: 16px;">
-                            <i class="fas fa-user"></i> کاربر: ${username}
-                        </strong>
-                    </div>
-                `;
+                configContent.innerHTML = '';
+                
+                // User info section
+                const userInfoDiv = document.createElement('div');
+                userInfoDiv.style.cssText = 'margin-bottom: 20px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-light);';
+                const userInfoContent = document.createElement('strong');
+                userInfoContent.style.cssText = 'color: var(--text-primary); font-size: 16px;';
+                userInfoContent.innerHTML = `<i class="fas fa-user"></i> کاربر: ${Security.sanitizeHtml(username)}`;
+                userInfoDiv.appendChild(userInfoContent);
+                configContent.appendChild(userInfoDiv);
                 
                 if (userData.subscription_url) {
                     const subDiv = document.createElement('div');
                     subDiv.className = 'config-display';
-                    subDiv.innerHTML = `
-                        <div class="config-info">
-                            <strong><i class="fas fa-link"></i> لینک ساب (Subscription):</strong>
-                            <button onclick="copyText('${userData.subscription_url}')" class="form-button success">
-                                <i class="fas fa-copy"></i> کپی
-                            </button>
-                        </div>
-                        <div class="config-text">${userData.subscription_url}</div>
+                    
+                    const subInfo = document.createElement('div');
+                    subInfo.className = 'config-info';
+                    subInfo.innerHTML = `
+                        <strong><i class="fas fa-link"></i> لینک ساب (Subscription):</strong>
+                        <button onclick="copyText('${userData.subscription_url}')" class="form-button success">
+                            <i class="fas fa-copy"></i> کپی
+                        </button>
                     `;
+                    
+                    const subText = Security.safeCreateElement('div', userData.subscription_url, 'config-text');
+                    
+                    subDiv.appendChild(subInfo);
+                    subDiv.appendChild(subText);
                     configContent.appendChild(subDiv);
                 }
                 
                 if (userData.links && userData.links.length > 0) {
                     userData.links.forEach((config, index) => {
-                        const protocol = config.split('://')[0].toUpperCase();
+                        const protocol = Security.sanitizeHtml(config.split('://')[0].toUpperCase());
                         
                         const configDiv = document.createElement('div');
                         configDiv.className = 'config-display';
-                        configDiv.innerHTML = `
-                            <div class="config-info">
-                                <strong><i class="fas fa-cog"></i> کانفیگ ${protocol} #${index + 1}:</strong>
-                                <button onclick="copyText('${config}')" class="form-button success">
-                                    <i class="fas fa-copy"></i> کپی
-                                </button>
-                            </div>
-                            <div class="config-text">${config}</div>
+                        
+                        const configInfo = document.createElement('div');
+                        configInfo.className = 'config-info';
+                        configInfo.innerHTML = `
+                            <strong><i class="fas fa-cog"></i> کانفیگ ${protocol} #${index + 1}:</strong>
+                            <button onclick="copyText('${config}')" class="form-button success">
+                                <i class="fas fa-copy"></i> کپی
+                            </button>
                         `;
+                        
+                        const configText = Security.safeCreateElement('div', config, 'config-text');
+                        
+                        configDiv.appendChild(configInfo);
+                        configDiv.appendChild(configText);
                         configContent.appendChild(configDiv);
                     });
                 } else {
-                    configContent.innerHTML += '<p style="text-align: center; color: var(--text-muted); padding: 20px; font-style: italic;">هیچ کانفیگی یافت نشد</p>';
+                    const noConfigMsg = Security.safeCreateElement('p', 'هیچ کانفیگی یافت نشد');
+                    noConfigMsg.style.cssText = 'text-align: center; color: var(--text-muted); padding: 20px; font-style: italic;';
+                    configContent.appendChild(noConfigMsg);
                 }
                 
                 document.getElementById('configModal').classList.remove('hidden');
@@ -3358,11 +3784,20 @@
         }
 
         function copyText(text) {
+            // Validate text before copying
+            if (!text || typeof text !== 'string' || text.length > 10000) {
+                showNotification('متن نامعتبر برای کپی', 'error');
+                return;
+            }
+            
             navigator.clipboard.writeText(text).then(() => {
                 showNotification('متن کپی شد! 📋', 'success');
             }).catch(() => {
+                // Fallback for older browsers
                 const textArea = document.createElement('textarea');
                 textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
@@ -3376,8 +3811,18 @@
             const defaultDataLimit = document.getElementById('defaultDataLimit').value;
             const defaultDuration = document.getElementById('defaultDuration').value;
             
-            localStorage.setItem('azadi_default_data_limit', defaultDataLimit);
-            localStorage.setItem('azadi_default_duration', defaultDuration);
+            if (!Security.validateInput(defaultDataLimit, 'number') || defaultDataLimit < 1 || defaultDataLimit > 1000) {
+                showNotification('حجم پیش‌فرض نامعتبر است', 'error');
+                return;
+            }
+            
+            if (!Security.validateInput(defaultDuration, 'number') || defaultDuration < 1 || defaultDuration > 365) {
+                showNotification('مدت پیش‌فرض نامعتبر است', 'error');
+                return;
+            }
+            
+            sessionStorage.setItem('azadi_default_data_limit', defaultDataLimit);
+            sessionStorage.setItem('azadi_default_duration', defaultDuration);
             
             showNotification('تنظیمات با موفقیت ذخیره شد ✅', 'success');
         }
@@ -3407,7 +3852,7 @@
 
         function showMessage(elementId, message) {
             const element = document.getElementById(elementId);
-            element.textContent = message;
+            Security.safeSetContent(element, message);
             element.classList.remove('hidden');
         }
 
@@ -3419,7 +3864,15 @@
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            notification.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${message}`;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const iconEl = document.createElement('i');
+            iconEl.className = `fas ${icon}`;
+            
+            const textEl = Security.safeCreateElement('span', ` ${Security.sanitizeHtml(message)}`);
+            
+            notification.appendChild(iconEl);
+            notification.appendChild(textEl);
             
             document.body.appendChild(notification);
             
