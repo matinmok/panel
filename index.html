@@ -17,10 +17,10 @@
         }
 
         :root {
-            --primary-color: #5D5CDE;
-            --primary-light: #7B7AE8;
-            --primary-dark: #4A49C7;
-            --secondary-color: #667eea;
+            --primary-color: #2C3E50;
+            --primary-light: #34495E;
+            --primary-dark: #1A252F;
+            --secondary-color: #4A6741;
             --accent-color: #CC9B50;
             --success-color: #2e7d32;
             --danger-color: #d32f2f;
@@ -151,7 +151,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><linearGradient id="a" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%235D5CDE;stop-opacity:0.1"/><stop offset="100%" style="stop-color:%23667eea;stop-opacity:0.1"/></linearGradient></defs><path fill="url(%23a)" d="M0,0 L1000,0 L1000,1000 L0,1000 Z"/><circle cx="200" cy="200" r="100" fill="rgba(255,255,255,0.05)"/><circle cx="800" cy="300" r="150" fill="rgba(255,255,255,0.03)"/><circle cx="300" cy="800" r="120" fill="rgba(255,255,255,0.04)"/></svg>');
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><linearGradient id="a" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%232C3E50;stop-opacity:0.1"/><stop offset="100%" style="stop-color:%234A6741;stop-opacity:0.1"/></linearGradient></defs><path fill="url(%23a)" d="M0,0 L1000,0 L1000,1000 L0,1000 Z"/><circle cx="200" cy="200" r="100" fill="rgba(255,255,255,0.05)"/><circle cx="800" cy="300" r="150" fill="rgba(255,255,255,0.03)"/><circle cx="300" cy="800" r="120" fill="rgba(255,255,255,0.04)"/></svg>');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -245,7 +245,7 @@
         
         .form-input:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(93, 92, 222, 0.1);
+            box-shadow: 0 0 0 4px rgba(44, 62, 80, 0.1);
             transform: translateY(-1px);
         }
         
@@ -376,9 +376,10 @@
             width: 100%;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: flex-start;
             transition: all 0.3s ease;
             font-weight: 500;
+            direction: rtl;
         }
         
         .nav-item i {
@@ -709,7 +710,7 @@
         .search-box:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(93, 92, 222, 0.1);
+            box-shadow: 0 0 0 4px rgba(44, 62, 80, 0.1);
         }
 
         .search-box::placeholder {
@@ -1341,25 +1342,25 @@
             
             <div class="nav-menu">
                 <button class="nav-item active" onclick="showSection('dashboard'); toggleMobileMenu()">
-                    <i class="fas fa-tachometer-alt"></i>داشبورد
+                    داشبورد<i class="fas fa-tachometer-alt"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('users'); toggleMobileMenu()">
-                    <i class="fas fa-users"></i>کاربران
+                    کاربران<i class="fas fa-users"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('addUser'); toggleMobileMenu()">
-                    <i class="fas fa-user-plus"></i>افزودن کاربر
+                    افزودن کاربر<i class="fas fa-user-plus"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('traffic'); toggleMobileMenu()">
-                    <i class="fas fa-chart-area"></i>ترافیک
+                    ترافیک<i class="fas fa-chart-area"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('payment'); toggleMobileMenu()">
-                    <i class="fas fa-credit-card"></i>پرداخت
+                    پرداخت<i class="fas fa-credit-card"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('analytics'); toggleMobileMenu()">
-                    <i class="fas fa-chart-bar"></i>آمار
+                    آمار<i class="fas fa-chart-bar"></i>
                 </button>
                 <button class="nav-item" onclick="showSection('settings'); toggleMobileMenu()">
-                    <i class="fas fa-cog"></i>تنظیمات
+                    تنظیمات<i class="fas fa-cog"></i>
                 </button>
             </div>
             
@@ -1381,25 +1382,25 @@
             
             <div class="nav-menu">
                 <button class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">
-                    <i class="fas fa-tachometer-alt"></i>داشبورد
+                    داشبورد<i class="fas fa-tachometer-alt"></i>
                 </button>
                 <button class="nav-item" data-section="users" onclick="showSection('users')">
-                    <i class="fas fa-users"></i>کاربران
+                    کاربران<i class="fas fa-users"></i>
                 </button>
                 <button class="nav-item" data-section="addUser" onclick="showSection('addUser')">
-                    <i class="fas fa-user-plus"></i>افزودن کاربر
+                    افزودن کاربر<i class="fas fa-user-plus"></i>
                 </button>
                 <button class="nav-item" data-section="traffic" onclick="showSection('traffic')">
-                    <i class="fas fa-chart-area"></i>ترافیک
+                    ترافیک<i class="fas fa-chart-area"></i>
                 </button>
                 <button class="nav-item" data-section="payment" onclick="showSection('payment')">
-                    <i class="fas fa-credit-card"></i>پرداخت
+                    پرداخت<i class="fas fa-credit-card"></i>
                 </button>
                 <button class="nav-item" data-section="analytics" onclick="showSection('analytics')">
-                    <i class="fas fa-chart-bar"></i>آمار
+                    آمار<i class="fas fa-chart-bar"></i>
                 </button>
                 <button class="nav-item" data-section="settings" onclick="showSection('settings')">
-                    <i class="fas fa-cog"></i>تنظیمات
+                    تنظیمات<i class="fas fa-cog"></i>
                 </button>
             </div>
             
@@ -2192,7 +2193,7 @@
                     datasets: [{
                         label: 'مصرف (GB)',
                         data: topTrafficUsers.map(user => (user.used_traffic || 0) / (1024 * 1024 * 1024)),
-                        backgroundColor: '#5D5CDE',
+                        backgroundColor: '#2C3E50',
                         borderRadius: 8
                     }]
                 },
@@ -2718,7 +2719,7 @@
                     labels: Object.keys(protocolData),
                     datasets: [{
                         data: Object.values(protocolData),
-                        backgroundColor: ['#5D5CDE', '#CC9B50', '#2e7d32', '#d32f2f', '#1976d2'],
+                        backgroundColor: ['#2C3E50', '#CC9B50', '#2e7d32', '#d32f2f', '#1976d2'],
                         borderWidth: 3,
                         borderColor: 'var(--card-bg)'
                     }]
