@@ -1,674 +1,893 @@
-برای تبدیل کد فعلی به یک پنل نمایندگی که به Marzban (پروژه متن‌باز مدیریت سرور VPN) متصل شود و قابلیت‌هایی مانند ایجاد کاربر، مشاهده کاربران و مدیریت آنها را داشته باشد، باید تغییرات اساسی در کد ایجاد کنیم. با این حال، درخواست شما مشخص کرده که ظاهر (UI) نباید تغییر کند، بنابراین ساختار HTML، CSS و جاوااسکریپت فعلی را حفظ می‌کنیم و منطق بک‌اند را برای اتصال به API Marzban تغییر می‌دهیم. در این پاسخ، یک کد کامل ارائه می‌شود که با API Marzban کار می‌کند، اما از همان ظاهر و استایل‌های کد اصلی استفاده می‌کند.
-
-### پیش‌نیازها
-1. **Marzban API**: فرض می‌کنیم سرور Marzban روی `https://admin.jozveraygan.xyz:8443` نصب شده و API آن فعال است.
-2. **توکن دسترسی**: برای ارتباط با API Marzban، نیاز به توکن ادمین دارید. این توکن باید در تنظیمات افزونه ذخیره شود.
-3. **وردپرس**: کد همچنان به عنوان یک افزونه وردپرس عمل می‌کند.
-4. **حفظ ظاهر**: استایل‌ها و ساختار HTML مشابه کد اصلی باقی می‌مانند.
-5. **امنیت**: برای اتصال به API، از cURL یا کتابخانه HTTP مانند Guzzle استفاده می‌کنیم و تمام درخواست‌ها با SSL انجام می‌شوند.
-
-### تغییرات مورد نیاز
-1. **حذف قابلیت‌های غیرمرتبط**: بخش‌هایی مانند مدیریت دوره‌ها، مقالات، و تیکت‌ها حذف می‌شوند و جای خود را به قابلیت‌های مدیریت کاربران Marzban (ایجاد، مشاهده، ویرایش، حذف) می‌دهند.
-2. **اتصال به API Marzban**: از API Marzban برای مدیریت کاربران، مشاهده آمار و انجام عملیات نمایندگی استفاده می‌کنیم.
-3. **نقش نمایندگی**: نقش `modares` به `agent` تغییر می‌کند و کاربران با این نقش به پنل نمایندگی دسترسی خواهند داشت.
-4. **مدیریت توکن**: هر نماینده یک توکن API برای دسترسی به Marzban خواهد داشت که در پروفایلش ذخیره می‌شود.
-5. **حفظ ظاهر**: استایل‌ها و جاوااسکریپت‌های مربوط به رابط کاربری ثابت می‌مانند.
-
-### کد کامل
-```php
-<?php
-/*
-Plugin Name: پنل نمایندگی جزورایگان
-Description: افزونه‌ای برای مدیریت کاربران VPN در Marzban
-Version: 1.0
-Author: تیم جزورایگان
-Text Domain: jozveraygan-agent
-*/
-defined('ABSPATH') || exit;
-
-// تابع تبدیل تاریخ میلادی به شمسی
-function jozveraygan_gregorian_to_jalali($date) {
-    if (empty($date)) return $date;
-    
-    $date = strtotime($date);
-    if ($date === false) return $date;
-    
-    $formatted_date = date_i18n('Y/m/d H:i', $date);
-    $persian_numbers = array('۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹');
-    $english_numbers = range(0, 9);
-    
-    return str_replace($english_numbers, $persian_numbers, $formatted_date);
-}
-
-// تابع ارسال درخواست به API Marzban
-function jozveraygan_marzban_api_request($endpoint, $method = 'GET', $data = [], $token = '') {
-    $url = 'https://admin.jozveraygan.xyz:8443/api' . $endpoint;
-    $args = [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $token,
-            'Content-Type' => 'application/json',
-        ],
-        'timeout' => 30,
-        'sslverify' => true, // برای سرورهای واقعی باید true باشد
-    ];
-
-    if ($method === 'POST' || $method === 'PUT') {
-        $args['body'] = json_encode($data);
-    }
-
-    $response = wp_remote_request($url, array_merge($args, ['method' => $method]));
-    
-    if (is_wp_error($response)) {
-        error_log('Marzban API Error: ' . $response->get_error_message());
-        return ['success' => false, 'error' => $response->get_error_message()];
-    }
-
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-    return [
-        'success' => wp_remote_retrieve_response_code($response) >= 200 && wp_remote_retrieve_response_code($response) < 300,
-        'data' => $body,
-    ];
-}
-
-// تابع دریافت لیست کاربران از Marzban
-function jozveraygan_get_marzban_users($token) {
-    $response = jozveraygan_marzban_api_request('/user', 'GET', [], $token);
-    if ($response['success']) {
-        return $response['data']['users'] ?? [];
-    }
-    return [];
-}
-
-// تابع افزودن کاربر جدید در Marzban
-function jozveraygan_add_marzban_user($username, $data_limit, $expire, $token) {
-    $data = [
-        'username' => $username,
-        'data_limit' => $data_limit * 1024 * 1024 * 1024, // تبدیل گیگابایت به بایت
-        'expire' => $expire,
-        'proxies' => ['vless' => [], 'vmess' => [], 'trojan' => []], // تنظیم پیش‌فرض
-    ];
-    return jozveraygan_marzban_api_request('/user', 'POST', $data, $token);
-}
-
-// تابع حذف کاربر از Marzban
-function jozveraygan_delete_marzban_user($username, $token) {
-    return jozveraygan_marzban_api_request('/user/' . $username, 'DELETE', [], $token);
-}
-
-// تابع ویرایش کاربر در Marzban
-function jozveraygan_edit_marzban_user($username, $data_limit, $expire, $token) {
-    $data = [
-        'data_limit' => $data_limit * 1024 * 1024 * 1024, // تبدیل گیگابایت به بایت
-        'expire' => $expire,
-    ];
-    return jozveraygan_marzban_api_request('/user/' . $username, 'PUT', $data, $token);
-}
-
-// ثبت استایل‌ها
-add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_style('jozveraygan-vazir-font', 'https://v1.fontapi.ir/css/Vazir', [], '1.0');
-});
-add_action('admin_enqueue_scripts', function () {
-    wp_enqueue_style('jozveraygan-vazir-font', 'https://v1.fontapi.ir/css/Vazir', [], '1.0');
-});
-
-// ایجاد نقش نماینده
-add_action('init', function () {
-    add_role('agent', 'نماینده', ['read' => true, 'edit_posts' => true, 'upload_files' => true]);
-});
-
-// ثبت جداول پایگاه داده
-register_activation_hook(__FILE__, function () {
-    global $wpdb;
-    $charset_collate = $wpdb->get_charset_collate();
-    $tables = [
-        "CREATE TABLE {$wpdb->prefix}jozveraygan_notifications (
-            id bigint(20) NOT NULL AUTO_INCREMENT,
-            user_id bigint(20) NOT NULL,
-            title varchar(255) NOT NULL,
-            message text NOT NULL,
-            type varchar(50) NOT NULL,
-            is_read tinyint(1) DEFAULT 0,
-            created_at datetime NOT NULL,
-            PRIMARY KEY (id)
-        ) $charset_collate;"
-    ];
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    foreach ($tables as $sql) dbDelta($sql);
-});
-
-// تابع ثبت اعلان
-function jozveraygan_add_notification($user_id, $title, $message, $type = 'info') {
-    global $wpdb;
-    return $wpdb->insert(
-        $wpdb->prefix . 'jozveraygan_notifications',
-        [
-            'user_id' => $user_id,
-            'title' => $title,
-            'message' => $message,
-            'type' => $type,
-            'created_at' => current_time('mysql')
-        ],
-        ['%d', '%s', '%s', '%s', '%s']
-    );
-}
-
-// تابع ارسال ایمیل اعلان
-function jozveraygan_send_admin_notification($subject, $message) {
-    wp_mail(get_option('admin_email'), $subject, $message, ['Content-Type: text/html; charset=UTF-8']);
-}
-
-// شورت‌کد پنل نمایندگی
-add_shortcode('jozveraygan-agent', function () {
-    ob_start();
-    if (wp_is_mobile()) {
-        ?>
-        <style>
-            *{margin:0;padding:0;box-sizing:border-box;font-family:'Vazir',Arial,sans-serif!important}.jozveraygan-error-fullpage{position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;justify-content:center;align-items:center;z-index:9999}.jozveraygan-error-container{background:#fff;border-radius:20px;padding:50px 40px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.1);max-width:450px;width:90%;animation:fadeInUp 0.6s ease-out}.jozveraygan-error-icon{font-size:80px;margin-bottom:20px;color:#667eea}.jozveraygan-error-title{font-size:28px;color:#333;margin-bottom:15px;font-weight:700}.jozveraygan-error-text{font-size:16px;color:#666;line-height:1.6;margin-bottom:30px}.jozveraygan-error-btn{display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border-radius:25px;text-decoration:none;font-size:16px;font-weight:600;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(102,126,234,0.3)}.jozveraygan-error-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(102,126,234,0.4);color:#fff}@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}@media (max-width:480px){.jozveraygan-error-container{padding:40px 30px}.jozveraygan-error-title{font-size:24px}.jozveraygan-error-text{font-size:14px}.jozveraygan-error-btn{font-size:14px;padding:10px 25px}}
-        </style>
-        <div class="jozveraygan-error-fullpage">
-            <div class="jozveraygan-error-container">
-                <div class="jozveraygan-error-icon">💻</div>
-                <h1 class="jozveraygan-error-title">دسترسی محدود</h1>
-                <p class="jozveraygan-error-text">برای دسترسی به پنل نمایندگی جزورایگان لطفا با لپتاپ و یا کامپیوتر وارد شوید!</p>
-                <a href="<?php echo esc_url(home_url()); ?>" class="jozveraygan-error-btn">بازگشت به صفحه اصلی</a>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-    if (!is_user_logged_in()) {
-        ?>
-        <style>
-            *{margin:0;padding:0;box-sizing:border-box;font-family:'Vazir',Arial,sans-serif!important}.jozveraygan-error-fullpage{position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;justify-content:center;align-items:center;z-index:9999}.jozveraygan-error-container{background:#fff;border-radius:20px;padding:50px 40px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.1);max-width:450px;width:90%;animation:fadeInUp 0.6s ease-out}.jozveraygan-error-icon{font-size:80px;margin-bottom:20px;color:#667eea}.jozveraygan-error-title{font-size:28px;color:#333;margin-bottom:15px;font-weight:700}.jozveraygan-error-text{font-size:16px;color:#666;line-height:1.6;margin-bottom:30px}.jozveraygan-error-btn{display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border-radius:25px;text-decoration:none;font-size:16px;font-weight:600;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(102,126,234,0.3)}.jozveraygan-error-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(102,126,234,0.4);color:#fff}@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}@media (max-width:480px){.jozveraygan-error-container{padding:40px 30px}.jozveraygan-error-title{font-size:24px}.jozveraygan-error-text{font-size:14px}.jozveraygan-error-btn{font-size:14px;padding:10px 25px}}
-        </style>
-        <div class="jozveraygan-error-fullpage">
-            <div class="jozveraygan-error-container">
-                <div class="jozveraygan-error-icon">🔐</div>
-                <h1 class="jozveraygan-error-title">نیاز به ورود</h1>
-                <p class="jozveraygan-error-text">لطفاً برای دسترسی به پنل نمایندگی ابتدا وارد حساب کاربری خود شوید.</p>
-                <a href="<?php echo esc_url(wp_login_url()); ?>" class="jozveraygan-error-btn">ورود به حساب</a>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-    $user = wp_get_current_user();
-    if (!in_array('agent', (array)$user->roles)) {
-        ?>
-        <style>
-            *{margin:0;padding:0;box-sizing:border-box;font-family:'Vazir',Arial,sans-serif!important}.jozveraygan-error-fullpage{position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;justify-content:center;align-items:center;z-index:9999}.jozveraygan-error-container{background:#fff;border-radius:20px;padding:50px 40px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.1);max-width:450px;width:90%;animation:fadeInUp 0.6s ease-out}.jozveraygan-error-icon{font-size:80px;margin-bottom:20px;color:#667eea}.jozveraygan-error-title{font-size:28px;color:#333;margin-bottom:15px;font-weight:700}.jozveraygan-error-text{font-size:16px;color:#666;line-height:1.6;margin-bottom:30px}.jozveraygan-error-btn{display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border-radius:25px;text-decoration:none;font-size:16px;font-weight:600;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(102,126,234,0.3)}.jozveraygan-error-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(102,126,234,0.4);color:#fff}@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}@media (max-width:480px){.jozveraygan-error-container{padding:40px 30px}.jozveraygan-error-title{font-size:24px}.jozveraygan-error-text{font-size:14px}.jozveraygan-error-btn{font-size:14px;padding:10px 25px}}
-        </style>
-        <div class="jozveraygan-error-fullpage">
-            <div class="jozveraygan-error-container">
-                <div class="jozveraygan-error-icon">⚠️</div>
-                <h1 class="jozveraygan-error-title">دسترسی غیرمجاز</h1>
-                <p class="jozveraygan-error-text">این پنل فقط برای نمایندگان قابل دسترسی است.</p>
-                <a href="<?php echo esc_url(home_url()); ?>" class="jozveraygan-error-btn">بازگشت به صفحه اصلی</a>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-
-    $token = get_user_meta($user->ID, 'jozveraygan_marzban_token', true);
-    $profile_picture = get_user_meta($user->ID, 'jozveraygan_profile_picture', true) ?: get_avatar_url($user->ID, ['size' => 100]);
-    $notification = '';
-
-    // پردازش درخواست‌های فرم
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nonce']) && wp_verify_nonce($_POST['nonce'], 'jozveraygan_action')) {
-        if (isset($_POST['add_user']) && !empty($_POST['username']) && !empty($_POST['data_limit']) && !empty($_POST['expire'])) {
-            $result = jozveraygan_add_marzban_user(sanitize_text_field($_POST['username']), floatval($_POST['data_limit']), strtotime($_POST['expire']), $token);
-            if ($result['success']) {
-                $notification = '<div class="jozveraygan-notification jozveraygan-success">کاربر جدید با موفقیت ایجاد شد.</div>';
-                jozveraygan_add_notification(1, 'کاربر جدید', sprintf('نماینده %s کاربر %s را ایجاد کرد.', $user->display_name, $_POST['username']), 'user');
-                jozveraygan_send_admin_notification('کاربر جدید', sprintf('نماینده %s کاربر %s را ایجاد کرد.', $user->display_name, $_POST['username']));
-            } else {
-                $notification = '<div class="jozveraygan-notification jozveraygan-error">خطا در ایجاد کاربر: ' . esc_html($result['error'] ?? 'خطای ناشناخته') . '</div>';
-            }
-        } elseif (isset($_POST['delete_user']) && !empty($_POST['username'])) {
-            $result = jozveraygan_delete_marzban_user(sanitize_text_field($_POST['username']), $token);
-            if ($result['success']) {
-                $notification = '<div class="jozveraygan-notification jozveraygan-success">کاربر با موفقیت حذف شد.</div>';
-                jozveraygan_add_notification(1, 'حذف کاربر', sprintf('نماینده %s کاربر %s را حذف کرد.', $user->display_name, $_POST['username']), 'user');
-                jozveraygan_send_admin_notification('حذف کاربر', sprintf('نماینده %s کاربر %s را حذف کرد.', $user->display_name, $_POST['username']));
-            } else {
-                $notification = '<div class="jozveraygan-notification jozveraygan-error">خطا در حذف کاربر: ' . esc_html($result['error'] ?? 'خطای ناشناخته') . '</div>';
-            }
-        } elseif (isset($_POST['edit_user']) && !empty($_POST['username']) && !empty($_POST['data_limit']) && !empty($_POST['expire'])) {
-            $result = jozveraygan_edit_marzban_user(sanitize_text_field($_POST['username']), floatval($_POST['data_limit']), strtotime($_POST['expire']), $token);
-            if ($result['success']) {
-                $notification = '<div class="jozveraygan-notification jozveraygan-success">کاربر با موفقیت ویرایش شد.</div>';
-                jozveraygan_add_notification(1, 'ویرایش کاربر', sprintf('نماینده %s کاربر %s را ویرایش کرد.', $user->display_name, $_POST['username']), 'user');
-                jozveraygan_send_admin_notification('ویرایش کاربر', sprintf('نماینده %s کاربر %s را ویرایش کرد.', $user->display_name, $_POST['username']));
-            } else {
-                $notification = '<div class="jozveraygan-notification jozveraygan-error">خطا در ویرایش کاربر: ' . esc_html($result['error'] ?? 'خطای ناشناخته') . '</div>';
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل نمایندگی - مرزبان VPN</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#CC9B50'
+                    },
+                    fontFamily: {
+                        'vazir': ['Vazir', 'Arial', 'sans-serif']
+                    }
+                }
             }
         }
-    }
-
-    $users = jozveraygan_get_marzban_users($token);
-    $user_count = count($users);
-    ?>
+    </script>
     <style>
-        *{font-family:'Vazir',Arial,sans-serif!important;box-sizing:border-box}.jozveraygan-panel{display:flex;flex-direction:row-reverse;width:100vw;height:100vh;position:fixed;top:0;left:0;background:#fff}.jozveraygan-nav{width:220px;background:#1a3c5e;color:#fff;display:flex;flex-direction:column;padding:15px;height:100%;box-shadow:-2px 0 8px rgba(0,0,0,0.1)}.jozveraygan-nav button{background:none;color:#fff;border:none;padding:10px;text-align:right;font-size:15px;cursor:pointer;border-radius:5px;margin:3px 0}.jozveraygan-nav button:hover,.jozveraygan-nav button.active{background:#CC9B50}.jozveraygan-content{flex:1;padding:20px;background:#f4f6f9;overflow-y:auto;height:100%;padding-bottom:80px}.jozveraygan-header-mobile{display:none;position:sticky;top:0;background:#1a3c5e;color:#fff;padding:10px;z-index:1000;text-align:center;font-size:18px}.jozveraygan-hamburger{display:none;position:absolute;right:10px;top:10px;background:none;border:none;color:#fff;font-size:24px;cursor:pointer}.jozveraygan-nav-mobile{display:none;flex-direction:column;background:#1a3c5e;position:absolute;top:50px;right:10px;width:200px;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.2)}.jozveraygan-nav-mobile button{background:none;color:#fff;border:none;padding:10px;text-align:right;font-size:14px;cursor:pointer;border-radius:5px;margin:3px 0}.jozveraygan-nav-mobile button:hover,.jozveraygan-nav-mobile button.active{background:#CC9B50}.jozveraygan-title{color:#1a3c5e;font-size:28px;margin-bottom:25px;text-align:center;font-weight:700;border-bottom:2px solid #CC9B50;padding-bottom:15px}.jozveraygan-profile{background:#fff;padding:15px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;align-items:center;gap:15px;margin-bottom:20px}.jozveraygan-profile img{width:60px;height:60px;border-radius:50%;object-fit:cover}.jozveraygan-profile-info p{margin:5px 0;color:#4a5b6e;font-size:14px}.jozveraygan-section{display:none;background:#fff;padding:20px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}.jozveraygan-section.active{display:block}.jozveraygan-section h3{color:#1a3c5e;font-size:20px;margin-bottom:10px;text-align:right}.jozveraygan-section label{display:block;margin:8px 0 4px;font-weight:bold;color:#4a5b6e;font-size:13px}.jozveraygan-section input,.jozveraygan-section textarea{width:100%;padding:10px;border:1px solid #d1d9e0;border-radius:6px;font-size:13px}.jozveraygan-section button{background:#CC9B50;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:13px}.jozveraygan-section button:hover{background:#b5893f}.jozveraygan-users{display:grid;gap:10px}.jozveraygan-user{background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #e0e6ed}.jozveraygan-notification{padding:10px;border-radius:6px;margin-bottom:15px;text-align:center;font-size:13px}.jozveraygan-notification.jozveraygan-success{background:#e6f4ea;color:#2e7d32}.jozveraygan-notification.jozveraygan-error{background:#f8d7da;color:#721c24}.jozveraygan-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:10px;background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}.jozveraygan-table th,.jozveraygan-table td{border:1px solid #e0e6ed;padding:10px;text-align:right;font-size:13px}.jozveraygan-table th{background:#f8fafc;color:#1a3c5e}.jozveraygan-table tr:hover{background:#f9f9f9}.jozveraygan-status{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:20px}.jozveraygan-status-card{background:#fff;padding:15px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);text-align:right}.jozveraygan-status-card h4{color:#1a3c5e;font-size:16px;margin-bottom:8px}.jozveraygan-status-card p{color:#4a5b6e;font-size:14px;margin:4px 0}.jozveraygan-footer{text-align:center;color:#9ca3af;font-size:11px;padding:40px 20px 30px;margin-top:50px;border-top:1px solid #e5e7eb;background:rgba(248,250,252,0.5)}@media (max-width:768px){.jozveraygan-panel{flex-direction:column;height:auto;position:static}.jozveraygan-nav{display:none}.jozveraygan-header-mobile{display:block}.jozveraygan-hamburger{display:block}.jozveraygan-nav-mobile.active{display:flex}.jozveraygan-content{padding:10px;padding-bottom:60px}.jozveraygan-title{font-size:22px;margin-bottom:20px}.jozveraygan-profile{flex-direction:column;align-items:flex-end}.jozveraygan-profile img{width:50px;height:50px}.jozveraygan-section h3{font-size:18px}.jozveraygan-status{grid-template-columns:1fr}.jozveraygan-section,.jozveraygan-status-card,.jozveraygan-user,.jozveraygan-table{border:1px solid #d1d9e0;border-radius:8px}.jozveraygan-footer{padding:25px 15px 20px}}
+        @import url('https://v1.fontapi.ir/css/Vazir');
+        * { font-family: 'Vazir', Arial, sans-serif !important; }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #5D5CDE;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <!-- Login Section -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md fade-in">
+            <div class="text-center mb-8">
+                <div class="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-shield-alt text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">پنل نمایندگی مرزبان</h1>
+                <p class="text-gray-600 dark:text-gray-300 mt-2">برای ادامه وارد حساب کاربری خود شوید</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نام کاربری</label>
+                    <input type="text" id="username" required 
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">رمز عبور</label>
+                    <div class="relative">
+                        <input type="password" id="password" required 
+                               class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base">
+                        <button type="button" onclick="togglePassword()" 
+                                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i id="passwordIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">آدرس سرور</label>
+                    <input type="url" id="serverUrl" value="https://admin.jozveraygan.xyz:8443" required 
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base">
+                </div>
+                
+                <div id="loginError" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-red-700 dark:text-red-300 text-sm"></div>
+                
+                <button type="submit" id="loginBtn" 
+                        class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <span id="loginBtnText">ورود به پنل</span>
+                    <div id="loginSpinner" class="loading-spinner hidden"></div>
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <button onclick="toggleDarkMode()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i id="themeIcon" class="fas fa-moon"></i>
+                    <span id="themeText" class="mr-2">حالت تاریک</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Panel Section -->
+    <div id="panelSection" class="hidden min-h-screen">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">پنل نمایندگی مرزبان</h1>
+                        <p class="text-sm text-gray-600 dark:text-gray-300" id="welcomeText">خوش آمدید</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleDarkMode()" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i id="headerThemeIcon" class="fas fa-moon"></i>
+                    </button>
+                    <button onclick="logout()" class="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>خروج</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div class="px-6">
+                <div class="flex space-x-8 rtl:space-x-reverse">
+                    <button onclick="showSection('dashboard')" class="nav-item active border-b-2 border-primary text-primary px-1 py-4 text-sm font-medium">
+                        <i class="fas fa-tachometer-alt ml-2"></i>داشبورد
+                    </button>
+                    <button onclick="showSection('users')" class="nav-item border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 px-1 py-4 text-sm font-medium">
+                        <i class="fas fa-users ml-2"></i>کاربران
+                    </button>
+                    <button onclick="showSection('addUser')" class="nav-item border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 px-1 py-4 text-sm font-medium">
+                        <i class="fas fa-user-plus ml-2"></i>افزودن کاربر
+                    </button>
+                    <button onclick="showSection('settings')" class="nav-item border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 px-1 py-4 text-sm font-medium">
+                        <i class="fas fa-cog ml-2"></i>تنظیمات
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <main class="p-6">
+            <!-- Dashboard Section -->
+            <div id="dashboardSection" class="section active">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 fade-in">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div class="mr-4">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">کل کاربران</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white" id="totalUsers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 fade-in">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user-check text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div class="mr-4">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">کاربران فعال</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white" id="activeUsers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 fade-in">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user-times text-red-600 dark:text-red-400"></i>
+                            </div>
+                            <div class="mr-4">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">کاربران غیرفعال</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white" id="inactiveUsers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 fade-in">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-download text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <div class="mr-4">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">کل ترافیک</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white" id="totalTraffic">0 GB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Users -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">کاربران اخیر</h3>
+                    </div>
+                    <div class="p-6">
+                        <div id="recentUsersList" class="space-y-4">
+                            <!-- Recent users will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="usersSection" class="section hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">لیست کاربران</h3>
+                            <button onclick="loadUsers()" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>بروزرسانی</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <input type="text" id="userSearch" placeholder="جستجوی کاربر..." 
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base">
+                        </div>
+                        
+                        <div id="usersTable" class="overflow-x-auto">
+                            <!-- Users table will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add User Section -->
+            <div id="addUserSection" class="section hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">افزودن کاربر جدید</h3>
+                    </div>
+                    
+                    <div class="p-6">
+                        <form id="addUserForm" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نام کاربری</label>
+                                    <input type="text" id="newUsername" required 
+                                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">حجم ترافیک (GB)</label>
+                                    <input type="number" id="newDataLimit" required min="1" 
+                                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">تاریخ انقضا</label>
+                                    <input type="date" id="newExpireDate" required 
+                                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">پروتکل</label>
+                                    <select id="newProtocol" required 
+                                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base">
+                                        <option value="vless">VLESS</option>
+                                        <option value="vmess">VMess</option>
+                                        <option value="trojan">Trojan</option>
+                                        <option value="shadowsocks">Shadowsocks</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div id="addUserError" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-red-700 dark:text-red-300 text-sm"></div>
+                            <div id="addUserSuccess" class="hidden bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 text-green-700 dark:text-green-300 text-sm"></div>
+                            
+                            <button type="submit" id="addUserBtn" 
+                                    class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                                <span id="addUserBtnText">افزودن کاربر</span>
+                                <div id="addUserSpinner" class="loading-spinner hidden"></div>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settingsSection" class="section hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">تنظیمات</h3>
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">آدرس سرور</label>
+                            <input type="url" id="settingsServerUrl" readonly 
+                                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white text-base">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نام کاربری</label>
+                            <input type="text" id="settingsUsername" readonly 
+                                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white text-base">
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-white">حالت تاریک</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">تغییر ظاهر رابط کاربری</p>
+                            </div>
+                            <button onclick="toggleDarkMode()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" id="darkModeToggle">
+                                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform dark:translate-x-6"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center gap-4">
+            <div class="loading-spinner"></div>
+            <span class="text-gray-900 dark:text-white">در حال بارگذاری...</span>
+        </div>
+    </div>
+
     <script>
-        function showSection(id) {
-            document.querySelectorAll('.jozveraygan-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.jozveraygan-nav button, .jozveraygan-nav-mobile button').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll(`button[data-section="${id}"]`).forEach(b => b.classList.add('active'));
-            if (id === 'section-analytics') {
-                const ctx = document.getElementById('performanceChart').getContext('2d');
-                if (ctx.chart) ctx.chart.destroy();
-                ctx.chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['کاربران'],
-                        datasets: [{
-                            label: 'آمار',
-                            data: [<?php echo $user_count; ?>],
-                            backgroundColor: ['#CC9B50'],
-                            borderColor: ['#CC9B50'],
-                            borderWidth: 1,
-                            borderRadius: 4
-                        }]
+        // Global Variables
+        let authToken = '';
+        let serverUrl = '';
+        let currentUsername = '';
+        let users = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            setupEventListeners();
+            
+            // Check if already logged in
+            const storedToken = localStorage.getItem('marzban_token');
+            const storedServer = localStorage.getItem('marzban_server');
+            const storedUser = localStorage.getItem('marzban_username');
+            
+            if (storedToken && storedServer && storedUser) {
+                authToken = storedToken;
+                serverUrl = storedServer;
+                currentUsername = storedUser;
+                showPanel();
+                loadDashboardData();
+            }
+        });
+
+        // Theme Management
+        function initializeTheme() {
+            const isDark = localStorage.getItem('theme') === 'dark' || 
+                          (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                updateThemeIcons(true);
+            } else {
+                updateThemeIcons(false);
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcons(isDark);
+        }
+
+        function updateThemeIcons(isDark) {
+            const icons = ['themeIcon', 'headerThemeIcon'];
+            const texts = ['themeText'];
+            
+            icons.forEach(iconId => {
+                const icon = document.getElementById(iconId);
+                if (icon) {
+                    icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+                }
+            });
+            
+            texts.forEach(textId => {
+                const text = document.getElementById(textId);
+                if (text) {
+                    text.textContent = isDark ? 'حالت روشن' : 'حالت تاریک';
+                }
+            });
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('addUserForm').addEventListener('submit', handleAddUser);
+            document.getElementById('userSearch').addEventListener('input', filterUsers);
+            
+            // Set default expire date to 30 days from now
+            const expireDate = new Date();
+            expireDate.setDate(expireDate.getDate() + 30);
+            document.getElementById('newExpireDate').value = expireDate.toISOString().split('T')[0];
+        }
+
+        // Authentication
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const server = document.getElementById('serverUrl').value;
+            
+            setLoadingState('loginBtn', 'loginBtnText', 'loginSpinner', true);
+            hideError('loginError');
+            
+            try {
+                const response = await fetch(`${server}/api/admin/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    options: {
-                        scales: { y: { beginAtZero: true } },
-                        plugins: { legend: { labels: { font: { size: 13 } } } },
-                        responsive: true
+                    body: new URLSearchParams({
+                        'username': username,
+                        'password': password
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    serverUrl = server;
+                    currentUsername = username;
+                    
+                    // Store credentials
+                    localStorage.setItem('marzban_token', authToken);
+                    localStorage.setItem('marzban_server', serverUrl);
+                    localStorage.setItem('marzban_username', currentUsername);
+                    
+                    showPanel();
+                    loadDashboardData();
+                } else {
+                    showError('loginError', 'نام کاربری یا رمز عبور اشتباه است');
+                }
+            } catch (error) {
+                showError('loginError', 'خطا در اتصال به سرور');
+            }
+            
+            setLoadingState('loginBtn', 'loginBtnText', 'loginSpinner', false);
+        }
+
+        function logout() {
+            localStorage.removeItem('marzban_token');
+            localStorage.removeItem('marzban_server');
+            localStorage.removeItem('marzban_username');
+            
+            authToken = '';
+            serverUrl = '';
+            currentUsername = '';
+            
+            document.getElementById('panelSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            
+            // Reset form
+            document.getElementById('loginForm').reset();
+            document.getElementById('serverUrl').value = 'https://admin.jozveraygan.xyz:8443';
+        }
+
+        // Panel Management
+        function showPanel() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('panelSection').classList.remove('hidden');
+            
+            document.getElementById('welcomeText').textContent = `خوش آمدید، ${currentUsername}`;
+            document.getElementById('settingsServerUrl').value = serverUrl;
+            document.getElementById('settingsUsername').value = currentUsername;
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active', 'border-primary', 'text-primary');
+                item.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+            });
+            
+            // Show selected section
+            document.getElementById(`${sectionName}Section`).classList.remove('hidden');
+            document.getElementById(`${sectionName}Section`).classList.add('active');
+            
+            // Update nav for active item
+            event.target.classList.add('active', 'border-primary', 'text-primary');
+            event.target.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+            
+            // Load section data
+            switch(sectionName) {
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+            }
+        }
+
+        // API Functions
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(`${serverUrl}/api${endpoint}`, options);
+                
+                if (response.status === 401) {
+                    logout();
+                    return null;
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return null;
+            }
+        }
+
+        // Dashboard Functions
+        async function loadDashboardData() {
+            showLoadingOverlay(true);
+            
+            try {
+                const usersData = await apiCall('/users');
+                
+                if (usersData && usersData.users) {
+                    users = usersData.users;
+                    updateDashboardStats(users);
+                    loadRecentUsers(users.slice(0, 5));
+                }
+            } catch (error) {
+                console.error('Dashboard Error:', error);
+            }
+            
+            showLoadingOverlay(false);
+        }
+
+        function updateDashboardStats(users) {
+            const totalUsers = users.length;
+            const activeUsers = users.filter(user => user.status === 'active').length;
+            const inactiveUsers = totalUsers - activeUsers;
+            const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
+            
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('activeUsers').textContent = activeUsers;
+            document.getElementById('inactiveUsers').textContent = inactiveUsers;
+            document.getElementById('totalTraffic').textContent = formatBytes(totalTraffic);
+        }
+
+        function loadRecentUsers(recentUsers) {
+            const container = document.getElementById('recentUsersList');
+            container.innerHTML = '';
+            
+            if (recentUsers.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center">هیچ کاربری یافت نشد</p>';
+                return;
+            }
+            
+            recentUsers.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.className = 'flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg';
+                userElement.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-white">${user.username}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">ترافیک: ${formatBytes(user.used_traffic || 0)} / ${formatBytes(user.data_limit || 0)}</p>
+                        </div>
+                    </div>
+                    <span class="px-2 py-1 text-xs rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'}">
+                        ${user.status === 'active' ? 'فعال' : 'غیرفعال'}
+                    </span>
+                `;
+                container.appendChild(userElement);
+            });
+        }
+
+        // Users Management
+        async function loadUsers() {
+            showLoadingOverlay(true);
+            
+            try {
+                const usersData = await apiCall('/users');
+                
+                if (usersData && usersData.users) {
+                    users = usersData.users;
+                    displayUsers(users);
+                }
+            } catch (error) {
+                console.error('Users Error:', error);
+            }
+            
+            showLoadingOverlay(false);
+        }
+
+        function displayUsers(usersToShow) {
+            const container = document.getElementById('usersTable');
+            
+            if (usersToShow.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-8">هیچ کاربری یافت نشد</p>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">نام کاربری</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">وضعیت</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ترافیک</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">تاریخ انقضا</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            `;
+            
+            usersToShow.forEach(user => {
+                const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
+                const statusClass = user.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+                const statusText = user.status === 'active' ? 'فعال' : 'غیرفعال';
+                
+                tableHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center ml-3">
+                                    <i class="fas fa-user text-white text-xs"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">${user.username}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs rounded-full ${statusClass}">${statusText}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            ${formatBytes(user.used_traffic || 0)} / ${formatBytes(user.data_limit || 0)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">${expireDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="toggleUserStatus('${user.username}', '${user.status}')" 
+                                    class="text-primary hover:text-primary/80 ml-3">
+                                ${user.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن'}
+                            </button>
+                            <button onclick="deleteUser('${user.username}')" 
+                                    class="text-red-600 hover:text-red-800">حذف</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const filteredUsers = users.filter(user => 
+                user.username.toLowerCase().includes(searchTerm)
+            );
+            displayUsers(filteredUsers);
+        }
+
+        async function toggleUserStatus(username, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
+            
+            showLoadingOverlay(true);
+            
+            try {
+                const result = await apiCall(`/user/${username}`, 'PUT', { status: newStatus });
+                
+                if (result) {
+                    loadUsers(); // Reload users list
+                    showSuccess('عملیات با موفقیت انجام شد');
+                }
+            } catch (error) {
+                showError('usersError', 'خطا در تغییر وضعیت کاربر');
+            }
+            
+            showLoadingOverlay(false);
+        }
+
+        async function deleteUser(username) {
+            if (!confirm(`آیا از حذف کاربر "${username}" اطمینان دارید؟`)) {
+                return;
+            }
+            
+            showLoadingOverlay(true);
+            
+            try {
+                const response = await fetch(`${serverUrl}/api/user/${username}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
                     }
                 });
-            }
-        }
-        function toggleMobileMenu() {
-            document.querySelector('.jozveraygan-nav-mobile').classList.toggle('active');
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-            const notifications = document.querySelectorAll('.jozveraygan-notification');
-            notifications.forEach(notification => {
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 5000);
-            });
-        });
-    </script>
-    <div class="jozveraygan-panel">
-        <div class="jozveraygan-header-mobile">پنل نمایندگی
-            <button class="jozveraygan-hamburger" onclick="toggleMobileMenu()">☰</button>
-        </div>
-        <div class="jozveraygan-nav-mobile">
-            <button class="active" data-section="section-status" onclick="showSection('section-status');toggleMobileMenu()">وضعیت حساب</button>
-            <button data-section="section-users" onclick="showSection('section-users');toggleMobileMenu()">کاربران</button>
-            <button data-section="section-analytics" onclick="showSection('section-analytics');toggleMobileMenu()">تحلیل</button>
-        </div>
-        <div class="jozveraygan-nav">
-            <button class="active" data-section="section-status" onclick="showSection('section-status')">وضعیت حساب</button>
-            <button data-section="section-users" onclick="showSection('section-users')">کاربران</button>
-            <button data-section="section-analytics" onclick="showSection('section-analytics')">تحلیل عملکرد</button>
-        </div>
-        <div class="jozveraygan-content">
-            <h1 class="jozveraygan-title">پنل نمایندگی جزورایگان</h1>
-            <?php echo $notification; ?>
-            <div class="jozveraygan-profile">
-                <img src="<?php echo esc_url($profile_picture); ?>" alt="پروفایل">
-                <div class="jozveraygan-profile-info">
-                    <p><strong>نام:</strong> <?php echo esc_html($user->display_name); ?></p>
-                    <p><strong>ایمیل:</strong> <?php echo esc_html($user->user_email); ?></p>
-                </div>
-            </div>
-            <div id="section-status" class="jozveraygan-section active">
-                <h3>وضعیت حساب</h3>
-                <div class="jozveraygan-status">
-                    <div class="jozveraygan-status-card"><h4>تاریخ</h4><p><?php echo esc_html(jozveraygan_gregorian_to_jalali(date_i18n('Y/m/d H:i'))); ?></p></div>
-                    <div class="jozveraygan-status-card"><h4>اطلاعات</h4><p><strong>نام:</strong> <?php echo esc_html($user->display_name); ?></p><p><strong>ایمیل:</strong> <?php echo esc_html($user->user_email); ?></p></div>
-                    <div class="jozveraygan-status-card"><h4>کاربران</h4><p><strong>تعداد:</strong> <?php echo esc_html($user_count); ?></p></div>
-                </div>
-            </div>
-            <div id="section-users" class="jozveraygan-section">
-                <h3>مدیریت کاربران</h3>
-                <form method="post">
-                    <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('jozveraygan_action'); ?>">
-                    <label>نام کاربری</label><input type="text" name="username" required>
-                    <label>حجم (گیگابایت)</label><input type="number" name="data_limit" min="1" required>
-                    <label>تاریخ انقضا</label><input type="date" name="expire" required>
-                    <button type="submit" name="add_user">ایجاد کاربر</button>
-                </form>
-                <h3>لیست کاربران</h3>
-                <table class="jozveraygan-table">
-                    <tr><th>نام کاربری</th><th>حجم (GB)</th><th>انقضا</th><th>وضعیت</th><th>عملیات</th></tr>
-                    <?php
-                    foreach ($users as $u) {
-                        $data_limit = round($u['data_limit'] / (1024 * 1024 * 1024), 2); // تبدیل بایت به گیگابایت
-                        $expire = $u['expire'] ? date('Y-m-d', $u['expire']) : 'بدون انقضا';
-                        $status = $u['status'] === 'active' ? 'فعال' : 'غیرفعال';
-                        echo '<tr>';
-                        echo '<td>' . esc_html($u['username']) . '</td>';
-                        echo '<td>' . esc_html($data_limit) . '</td>';
-                        echo '<td>' . esc_html($expire) . '</td>';
-                        echo '<td>' . esc_html($status) . '</td>';
-                        echo '<td>';
-                        echo '<form method="post" style="display:inline"><input type="hidden" name="nonce" value="' . wp_create_nonce('jozveraygan_action') . '"><input type="hidden" name="username" value="' . esc_attr($u['username']) . '"><input type="number" name="data_limit" value="' . esc_attr($data_limit) . '" min="1" style="width:80px"><input type="date" name="expire" value="' . esc_attr($expire === 'بدون انقضا' ? '' : $expire) . '"><button type="submit" name="edit_user">ویرایش</button></form>';
-                        echo '<form method="post" style="display:inline" onsubmit="return confirm(\'آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟\');"><input type="hidden" name="nonce" value="' . wp_create_nonce('jozveraygan_action') . '"><input type="hidden" name="username" value="' . esc_attr($u['username']) . '"><button type="submit" name="delete_user">حذف</button></form>';
-                        echo '</td>';
-                        echo '</tr>';
-                    }
-                    if (empty($users)) echo '<tr><td colspan="5">بدون کاربر.</td></tr>';
-                    ?>
-                </table>
-            </div>
-            <div id="section-analytics" class="jozveraygan-section">
-                <h3>تحلیل</h3>
-                <p><strong>تعداد کاربران:</strong> <?php echo esc_html($user_count); ?></p>
-                <canvas id="performanceChart"></canvas>
-            </div>
-            <div class="jozveraygan-footer">
-                تمامی حقوق برای تیم جزورایگان محفوظ است | طراحی و توسعه یافته توسط تیم برنامه‌نویسی جزورایگان
-            </div>
-        </div>
-    </div>
-    <?php
-    return ob_get_clean();
-});
-
-// اضافه کردن اعلان در هدر ادمین
-add_action('admin_bar_menu', function($wp_admin_bar) {
-    if (!current_user_can('manage_options')) return;
-    
-    global $wpdb;
-    $unread_count = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}jozveraygan_notifications WHERE is_read = 0");
-    
-    $wp_admin_bar->add_node([
-        'id' => 'jozveraygan-notifications',
-        'title' => '<span class="ab-icon dashicons dashicons-welcome-learn-more"></span><span class="ab-label">نمایندگی</span>' . ($unread_count > 0 ? '<span class="jozveraygan-notification-count">' . $unread_count . '</span>' : ''),
-        'href' => admin_url('admin.php?page=jozveraygan-notifications'),
-        'meta' => ['class' => 'jozveraygan-notification-item']
-    ]);
-}, 100);
-
-// CSS برای اعلان در هدر
-add_action('admin_head', function() {
-    echo '<style>
-    .jozveraygan-notification-count {
-        background: #d63638;
-        color: #fff;
-        border-radius: 50%;
-        padding: 2px 6px;
-        font-size: 11px;
-        margin-left: 5px;
-        display: inline-block;
-        min-width: 18px;
-        text-align: center;
-        line-height: 1.2;
-    }
-    .jozveraygan-notification-item .ab-item {
-        position: relative;
-    }
-    </style>';
-});
-
-add_action('admin_menu', function () {
-    add_menu_page('نمایندگان', 'نمایندگان', 'manage_options', 'jozveraygan-panel', 'jozveraygan_admin_panel', 'dashicons-welcome-learn-more', 30);
-    add_submenu_page('jozveraygan-panel', 'کاربران', 'کاربران', 'manage_options', 'jozveraygan-users', 'jozveraygan_users_panel');
-    add_submenu_page('jozveraygan-panel', 'اعلانات', 'اعلانات', 'manage_options', 'jozveraygan-notifications', 'jozveraygan_notifications_panel');
-});
-
-function jozveraygan_notifications_panel() {
-    global $wpdb;
-    $notifications_table = $wpdb->prefix . 'jozveraygan_notifications';
-    
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_read']) && wp_verify_nonce($_POST['nonce'], 'jozveraygan_notifications_action')) {
-        if (isset($_POST['notification_ids']) && is_array($_POST['notification_ids'])) {
-            $ids = array_map('absint', $_POST['notification_ids']);
-            $placeholders = implode(',', array_fill(0, count($ids), '%d'));
-            $wpdb->query($wpdb->prepare("UPDATE {$notifications_table} SET is_read = 1 WHERE id IN ($placeholders)", ...$ids));
-            echo '<div class="notice notice-success"><p>اعلانات انتخاب شده به عنوان خوانده شده علامت‌گذاری شدند.</p></div>';
-        }
-    }
-    
-    $notifications = $wpdb->get_results("SELECT * FROM {$notifications_table} ORDER BY created_at DESC");
-    ?>
-    <style>
-        .jozveraygan-notifications-container{max-width:1200px;margin:15px auto;padding:15px}.jozveraygan-notifications-header{font-size:32px;color:#1a3c5e;margin-bottom:20px;text-align:center}.jozveraygan-notifications-card{background:#fff;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.1);padding:20px;margin-bottom:20px}.jozveraygan-notifications-card h3{font-size:22px;color:#1a3c5e;margin-bottom:15px;text-align:right}.jozveraygan-notifications-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:15px;background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}.jozveraygan-notifications-table th,.jozveraygan-notifications-table td{border:1px solid #e0e6ed;padding:10px;text-align:right;font-size:13px}.jozveraygan-notifications-table th{background:#f8fafc;color:#1a3c5e}.jozveraygan-notifications-table tr:hover{background:#f4f6f9}.jozveraygan-notifications-table tr.unread{background:#fff3cd;border-left:4px solid #ffc107}.jozveraygan-notifications-table tr.unread:hover{background:#fff3e0}.notification-type{padding:3px 8px;border-radius:12px;font-size:11px;color:#fff}.notification-type.user{background:#17a2b8}.jozveraygan-mark-read-form{margin-bottom:20px;padding:15px;background:#f8f9fa;border-radius:6px}.jozveraygan-mark-read-form button{background:#28a745;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer}.jozveraygan-mark-read-form button:hover{background:#218838}.select-all-checkbox{margin-left:10px}
-    </style>
-    <div class="jozveraygan-notifications-container">
-        <h1 class="jozveraygan-notifications-header">مدیریت اعلانات نمایندگان</h1>
-        <div class="jozveraygan-notifications-card">
-            <h3>اعلانات</h3>
-            <?php if ($notifications): ?>
-                <form method="post" class="jozveraygan-mark-read-form">
-                    <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('jozveraygan_notifications_action'); ?>">
-                    <label>
-                        <input type="checkbox" id="select-all" class="select-all-checkbox"> انتخاب همه
-                    </label>
-                    <button type="submit" name="mark_read">علامت‌گذاری به عنوان خوانده شده</button>
-                    <table class="jozveraygan-notifications-table">
-                        <tr>
-                            <th>انتخاب</th>
-                            <th>نوع</th>
-                            <th>عنوان</th>
-                            <th>پیام</th>
-                            <th>نماینده</th>
-                            <th>تاریخ</th>
-                            <th>وضعیت</th>
-                        </tr>
-                        <?php foreach ($notifications as $notification): 
-                            $user = get_user_by('id', $notification->user_id);
-                            $type_labels = ['user' => 'کاربر'];
-                        ?>
-                            <tr<?php echo !$notification->is_read ? ' class="unread"' : ''; ?>>
-                                <td>
-                                    <input type="checkbox" name="notification_ids[]" value="<?php echo $notification->id; ?>" class="notification-checkbox">
-                                </td>
-                                <td>
-                                    <span class="notification-type <?php echo esc_attr($notification->type); ?>">
-                                        <?php echo esc_html($type_labels[$notification->type] ?? $notification->type); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo esc_html($notification->title); ?></td>
-                                <td><?php echo esc_html(wp_trim_words($notification->message, 15)); ?></td>
-                                <td><?php echo esc_html($user ? $user->display_name : 'کاربر حذف شده'); ?></td>
-                                <td><?php echo esc_html(jozveraygan_gregorian_to_jalali($notification->created_at)); ?></td>
-                                <td><?php echo $notification->is_read ? '✓ خوانده شده' : '● خوانده نشده'; ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </form>
-            <?php else: ?>
-                <p>هیچ اعلانی موجود نیست.</p>
-            <?php endif; ?>
-        </div>
-    </div>
-    <script>
-        document.getElementById('select-all').addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.notification-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-    </script>
-    <?php
-}
-
-function jozveraygan_admin_panel() {
-    global $wpdb;
-    $agent_users = get_users(['role' => 'agent']);
-    
-    $search_query = '';
-    if (isset($_GET['search']) && !empty($_GET['search'])) {
-        $search_query = sanitize_text_field($_GET['search']);
-    }
-    
-    if (!empty($search_query)) {
-        $filtered_users = [];
-        foreach ($agent_users as $user) {
-            if (strpos($user->display_name, $search_query) !== false || 
-                strpos($user->user_email, $search_query) !== false) {
-                $filtered_users[] = $user;
-            }
-        }
-        $agent_users = $filtered_users;
-    }
-    ?>
-    <style>
-        .jozveraygan-container{max-width:1200px;margin:15px auto;padding:15px}.jozveraygan-header{font-size:32px;color:#1a3c5e;margin-bottom:20px;text-align:center}.jozveraygan-card{background:#fff;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.1);padding:20px;margin-bottom:20px}.jozveraygan-card h3{font-size:22px;color:#1a3c5e;margin-bottom:15px;text-align:right}.jozveraygan-card form{display:grid;gap:10px}.jozveraygan-card select,.jozveraygan-card input,.jozveraygan-card textarea{width:100%;padding:10px;border:1px solid #d1d9e0;border-radius:6px;font-size:13px}.jozveraygan-card button{background:#CC9B50;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:13px}.jozveraygan-card button:hover{background:#b5893f}.jozveraygan-card button.delete{background:#dc3545}.jozveraygan-card button.delete:hover{background:#c82333}.jozveraygan-notification{padding:10px;border-radius:6px;margin-bottom:15px;text-align:center;font-size:13px}.jozveraygan-notification.jozveraygan-success{background:#e6f4ea;color:#2e7d32}.jozveraygan-notification.jozveraygan-error{background:#f8d7da;color:#721c24}.jozveraygan-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:15px;background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}.jozveraygan-table th,.jozveraygan-table td{border:1px solid #e0e6ed;padding:10px;text-align:right;font-size:13px}.jozveraygan-table th{background:#f8fafc;color:#1a3c5e}.jozveraygan-table tr:hover{background:#f4f6f9}.jozveraygan-table button{background:#d32f2f;color:#fff;padding:6px 12px;border-radius:5px;font-size:12px}.jozveraygan-table button:hover{background:#b71c1c}.jozveraygan-search{display:flex;gap:10px;margin-bottom:20px;align-items:center}.jozveraygan-search input{flex:1;padding:10px;border:1px solid #d1d9e0;border-radius:6px}.jozveraygan-search button{background:#CC9B50;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer}
-    </style>
-    <div class="jozveraygan-container">
-        <h1 class="jozveraygan-header">مدیریت نمایندگان</h1>
-        <div class="jozveraygan-card">
-            <h3>جستجوی نماینده</h3>
-            <form method="get" class="jozveraygan-search">
-                <input type="hidden" name="page" value="jozveraygan-panel">
-                <input type="text" name="search" placeholder="جستجو بر اساس نام یا ایمیل..." value="<?php echo esc_attr($search_query); ?>">
-                <button type="submit">جستجو</button>
-                <?php if (!empty($search_query)): ?>
-                    <a href="?page=jozveraygan-panel" style="background:#d32f2f;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;">پاک کردن</a>
-                <?php endif; ?>
-            </form>
-        </div>
-        <div class="jozveraygan-card">
-            <h3>افزودن نماینده</h3>
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('jozveraygan_admin_action'); ?>">
-                <select name="user_id" required><option value="">انتخاب کاربر</option><?php foreach (get_users() as $u) echo '<option value="' . esc_attr($u->ID) . '">' . esc_html($u->display_name) . '</option>'; ?></select>
-                <label>توکن Marzban</label><input type="text" name="marzban_token" required>
-                <label>عکس پروفایل</label><input type="file" name="profile_picture" accept="image/jpeg,image/png,image/jpg">
-                <button type="submit" name="add_agent">افزودن</button>
-            </form>
-            <?php
-            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_agent']) && !empty($_POST['user_id']) && wp_verify_nonce($_POST['nonce'], 'jozveraygan_admin_action')) {
-                $user_id = absint($_POST['user_id']);
-                $user = new WP_User($user_id);
-                $user->add_role('agent');
-                if (!empty($_POST['marzban_token'])) update_user_meta($user_id, 'jozveraygan_marzban_token', sanitize_text_field($_POST['marzban_token']));
-                if (!empty($_FILES['profile_picture']['name']) && in_array($_FILES['profile_picture']['type'], ['image/jpeg', 'image/png', 'image/jpg']) && $_FILES['profile_picture']['size'] <= 2 * 1024 * 1024) {
-                    require_once ABSPATH . 'wp-admin/includes/file.php';
-                    require_once ABSPATH . 'wp-admin/includes/media.php';
-                    require_once ABSPATH . 'wp-admin/includes/image.php';
-                    $attachment_id = media_handle_upload('profile_picture', 0);
-                    if (!is_wp_error($attachment_id)) update_user_meta($user_id, 'jozveraygan_profile_picture', esc_url_raw(wp_get_attachment_url($attachment_id)));
-                }
-                echo '<div class="jozveraygan-notification jozveraygan-success">نماینده اضافه شد.</div>';
-            }
-            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_agent']) && !empty($_POST['delete_user_id']) && wp_verify_nonce($_POST['nonce'], 'jozveraygan_admin_action')) {
-                $user_id = absint($_POST['delete_user_id']);
-                $user = new WP_User($user_id);
-                $user->remove_role('agent');
-                delete_user_meta($user_id, 'jozveraygan_marzban_token');
-                delete_user_meta($user_id, 'jozveraygan_profile_picture');
-                echo '<div class="jozveraygan-notification jozveraygan-success">نماینده حذف شد.</div>';
-            }
-            ?>
-        </div>
-        <div class="jozveraygan-card">
-            <h3>لیست نمایندگان</h3>
-            <?php if (!empty($search_query)): ?>
-                <p><strong>نتایج جستجو برای:</strong> "<?php echo esc_html($search_query); ?>" (<?php echo count($agent_users); ?> نتیجه)</p>
-            <?php endif; ?>
-            <table class="jozveraygan-table">
-                <tr><th>نام</th><th>ایمیل</th><th>توکن</th><th>عملیات</th></tr>
-                <?php
-                if ($agent_users) {
-                    foreach ($agent_users as $user) {
-                        $token = get_user_meta($user->ID, 'jozveraygan_marzban_token', true) ?: 'تعیین نشده';
-                        echo '<tr>';
-                        echo '<td>' . esc_html($user->display_name) . '</td>';
-                        echo '<td>' . esc_html($user->user_email) . '</td>';
-                        echo '<td>' . esc_html(substr($token, 0, 10) . '...') . '</td>';
-                        echo '<td>';
-                        echo '<form method="post" style="display:inline" onsubmit="return confirm(\'آیا مطمئن هستید که می‌خواهید این نماینده را حذف کنید؟\');"><input type="hidden" name="nonce" value="' . wp_create_nonce('jozveraygan_admin_action') . '"><input type="hidden" name="delete_user_id" value="' . $user->ID . '"><button type="submit" name="delete_agent" class="delete">حذف</button></form>';
-                        echo '</td>';
-                        echo '</tr>';
-                    }
+                
+                if (response.ok) {
+                    loadUsers(); // Reload users list
+                    showSuccess('کاربر با موفقیت حذف شد');
                 } else {
-                    echo '<tr><td colspan="4">هیچ نماینده‌ای یافت نشد.</td></tr>';
+                    showError('usersError', 'خطا در حذف کاربر');
                 }
-                ?>
-            </table>
-        </div>
-    </div>
-    <?php
-}
+            } catch (error) {
+                showError('usersError', 'خطا در حذف کاربر');
+            }
+            
+            showLoadingOverlay(false);
+        }
 
-function jozveraygan_users_panel() {
-    global $wpdb;
-    $agent_users = get_users(['role' => 'agent']);
-    ?>
-    <style>
-        .jozveraygan-container{max-width:1000px;margin:15px auto;padding:15px}.jozveraygan-header{font-size:32px;color:#1a3c5e;margin-bottom:20px;text-align:center}.jozveraygan-card{background:#fff;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.1);padding:20px;margin-bottom:20px}.jozveraygan-card h3{font-size:22px;color:#1a3c5e;margin-bottom:15px;text-align:right}.jozveraygan-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:15px;background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}.jozveraygan-table th,.jozveraygan-table td{border:1px solid #e0e6ed;padding:10px;text-align:right;font-size:13px}.jozveraygan-table th{background:#f8fafc;color:#1a3c5e}.jozveraygan-table tr:hover{background:#f4f6f9}
-    </style>
-    <div class="jozveraygan-container">
-        <h1 class="jozveraygan-header">مدیریت کاربران</h1>
-        <div class="jozveraygan-card">
-            <h3>لیست کاربران</h3>
-            <table class="jozveraygan-table">
-                <tr><th>نماینده</th><th>نام کاربری</th><th>حجم (GB)</th><th>انقضا</th><th>وضعیت</th></tr>
-                <?php
-                $has_users = false;
-                foreach ($agent_users as $agent) {
-                    $token = get_user_meta($agent->ID, 'jozveraygan_marzban_token', true);
-                    $users = jozveraygan_get_marzban_users($token);
-                    foreach ($users as $u) {
-                        $has_users = true;
-                        $data_limit = round($u['data_limit'] / (1024 * 1024 * 1024), 2);
-                        $expire = $u['expire'] ? date('Y-m-d', $u['expire']) : 'بدون انقضا';
-                        $status = $u['status'] === 'active' ? 'فعال' : 'غیرفعال';
-                        echo '<tr>';
-                        echo '<td>' . esc_html($agent->display_name) . '</td>';
-                        echo '<td>' . esc_html($u['username']) . '</td>';
-                        echo '<td>' . esc_html($data_limit) . '</td>';
-                        echo '<td>' . esc_html($expire) . '</td>';
-                        echo '<td>' . esc_html($status) . '</td>';
-                        echo '</tr>';
-                    }
+        // Add User Functions
+        async function handleAddUser(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('newUsername').value;
+            const dataLimit = parseFloat(document.getElementById('newDataLimit').value) * 1024 * 1024 * 1024; // Convert GB to bytes
+            const expireDate = new Date(document.getElementById('newExpireDate').value);
+            const protocol = document.getElementById('newProtocol').value;
+            
+            const expire = Math.floor(expireDate.getTime() / 1000); // Convert to Unix timestamp
+            
+            setLoadingState('addUserBtn', 'addUserBtnText', 'addUserSpinner', true);
+            hideError('addUserError');
+            hideSuccess('addUserSuccess');
+            
+            const userData = {
+                username,
+                data_limit: dataLimit,
+                expire,
+                proxies: {
+                    [protocol]: {}
                 }
-                if (!$has_users) echo '<tr><td colspan="5">بدون کاربر.</td></tr>';
-                ?>
-            </table>
-        </div>
-    </div>
-    <?php
-}
-?>
-```
+            };
+            
+            try {
+                const result = await apiCall('/user', 'POST', userData);
+                
+                if (result) {
+                    showSuccess('addUserSuccess', 'کاربر با موفقیت اضافه شد');
+                    document.getElementById('addUserForm').reset();
+                    
+                    // Reset expire date to 30 days from now
+                    const newExpireDate = new Date();
+                    newExpireDate.setDate(newExpireDate.getDate() + 30);
+                    document.getElementById('newExpireDate').value = newExpireDate.toISOString().split('T')[0];
+                } else {
+                    showError('addUserError', 'خطا در افزودن کاربر');
+                }
+            } catch (error) {
+                showError('addUserError', 'خطا در افزودن کاربر');
+            }
+            
+            setLoadingState('addUserBtn', 'addUserBtnText', 'addUserSpinner', false);
+        }
 
-### توضیحات کد
-1. **ساختار افزونه**: افزونه به عنوان یک افزونه وردپرس عمل می‌کند و شورت‌کد `[jozveraygan-agent]` برای نمایش پنل نمایندگی استفاده می‌شود.
-2. **اتصال به Marzban**: از تابع `jozveraygan_marzban_api_request` برای ارسال درخواست‌های HTTP به API Marzban استفاده می‌شود. این تابع از `wp_remote_request` وردپرس استفاده می‌کند که امن و استاندارد است.
-3. **مدیریت کاربران**: نمایندگان می‌توانند کاربران جدید ایجاد کنند، کاربران موجود را ویرایش کنند یا حذف کنند. اطلاعات کاربران (نام کاربری، حجم، تاریخ انقضا) از API Marzban دریافت می‌شود.
-4. **نقش نماینده**: نقش `agent` جایگزین `modares` شده و نمایندگان با این نقش به پنل دسترسی دارند. توکن API هر نماینده در متای کاربر ذخیره می‌شود.
-5. **اعلانات**: سیستم اعلانات مشابه کد اصلی حفظ شده و برای اقدامات مربوط به کاربران (ایجاد، ویرایش، حذف) اعلان تولید می‌کند.
-6. **پنل ادمین**: ادمین می‌تواند نمایندگان را اضافه یا حذف کند و توکن Marzban آنها را مدیریت کند. همچنین می‌تواند لیست تمام کاربران نمایندگان را مشاهده کند.
-7. **حفظ ظاهر**: تمام استایل‌های CSS و جاوااسکریپت‌های مربوط به رابط کاربری (مانند منوی کناری، نمودارها و انیمیشن‌ها) از کد اصلی کپی شده‌اند و فقط نام کلاس‌ها به `jozveraygan-` تغییر کرده‌اند.
-8. **تحلیل عملکرد**: بخش تحلیل فقط تعداد کاربران را نمایش می‌دهد (می‌توانید بعداً معیارهای بیشتری از Marzban اضافه کنید).
+        // Utility Functions
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.className = 'fas fa-eye';
+            }
+        }
 
-### نصب و راه‌اندازی
-1. **نصب افزونه**:
-   - فایل را در پوشه `wp-content/plugins` ذخیره کنید (مثلاً به نام `jozveraygan-agent.php`).
-   - افزونه را از پنل ادمین وردپرس فعال کنید.
-2. **تنظیم توکن**:
-   - در پنل ادمین، به بخش «نمایندگان» بروید و برای هر نماینده یک توکن API از Marzban تنظیم کنید.
-3. **ایجاد صفحه پنل**:
-   - یک صفحه جدید در وردپرس ایجاد کنید و شورت‌کد `[jozveraygan-agent]` را در آن قرار دهید.
-4. **دسترسی به API Marzban**:
-   - مطمئن شوید سرور Marzban در دسترس است و توکن‌های API معتبر هستند.
-   - اگر سرور از SSL معتبر استفاده نمی‌کند، ممکن است نیاز باشد `sslverify` را در تابع `jozveraygan_marzban_api_request` به `false` تغییر دهید (این کار توصیه نمی‌شود مگر در محیط تست).
+        function setLoadingState(btnId, textId, spinnerId, loading) {
+            const btn = document.getElementById(btnId);
+            const text = document.getElementById(textId);
+            const spinner = document.getElementById(spinnerId);
+            
+            btn.disabled = loading;
+            if (loading) {
+                text.style.display = 'none';
+                spinner.classList.remove('hidden');
+            } else {
+                text.style.display = 'inline';
+                spinner.classList.add('hidden');
+            }
+        }
 
-### نکات امنیتی
-- **توکن API**: توکن‌های Marzban باید به‌صورت امن ذخیره شوند و فقط برای نماینده مربوطه قابل استفاده باشند.
-- **اعتبارسنجی ورودی‌ها**: تمام ورودی‌های فرم با `sanitize_text_field` و `wp_verify_nonce` اعتبارسنجی می‌شوند.
-- **SSL**: درخواست‌های API با `sslverify => true` ارسال می‌شوند تا امنیت حفظ شود.
-- **محدودیت دسترسی**: فقط کاربران با نقش `agent` به پنل دسترسی دارند و فقط ادمین‌ها می‌توانند نمایندگان را مدیریت کنند.
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
 
-### گسترش‌پذیری
-- می‌توانید قابلیت‌های بیشتری مانند مدیریت پروتکل‌های VPN، نمایش جزئیات ترافیک کاربران، یا تنظیمات پیشرفته‌تر را با استفاده از APIهای دیگر Marzban اضافه کنید.
-- برای اطلاعات بیشتر در مورد APIهای Marzban، مستندات رسمی پروژه را در GitHub بررسی کنید: [Gozargah/Marzban](https://github.com/Gozargah/Marzban).
+        function hideError(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.add('hidden');
+        }
 
-### محدودیت‌ها
-- این کد فرض می‌کند که API Marzban روی `https://admin.jozveraygan.xyz:8443` در دسترس است. اگر آدرس یا پورت تغییر کند، باید در تابع `jozveraygan_marzban_api_request` اصلاح شود.
-- قابلیت‌های پیشرفته‌تر Marzban (مانند مدیریت سرورها یا تنظیمات پروکسی) در این کد پیاده‌سازی نشده‌اند، اما می‌توانید آنها را اضافه کنید.
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (typeof elementId === 'string') {
+                element.textContent = message;
+                element.classList.remove('hidden');
+            } else {
+                // If elementId is actually the message (for general success)
+                console.log('Success:', elementId);
+            }
+        }
 
-اگر سؤال یا نیاز به تغییر خاصی دارید، لطفاً اطلاع دهید!
+        function hideSuccess(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.add('hidden');
+        }
+
+        function showLoadingOverlay(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Dark mode media query listener
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (!localStorage.getItem('theme')) {
+                if (event.matches) {
+                    document.documentElement.classList.add('dark');
+                    updateThemeIcons(true);
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    updateThemeIcons(false);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
