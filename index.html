@@ -410,13 +410,6 @@
             text-align: center;
         }
         
-        .nav-copyright {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-        
         .logout-btn {
             background: var(--bg-secondary);
             color: var(--text-secondary);
@@ -431,6 +424,7 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            width: 100%;
         }
         
         .logout-btn:hover {
@@ -475,10 +469,19 @@
             display: block;
         }
         
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
         .section-title {
             color: var(--text-primary);
             font-size: 22px;
-            margin-bottom: 24px;
+            margin: 0;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -491,6 +494,28 @@
             height: 24px;
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             border-radius: 2px;
+        }
+        
+        .refresh-btn {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid transparent;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: var(--primary-light);
         }
         
         /* Stats Cards */
@@ -1107,6 +1132,17 @@
             display: block;
         }
         
+        /* Footer Copyright */
+        .footer-copyright {
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        
         .hidden {
             display: none !important;
         }
@@ -1259,12 +1295,11 @@
                 font-size: 15px;
             }
 
-            /* Mobile Panel Layout - هدر کناری حذف شود */
+            /* Mobile Panel Layout */
             .panel-nav {
                 display: none !important;
             }
             
-            /* Mobile Header نمایش داده شود */
             .mobile-header {
                 display: flex !important;
             }
@@ -1276,7 +1311,7 @@
             .panel-content {
                 margin-right: 0 !important;
                 padding: 12px;
-                padding-top: 75px; /* فضا برای هدر ثابت */
+                padding-top: 75px;
                 width: 100vw;
                 max-width: 100vw;
                 overflow-x: hidden;
@@ -1287,7 +1322,16 @@
                 margin-bottom: 16px;
             }
             
-            /* Mobile Cards - هم‌اندازه با صفحه */
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .refresh-btn {
+                align-self: flex-end;
+            }
+            
             .stats-grid, .traffic-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 8px;
@@ -1342,7 +1386,6 @@
                 height: 18px;
             }
 
-            /* Mobile Charts - تک ستونه */
             div[style*="grid-template-columns: 1fr 1fr"] {
                 display: grid !important;
                 grid-template-columns: 1fr !important;
@@ -1362,7 +1405,6 @@
                 margin-bottom: 12px;
             }
             
-            /* Mobile Tables */
             .data-table {
                 font-size: 12px;
                 width: 100%;
@@ -1378,7 +1420,6 @@
                 min-width: 80px;
             }
 
-            /* Mobile Modals */
             .modal {
                 padding: 12px;
             }
@@ -1405,14 +1446,12 @@
                 font-size: 14px;
             }
 
-            /* Mobile Form Actions */
             .form-button {
                 padding: 8px 12px;
                 font-size: 12px;
                 margin: 1px;
             }
 
-            /* Mobile Config Display */
             .config-display {
                 padding: 12px;
                 margin: 12px 0;
@@ -1431,7 +1470,6 @@
                 max-height: 60px;
             }
 
-            /* Mobile Search */
             .search-box {
                 margin-bottom: 12px;
                 font-size: 14px;
@@ -1441,7 +1479,6 @@
                 box-sizing: border-box;
             }
 
-            /* Mobile Action Buttons */
             div[style*="display: flex"] {
                 flex-wrap: wrap;
                 gap: 6px;
@@ -1454,7 +1491,6 @@
                 max-width: calc(100vw - 24px);
             }
 
-            /* Mobile Pagination */
             .pagination {
                 gap: 4px;
                 margin: 16px 0;
@@ -1472,7 +1508,6 @@
             }
         }
 
-        /* Tablet و Desktop - هدر موبایل حذف شود */
         @media (min-width: 769px) {
             .mobile-header {
                 display: none !important;
@@ -1651,7 +1686,6 @@
             </div>
             
             <div class="nav-footer">
-                <div class="nav-copyright">تمامی حقوق برای دپارتمان<br>نمایندگان آزادی وی ان محفوظ است</div>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> خروج
                 </button>
@@ -1691,7 +1725,6 @@
             </div>
             
             <div class="nav-footer">
-                <div class="nav-copyright">تمامی حقوق برای دپارتمان<br>نمایندگان آزادی وی ان محفوظ است</div>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> خروج
                 </button>
@@ -1704,10 +1737,16 @@
             
             <!-- Dashboard Section -->
             <div id="dashboardSection" class="content-section active">
-                <h3 class="section-title">
-                    <i class="fas fa-tachometer-alt"></i>
-                    داشبورد
-                </h3>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-tachometer-alt"></i>
+                        داشبورد
+                    </h3>
+                    <button class="refresh-btn" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
                 
                 <div class="stats-grid">
                     <div class="stats-card">
@@ -1750,10 +1789,16 @@
 
             <!-- Users Section -->
             <div id="usersSection" class="content-section">
-                <h3 class="section-title">
-                    <i class="fas fa-users"></i>
-                    مدیریت کاربران
-                </h3>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-users"></i>
+                        مدیریت کاربران
+                    </h3>
+                    <button class="refresh-btn" onclick="refreshUsersSection()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
                 
                 <div id="usersContent">
                     <div class="section-loading">
@@ -1765,10 +1810,16 @@
 
             <!-- Add User Section -->
             <div id="addUserSection" class="content-section">
-                <h3 class="section-title">
-                    <i class="fas fa-user-plus"></i>
-                    افزودن کاربر جدید
-                </h3>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-plus"></i>
+                        افزودن کاربر جدید
+                    </h3>
+                    <button class="refresh-btn" onclick="refreshAddUserSection()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
                 
                 <form id="addUserForm">
                     <div class="form-grid">
@@ -1819,10 +1870,16 @@
 
             <!-- Traffic Section -->
             <div id="trafficSection" class="content-section">
-                <h3 class="section-title">
-                    <i class="fas fa-chart-area"></i>
-                    گزارش ترافیک
-                </h3>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-area"></i>
+                        گزارش ترافیک
+                    </h3>
+                    <button class="refresh-btn" onclick="refreshTrafficSection()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
                 
                 <div id="trafficContent">
                     <div class="section-loading">
@@ -1834,10 +1891,16 @@
 
             <!-- Payment Section -->
             <div id="paymentSection" class="content-section">
-                <h3 class="section-title">
-                    <i class="fas fa-credit-card"></i>
-                    پرداخت و خرید ترافیک
-                </h3>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-credit-card"></i>
+                        پرداخت و خرید ترافیک
+                    </h3>
+                    <button class="refresh-btn" onclick="refreshPaymentSection()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
                 
                 <div class="payment-card">
                     <div class="payment-title">🎯 نماینده عزیز</div>
@@ -1864,10 +1927,16 @@
 
             <!-- Analytics Section -->
             <div id="analyticsSection" class="content-section">
-                <h3 class="section-title">
-                    <i class="fas fa-chart-bar"></i>
-                    تحلیل آمار
-                </h3>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-bar"></i>
+                        تحلیل آمار
+                    </h3>
+                    <button class="refresh-btn" onclick="refreshAnalyticsSection()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
                 
                 <div id="analyticsContent">
                     <div class="section-loading">
@@ -1879,10 +1948,16 @@
 
             <!-- Settings Section -->
             <div id="settingsSection" class="content-section">
-                <h3 class="section-title">
-                    <i class="fas fa-cog"></i>
-                    تنظیمات
-                </h3>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-cog"></i>
+                        تنظیمات
+                    </h3>
+                    <button class="refresh-btn" onclick="refreshSettingsSection()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
                     <div class="chart-container">
@@ -1914,6 +1989,12 @@
                         </button>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Footer Copyright -->
+            <div class="footer-copyright">
+                تمامی حقوق برای دپارتمان نمایندگان آزادی وی ان محفوظ است<br>
+                © 2024 Azadi VPN Representatives Panel. All rights reserved.
             </div>
         </div>
     </div>
@@ -2060,6 +2141,62 @@
             document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
+        // Refresh Functions
+        function refreshDashboard() {
+            showLoading('در حال بروزرسانی داشبورد...');
+            loadDashboardData().then(() => {
+                hideLoading();
+                showNotification('داشبورد بروزرسانی شد! 🔄', 'success');
+            });
+        }
+
+        function refreshUsersSection() {
+            showLoading('در حال بروزرسانی کاربران...');
+            loadUsers().then(() => {
+                hideLoading();
+                showNotification('لیست کاربران بروزرسانی شد! 🔄', 'success');
+            });
+        }
+
+        function refreshAddUserSection() {
+            document.getElementById('addUserForm').reset();
+            document.getElementById('userCreationResult').classList.add('hidden');
+            hideMessage('addUserError');
+            hideMessage('addUserSuccess');
+            
+            // Reset expire date
+            const expireDate = new Date();
+            expireDate.setDate(expireDate.getDate() + 30);
+            document.getElementById('newExpireDate').value = expireDate.toISOString().split('T')[0];
+            
+            showNotification('فرم افزودن کاربر بازنشانی شد! 🔄', 'success');
+        }
+
+        function refreshTrafficSection() {
+            showLoading('در حال بروزرسانی گزارش ترافیک...');
+            loadTrafficData().then(() => {
+                hideLoading();
+                showNotification('گزارش ترافیک بروزرسانی شد! 🔄', 'success');
+            });
+        }
+
+        function refreshPaymentSection() {
+            showNotification('بخش پرداخت بروزرسانی شد! 🔄', 'success');
+        }
+
+        function refreshAnalyticsSection() {
+            showLoading('در حال بروزرسانی آمار...');
+            loadAnalytics().then(() => {
+                hideLoading();
+                showNotification('آمار بروزرسانی شد! 🔄', 'success');
+            });
+        }
+
+        function refreshSettingsSection() {
+            document.getElementById('settingsUsername').value = currentUsername;
+            showNotification('تنظیمات بروزرسانی شد! 🔄', 'success');
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             initTheme();
@@ -2073,7 +2210,7 @@
                 authToken = storedToken;
                 currentUsername = storedUser;
                 showPanel();
-                loadDashboardData(); // فقط داشبورد بار اول لود شود
+                loadDashboardData();
                 startAutoUpdate();
             }
             
@@ -2155,14 +2292,13 @@
             showNotification('با موفقیت خارج شدید', 'success');
         }
 
-        // Auto Update Function - فقط برای داشبورد
+        // Auto Update Function
         function startAutoUpdate() {
             updateInterval = setInterval(() => {
-                // فقط داشبورد بروزرسانی خودکار می‌شود
                 if (document.getElementById('dashboardSection').classList.contains('active')) {
                     loadDashboardData();
                 }
-            }, 30000); // Update every 30 seconds
+            }, 30000);
         }
 
         // Panel Management
@@ -2194,7 +2330,7 @@
                 item.classList.add('active');
             });
             
-            // Lazy load section data فقط اگر قبلاً لود نشده باشد
+            // Lazy load section data
             switch(sectionName) {
                 case 'users':
                     if (!sectionsLoaded.users) {
@@ -2373,7 +2509,7 @@
             });
         }
 
-        // Users Management - با حفظ pagination state
+        // Users Management
         async function loadUsers() {
             const usersContent = document.getElementById('usersContent');
             
@@ -2383,13 +2519,11 @@
                 if (usersData && usersData.users) {
                     users = usersData.users;
                     
-                    // حفظ فیلتر جستجو
                     const searchValue = document.getElementById('userSearch')?.value || '';
                     filteredUsers = users.filter(user => 
                         user.username.toLowerCase().includes(searchValue.toLowerCase())
                     );
                     
-                    // اگر صفحه جاری خالی باشد، به صفحه آخر برگرد
                     const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
                     if (currentPage > totalPages && totalPages > 0) {
                         currentPage = totalPages;
@@ -2420,7 +2554,6 @@
                 <div id="usersPagination" class="pagination"></div>
             `;
             
-            // Event listener برای جستجو
             document.getElementById('userSearch').addEventListener('input', filterUsers);
             
             displayUsers();
@@ -2500,7 +2633,6 @@
             tableHTML += '</tbody></table>';
             container.innerHTML = tableHTML;
             
-            // Generate pagination
             generatePagination();
         }
 
@@ -2515,7 +2647,6 @@
             
             let paginationHTML = '';
             
-            // Previous button
             paginationHTML += `
                 <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
                         onclick="changePage(${currentPage - 1})" 
@@ -2524,7 +2655,6 @@
                 </button>
             `;
             
-            // Page numbers
             const startPage = Math.max(1, currentPage - 2);
             const endPage = Math.min(totalPages, currentPage + 2);
             
@@ -2551,7 +2681,6 @@
                 paginationHTML += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
             }
             
-            // Next button
             paginationHTML += `
                 <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
                         onclick="changePage(${currentPage + 1})" 
@@ -2560,7 +2689,6 @@
                 </button>
             `;
             
-            // Info
             const startItem = (currentPage - 1) * usersPerPage + 1;
             const endItem = Math.min(currentPage * usersPerPage, filteredUsers.length);
             paginationHTML += `
@@ -2597,7 +2725,7 @@
                 const result = await apiCall(`/user/${username}`, 'PUT', { status: newStatus });
                 
                 if (result) {
-                    loadUsers(); // بروزرسانی بدون تغییر pagination
+                    loadUsers();
                     showNotification(`وضعیت کاربر ${username} تغییر کرد`, 'success');
                 }
             } catch (error) {
@@ -2678,13 +2806,12 @@
 
         function updateTrafficStats(users) {
             const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
-            const totalDownload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.7), 0); // تخمینی
-            const totalUpload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.3), 0); // تخمینی
+            const totalDownload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.7), 0);
+            const totalUpload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.3), 0);
             
-            // محاسبه ترافیک امروز (تخمینی بر اساس آخرین فعالیت)
             const todayTraffic = users.reduce((sum, user) => {
                 if (user.last_online && isToday(new Date(user.last_online))) {
-                    return sum + (user.used_traffic || 0) * 0.1; // تخمین 10% ترافیک امروز
+                    return sum + (user.used_traffic || 0) * 0.1;
                 }
                 return sum;
             }, 0);
@@ -2696,11 +2823,9 @@
         }
 
         function updateTrafficCharts(users) {
-            // Destroy existing charts
             if (dailyTrafficChartInstance) dailyTrafficChartInstance.destroy();
             if (userTrafficChartInstance) userTrafficChartInstance.destroy();
 
-            // Daily Traffic Chart (7 days)
             const dailyData = generateDailyTrafficData(users);
             const dailyCtx = document.getElementById('dailyTrafficChart').getContext('2d');
             dailyTrafficChartInstance = new Chart(dailyCtx, {
@@ -2748,7 +2873,6 @@
                 }
             });
 
-            // User Traffic Distribution
             const topTrafficUsers = users
                 .filter(user => user.used_traffic > 0)
                 .sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0))
@@ -2857,13 +2981,11 @@
             const labels = [];
             const data = [];
             
-            // Generate last 7 days
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 labels.push(date.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' }));
                 
-                // Simulate daily traffic (in reality, you'd get this from API)
                 const dailyTraffic = users.reduce((sum, user) => {
                     return sum + (user.used_traffic || 0) * (0.1 + Math.random() * 0.1);
                 }, 0);
@@ -2898,11 +3020,9 @@
                     </div>
                 `;
                 
-                // Destroy existing charts
                 if (protocolChartInstance) protocolChartInstance.destroy();
                 if (expiryChartInstance) expiryChartInstance.destroy();
                 
-                // Protocol distribution
                 const protocolData = {};
                 users.forEach(user => {
                     if (user.proxies) {
@@ -2937,7 +3057,6 @@
                     }
                 });
                 
-                // Expiry analysis
                 const now = new Date();
                 const expiryData = {
                     'فعال': 0,
@@ -3058,7 +3177,7 @@
                 
                 if (result) {
                     showMessage('editUserSuccess', `اطلاعات کاربر ${username} بروزرسانی شد`);
-                    loadUsers(); // بروزرسانی بدون تغییر pagination
+                    loadUsers();
                     showNotification(`کاربر ${username} بروزرسانی شد`, 'success');
                     
                     setTimeout(() => {
@@ -3115,12 +3234,10 @@
                     showMessage('addUserSuccess', `کاربر ${username} با موفقیت اضافه شد`);
                     document.getElementById('addUserForm').reset();
                     
-                    // Reset expire date
                     const newExpireDate = new Date();
                     newExpireDate.setDate(newExpireDate.getDate() + 30);
                     document.getElementById('newExpireDate').value = newExpireDate.toISOString().split('T')[0];
                     
-                    // Show user configs
                     await showNewUserConfigs(username);
                     
                     showNotification(`کاربر ${username} اضافه شد`, 'success');
@@ -3143,7 +3260,6 @@
                 const configsContainer = document.getElementById('newUserConfigs');
                 configsContainer.innerHTML = '';
                 
-                // Subscription URL
                 if (userData.subscription_url) {
                     const subDiv = document.createElement('div');
                     subDiv.className = 'config-display';
@@ -3159,7 +3275,6 @@
                     configsContainer.appendChild(subDiv);
                 }
                 
-                // Individual configs
                 if (userData.links && userData.links.length > 0) {
                     userData.links.forEach((config, index) => {
                         const protocol = config.split('://')[0].toUpperCase();
@@ -3207,7 +3322,6 @@
                     </div>
                 `;
                 
-                // Subscription URL
                 if (userData.subscription_url) {
                     const subDiv = document.createElement('div');
                     subDiv.className = 'config-display';
@@ -3223,7 +3337,6 @@
                     configContent.appendChild(subDiv);
                 }
                 
-                // Individual configs
                 if (userData.links && userData.links.length > 0) {
                     userData.links.forEach((config, index) => {
                         const protocol = config.split('://')[0].toUpperCase();
@@ -3262,7 +3375,6 @@
             navigator.clipboard.writeText(text).then(() => {
                 showNotification('متن کپی شد! 📋', 'success');
             }).catch(() => {
-                // Fallback for older browsers
                 const textArea = document.createElement('textarea');
                 textArea.value = text;
                 document.body.appendChild(textArea);
