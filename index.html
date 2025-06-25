@@ -961,8 +961,10 @@
         /* Mobile Styles */
         .mobile-header {
             display: none;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             background: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
             color: var(--text-primary);
@@ -971,6 +973,17 @@
             font-size: 18px;
             font-weight: 700;
             box-shadow: var(--shadow-sm);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+            color: var(--text-primary);
         }
         
         .mobile-menu-btn {
@@ -981,11 +994,16 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 8px;
+            padding: 12px;
             color: var(--text-primary);
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.3s ease;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .mobile-menu-btn:hover {
@@ -999,7 +1017,7 @@
             position: fixed;
             top: 0;
             right: -100%;
-            width: 280px;
+            width: 300px;
             height: 100vh;
             background: var(--card-bg);
             transition: right 0.3s ease;
@@ -1007,6 +1025,7 @@
             overflow-y: auto;
             box-shadow: var(--shadow-xl);
             border-left: 1px solid var(--border-color);
+            padding: 24px;
         }
         
         .mobile-nav.active {
@@ -1117,21 +1136,17 @@
             
             .mobile-header {
                 display: flex !important;
-                align-items: center;
-                justify-content: center;
-                position: relative;
             }
             
             .mobile-nav {
                 display: flex !important;
                 flex-direction: column;
-                padding: 24px;
             }
             
             .panel-content {
                 margin-right: 0 !important;
                 padding: 16px;
-                padding-top: 80px; /* Space for fixed header */
+                padding-top: 90px; /* Space for fixed header */
             }
             
             .content-header {
@@ -1259,6 +1274,11 @@
                 flex-wrap: wrap;
                 gap: 8px;
             }
+
+            .notification {
+                right: 12px;
+                top: 80px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1290,7 +1310,15 @@
             .notification {
                 max-width: 280px;
                 right: 12px;
-                top: 12px;
+                top: 80px;
+            }
+
+            .mobile-nav {
+                width: 280px;
+            }
+
+            .mobile-header-title {
+                font-size: 14px;
             }
         }
 
@@ -1396,7 +1424,7 @@
     <div id="panelSection" class="panel-container hidden">
         <!-- Mobile Header -->
         <div class="mobile-header">
-            پنل نمایندگان آزادی VPN
+            <div class="mobile-header-title">پنل نمایندگان آزادی VPN</div>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars"></i>
             </button>
@@ -1808,7 +1836,7 @@
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="loading-content">
             <div class="loading-spinner"></div>
-            <p class="loading-text">در حال بارگذاری...</p>
+            <p class="loading-text">منتظر بمانید...</p>
         </div>
     </div>
 
@@ -1866,6 +1894,16 @@
         let dailyTrafficChartInstance = null;
         let userTrafficChartInstance = null;
 
+        // Loading Functions
+        function showLoading(message = 'منتظر بمانید...') {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.querySelector('.loading-text').textContent = message;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             initTheme();
@@ -1906,6 +1944,7 @@
             
             setLoadingState('loginBtn', 'loginBtnText', 'loginSpinner', true);
             hideMessage('loginError');
+            showLoading('در حال ورود...');
             
             try {
                 const response = await fetch(`${serverUrl}/api/admin/token`, {
@@ -1939,6 +1978,7 @@
             }
             
             setLoadingState('loginBtn', 'loginBtnText', 'loginSpinner', false);
+            hideLoading();
         }
 
         function logout() {
@@ -1970,6 +2010,9 @@
         }
 
         function showSection(sectionName) {
+            // Show loading for section switch
+            showLoading('در حال بارگذاری...');
+            
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
@@ -2001,6 +2044,9 @@
                     break;
                 case 'traffic':
                     loadTrafficData();
+                    break;
+                default:
+                    hideLoading();
                     break;
             }
         }
@@ -2070,8 +2116,10 @@
                     loadTopUsers(users);
                     updateCharts();
                 }
+                hideLoading();
             } catch (error) {
                 console.error('Dashboard Error:', error);
+                hideLoading();
             }
         }
 
@@ -2175,8 +2223,10 @@
                     updateTrafficCharts(users);
                     loadTrafficDetails(users);
                 }
+                hideLoading();
             } catch (error) {
                 console.error('Traffic Error:', error);
+                hideLoading();
             }
         }
 
@@ -2392,8 +2442,10 @@
                     users = usersData.users;
                     displayUsers(users);
                 }
+                hideLoading();
             } catch (error) {
                 console.error('Users Error:', error);
+                hideLoading();
             }
         }
 
@@ -2472,6 +2524,7 @@
 
         async function toggleUserStatus(username, currentStatus) {
             const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
+            showLoading('در حال تغییر وضعیت...');
             
             try {
                 const result = await apiCall(`/user/${username}`, 'PUT', { status: newStatus });
@@ -2483,12 +2536,15 @@
             } catch (error) {
                 showNotification('خطا در تغییر وضعیت کاربر', 'error');
             }
+            hideLoading();
         }
 
         async function deleteUser(username) {
             if (!confirm(`آیا از حذف کاربر "${username}" اطمینان دارید؟\nاین عمل غیرقابل برگشت است!`)) {
                 return;
             }
+            
+            showLoading('در حال حذف کاربر...');
             
             try {
                 const response = await fetch(`${serverUrl}/api/user/${username}`, {
@@ -2507,6 +2563,7 @@
             } catch (error) {
                 showNotification('خطا در حذف کاربر', 'error');
             }
+            hideLoading();
         }
 
         // Edit User Functions
@@ -2531,6 +2588,8 @@
             e.preventDefault();
             
             if (!currentEditUser) return;
+            
+            showLoading('در حال ویرایش کاربر...');
             
             const dataLimit = parseFloat(document.getElementById('editDataLimit').value) * 1024 * 1024 * 1024;
             const expireDateStr = document.getElementById('editExpireDate').value;
@@ -2557,6 +2616,7 @@
             } catch (error) {
                 showNotification('خطا در ویرایش کاربر', 'error');
             }
+            hideLoading();
         }
 
         async function resetUserTraffic() {
@@ -2565,6 +2625,8 @@
             if (!confirm(`آیا از ریست ترافیک کاربر "${currentEditUser.username}" اطمینان دارید؟`)) {
                 return;
             }
+            
+            showLoading('در حال ریست ترافیک...');
             
             try {
                 const result = await apiCall(`/user/${currentEditUser.username}/reset`, 'POST');
@@ -2578,6 +2640,7 @@
             } catch (error) {
                 showNotification('خطا در ریست ترافیک', 'error');
             }
+            hideLoading();
         }
 
         function closeEditModal() {
@@ -2600,6 +2663,7 @@
             hideMessage('addUserError');
             hideMessage('addUserSuccess');
             document.getElementById('userCreationResult').classList.add('hidden');
+            showLoading('در حال افزودن کاربر...');
             
             const userData = {
                 username,
@@ -2634,6 +2698,7 @@
             }
             
             setLoadingState('addUserForm', 'addUserBtnText', 'addUserSpinner', false);
+            hideLoading();
         }
 
         async function showNewUserConfigs(username) {
@@ -2689,10 +2754,13 @@
 
         // Config Functions
         async function showUserConfigs(username) {
+            showLoading('در حال دریافت کانفیگ‌ها...');
+            
             try {
                 const userData = await apiCall(`/user/${username}`);
                 if (!userData) {
                     showNotification('خطا در دریافت کانفیگ‌ها', 'error');
+                    hideLoading();
                     return;
                 }
                 
@@ -2744,9 +2812,11 @@
                 }
                 
                 document.getElementById('configModal').classList.remove('hidden');
+                hideLoading();
                 
             } catch (error) {
                 showNotification('خطا در دریافت کانفیگ‌ها', 'error');
+                hideLoading();
             }
         }
 
@@ -2881,6 +2951,8 @@
                     }
                 }
             });
+            
+            hideLoading();
         }
 
         // Settings Functions
