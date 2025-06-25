@@ -116,6 +116,12 @@
             box-shadow: 0 0 0 2px rgba(204, 155, 80, 0.2);
         }
         
+        .form-input:disabled,
+        .form-input[readonly] {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
         .login-btn {
             width: 100%;
             background: #CC9B50;
@@ -696,7 +702,7 @@
                     
                     <div class="form-group">
                         <label class="form-label">آدرس سرور</label>
-                        <input type="url" id="serverUrl" class="form-input" value="https://admin.jozveraygan.xyz:8443" required>
+                        <input type="password" id="serverUrl" class="form-input" value="https://admin.jozveraygan.xyz:8443" readonly style="background: #f5f5f5; cursor: not-allowed; color: #999;" placeholder="******************************************">
                     </div>
                     
                     <div id="loginError" class="error-message hidden"></div>
@@ -911,8 +917,8 @@
                     </div>
                     
                     <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-                        <h4 style="color: #1a3c5e; margin-bottom: 15px;">رشد کاربران</h4>
-                        <canvas id="growthChart" width="300" height="200"></canvas>
+                        <h4 style="color: #1a3c5e; margin-bottom: 15px;">نمودار تاریخ انقضا</h4>
+                        <canvas id="expiryChart" width="300" height="200"></canvas>
                     </div>
                 </div>
                 
@@ -970,8 +976,8 @@
                 </div>
                 
                 <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-                    <h4 style="color: #1a3c5e; margin-bottom: 15px;">نمودار مصرف ترافیک روزانه</h4>
-                    <canvas id="dailyTrafficChart" width="600" height="300"></canvas>
+                    <h4 style="color: #1a3c5e; margin-bottom: 15px;">نمودار مصرف ترافیک کاربران</h4>
+                    <canvas id="userTrafficChart" width="600" height="300"></canvas>
                 </div>
             </div>
 
@@ -984,7 +990,7 @@
                         <h4 style="color: #1a3c5e; margin-bottom: 15px;">اطلاعات اتصال</h4>
                         <div class="form-group">
                             <label class="form-label">آدرس سرور</label>
-                            <input type="text" id="settingsServerUrl" class="form-input" readonly>
+                            <input type="password" id="settingsServerUrl" class="form-input" readonly value="******************************************" style="background: #f5f5f5;">
                         </div>
                         <div class="form-group">
                             <label class="form-label">نام کاربری</label>
@@ -1080,11 +1086,16 @@
     <script>
         // Global Variables
         let authToken = '';
-        let serverUrl = '';
+        let serverUrl = 'https://admin.jozveraygan.xyz:8443'; // Fixed server URL
         let currentUsername = '';
         let users = [];
         let currentQRConfig = '';
         let currentConfigs = [];
+        let userStatusChartInstance = null;
+        let trafficChartInstance = null;
+        let protocolChartInstance = null;
+        let expiryChartInstance = null;
+        let userTrafficChartInstance = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1092,12 +1103,10 @@
             
             // Check if already logged in
             const storedToken = localStorage.getItem('marzban_token');
-            const storedServer = localStorage.getItem('marzban_server');
             const storedUser = localStorage.getItem('marzban_username');
             
-            if (storedToken && storedServer && storedUser) {
+            if (storedToken && storedUser) {
                 authToken = storedToken;
-                serverUrl = storedServer;
                 currentUsername = storedUser;
                 showPanel();
                 loadDashboardData();
@@ -1122,13 +1131,12 @@
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const server = document.getElementById('serverUrl').value;
             
             setLoadingState('loginBtn', 'loginBtnText', 'loginSpinner', true);
             hideMessage('loginError');
             
             try {
-                const response = await fetch(`${server}/api/admin/token`, {
+                const response = await fetch(`${serverUrl}/api/admin/token`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1142,12 +1150,10 @@
                 if (response.ok) {
                     const data = await response.json();
                     authToken = data.access_token;
-                    serverUrl = server;
                     currentUsername = username;
                     
                     // Store credentials
                     localStorage.setItem('marzban_token', authToken);
-                    localStorage.setItem('marzban_server', serverUrl);
                     localStorage.setItem('marzban_username', currentUsername);
                     
                     showPanel();
@@ -1165,11 +1171,9 @@
 
         function logout() {
             localStorage.removeItem('marzban_token');
-            localStorage.removeItem('marzban_server');
             localStorage.removeItem('marzban_username');
             
             authToken = '';
-            serverUrl = '';
             currentUsername = '';
             
             document.getElementById('panelSection').classList.add('hidden');
@@ -1177,7 +1181,6 @@
             
             // Reset form
             document.getElementById('loginForm').reset();
-            document.getElementById('serverUrl').value = 'https://admin.jozveraygan.xyz:8443';
         }
 
         // Panel Management
@@ -1186,7 +1189,6 @@
             document.getElementById('panelSection').classList.remove('hidden');
             
             document.getElementById('navWelcome').textContent = `خوش آمدید، ${currentUsername}`;
-            document.getElementById('settingsServerUrl').value = serverUrl;
             document.getElementById('settingsUsername').value = currentUsername;
         }
 
@@ -1273,7 +1275,7 @@
                 if (usersData && usersData.users) {
                     users = usersData.users;
                     updateDashboardStats(users);
-                    loadRecentUsers(users.slice(0, 10));
+                    loadRecentUsers(users.slice(-10).reverse()); // Recent users (last 10, reversed)
                     updateCharts();
                 }
             } catch (error) {
@@ -1285,13 +1287,14 @@
 
         function updateDashboardStats(users) {
             const totalUsers = users.length;
-            const activeUsers = users.filter(user => user.status === 'active').length;
+            const activeUsers = users.filter(user => getUserStatus(user) === 'فعال').length;
             const inactiveUsers = users.filter(user => user.status === 'disabled').length;
             const expiredUsers = users.filter(user => {
                 if (!user.expire) return false;
                 return new Date(user.expire * 1000) < new Date();
             }).length;
             
+            // Calculate actual traffic usage
             const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
             const totalDataLimit = users.reduce((sum, user) => sum + (user.data_limit || 0), 0);
             
@@ -1318,7 +1321,8 @@
                 
                 const status = getUserStatus(user);
                 const statusClass = status === 'فعال' ? 'status-active' : 
-                                 status === 'منقضی شده' ? 'status-expired' : 'status-inactive';
+                                 status === 'منقضی شده' ? 'status-expired' : 
+                                 status === 'ترافیک تمام شده' ? 'status-limited' : 'status-inactive';
                 
                 userElement.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 12px;">
@@ -1334,9 +1338,6 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span class="status-badge ${statusClass}">${status}</span>
-                        <button onclick="showUserActions('${user.username}')" class="form-button" style="padding: 6px 12px; font-size: 12px;">
-                            عملیات
-                        </button>
                     </div>
                 `;
                 container.appendChild(userElement);
@@ -1344,22 +1345,29 @@
         }
 
         function updateCharts() {
+            // Destroy existing charts
+            if (userStatusChartInstance) userStatusChartInstance.destroy();
+            if (trafficChartInstance) trafficChartInstance.destroy();
+            
             // User Status Chart
-            const activeUsers = users.filter(user => user.status === 'active').length;
+            const activeUsers = users.filter(user => getUserStatus(user) === 'فعال').length;
             const inactiveUsers = users.filter(user => user.status === 'disabled').length;
             const expiredUsers = users.filter(user => {
                 if (!user.expire) return false;
                 return new Date(user.expire * 1000) < new Date();
             }).length;
+            const limitedUsers = users.filter(user => {
+                return user.data_limit && user.used_traffic >= user.data_limit && new Date(user.expire * 1000) >= new Date();
+            }).length;
             
             const statusCtx = document.getElementById('userStatusChart').getContext('2d');
-            new Chart(statusCtx, {
+            userStatusChartInstance = new Chart(statusCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['فعال', 'غیرفعال', 'منقضی شده'],
+                    labels: ['فعال', 'غیرفعال', 'منقضی شده', 'ترافیک تمام'],
                     datasets: [{
-                        data: [activeUsers, inactiveUsers, expiredUsers],
-                        backgroundColor: ['#2e7d32', '#d32f2f', '#ff9800'],
+                        data: [activeUsers, inactiveUsers, expiredUsers, limitedUsers],
+                        backgroundColor: ['#2e7d32', '#d32f2f', '#ff9800', '#1976d2'],
                         borderWidth: 2,
                         borderColor: '#fff'
                     }]
@@ -1374,15 +1382,18 @@
                 }
             });
             
-            // Traffic Chart
-            const trafficData = users.map(user => ({
-                username: user.username,
-                used: user.used_traffic || 0,
-                limit: user.data_limit || 0
-            })).sort((a, b) => b.used - a.used).slice(0, 10);
+            // Traffic Chart - Top 10 users by traffic
+            const trafficData = users
+                .filter(user => user.used_traffic > 0)
+                .map(user => ({
+                    username: user.username,
+                    used: user.used_traffic || 0
+                }))
+                .sort((a, b) => b.used - a.used)
+                .slice(0, 10);
             
             const trafficCtx = document.getElementById('trafficChart').getContext('2d');
-            new Chart(trafficCtx, {
+            trafficChartInstance = new Chart(trafficCtx, {
                 type: 'bar',
                 data: {
                     labels: trafficData.map(item => item.username),
@@ -1449,9 +1460,10 @@
             usersToShow.forEach(user => {
                 const status = getUserStatus(user);
                 const statusClass = status === 'فعال' ? 'status-active' : 
-                                 status === 'منقضی شده' ? 'status-expired' : 'status-inactive';
+                                 status === 'منقضی شده' ? 'status-expired' : 
+                                 status === 'ترافیک تمام شده' ? 'status-limited' : 'status-inactive';
                 const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
-                const progressPercent = user.data_limit ? Math.min((user.used_traffic / user.data_limit) * 100, 100) : 0;
+                const progressPercent = user.data_limit ? Math.min(((user.used_traffic || 0) / user.data_limit) * 100, 100) : 0;
                 
                 tableHTML += `
                     <tr>
@@ -1592,14 +1604,14 @@
         // QR Code Functions
         async function showQRCode(username) {
             try {
-                // Get user configs
-                const userConfigs = await apiCall(`/user/${username}/links`);
-                if (!userConfigs || !userConfigs.links || userConfigs.links.length === 0) {
+                // First get user details
+                const userData = await apiCall(`/user/${username}`);
+                if (!userData || !userData.links || userData.links.length === 0) {
                     showNotification('هیچ کانفیگی برای این کاربر یافت نشد', 'error');
                     return;
                 }
                 
-                const configLink = userConfigs.links[0]; // Use first config
+                const configLink = userData.links[0]; // Use first config
                 currentQRConfig = configLink;
                 
                 document.getElementById('qrUsername').textContent = `کاربر: ${username}`;
@@ -1634,13 +1646,14 @@
         // Config Functions
         async function showConfigs(username) {
             try {
-                const userConfigs = await apiCall(`/user/${username}/links`);
-                if (!userConfigs || !userConfigs.links) {
+                // Get user details which includes configs
+                const userData = await apiCall(`/user/${username}`);
+                if (!userData || !userData.links) {
                     showNotification('خطا در دریافت کانفیگ‌ها', 'error');
                     return;
                 }
                 
-                currentConfigs = userConfigs.links;
+                currentConfigs = userData.links;
                 document.getElementById('configUsername').textContent = `کاربر: ${username}`;
                 
                 // Generate subscription link
@@ -1723,6 +1736,10 @@
 
         // Analytics Functions
         async function loadAnalytics() {
+            // Destroy existing charts
+            if (protocolChartInstance) protocolChartInstance.destroy();
+            if (expiryChartInstance) expiryChartInstance.destroy();
+            
             // Protocol distribution chart
             const protocolData = {};
             users.forEach(user => {
@@ -1734,7 +1751,7 @@
             });
             
             const protocolCtx = document.getElementById('protocolChart').getContext('2d');
-            new Chart(protocolCtx, {
+            protocolChartInstance = new Chart(protocolCtx, {
                 type: 'pie',
                 data: {
                     labels: Object.keys(protocolData),
@@ -1755,18 +1772,44 @@
                 }
             });
             
-            // Growth chart (simulated data)
-            const growthCtx = document.getElementById('growthChart').getContext('2d');
-            new Chart(growthCtx, {
-                type: 'line',
+            // Expiry analysis chart
+            const now = new Date();
+            const expiryData = {
+                'فعال': 0,
+                'منقضی شده': 0,
+                '۷ روز آینده': 0,
+                '۳۰ روز آینده': 0
+            };
+            
+            users.forEach(user => {
+                if (!user.expire) {
+                    expiryData['فعال']++;
+                } else {
+                    const expireDate = new Date(user.expire * 1000);
+                    const daysDiff = Math.ceil((expireDate - now) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysDiff < 0) {
+                        expiryData['منقضی شده']++;
+                    } else if (daysDiff <= 7) {
+                        expiryData['۷ روز آینده']++;
+                    } else if (daysDiff <= 30) {
+                        expiryData['۳۰ روز آینده']++;
+                    } else {
+                        expiryData['فعال']++;
+                    }
+                }
+            });
+            
+            const expiryCtx = document.getElementById('expiryChart').getContext('2d');
+            expiryChartInstance = new Chart(expiryCtx, {
+                type: 'bar',
                 data: {
-                    labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
+                    labels: Object.keys(expiryData),
                     datasets: [{
-                        label: 'کاربران جدید',
-                        data: [12, 19, 15, 25, 22, users.length],
-                        borderColor: '#CC9B50',
-                        backgroundColor: 'rgba(204, 155, 80, 0.1)',
-                        tension: 0.4
+                        label: 'تعداد کاربران',
+                        data: Object.values(expiryData),
+                        backgroundColor: ['#2e7d32', '#d32f2f', '#ff9800', '#1976d2'],
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -1781,11 +1824,17 @@
             
             // Top users by traffic
             const topUsers = users
+                .filter(user => user.used_traffic > 0)
                 .sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0))
                 .slice(0, 10);
             
             const topUsersList = document.getElementById('topUsersList');
             topUsersList.innerHTML = '';
+            
+            if (topUsers.length === 0) {
+                topUsersList.innerHTML = '<p style="text-align: center; color: #4a5b6e;">هیچ داده‌ای برای نمایش یافت نشد</p>';
+                return;
+            }
             
             topUsers.forEach((user, index) => {
                 const userElement = document.createElement('div');
@@ -1813,46 +1862,45 @@
 
         // Traffic Functions
         async function loadTrafficData() {
-            // Simulated traffic data
-            const today = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0) * 0.1;
-            const week = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0) * 0.5;
-            const month = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
-            const avg = month / 30;
+            // Calculate actual traffic data from users
+            const totalUsedTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
             
-            document.getElementById('todayTraffic').textContent = formatBytes(today);
-            document.getElementById('weekTraffic').textContent = formatBytes(week);
-            document.getElementById('monthTraffic').textContent = formatBytes(month);
-            document.getElementById('avgTraffic').textContent = formatBytes(avg);
+            // Simulated daily breakdown (30%, 70% distribution for today/this week)
+            const todayTraffic = totalUsedTraffic * 0.05; // 5% of total for today
+            const weekTraffic = totalUsedTraffic * 0.3;   // 30% of total for this week
+            const monthTraffic = totalUsedTraffic;        // All traffic for this month
+            const avgTraffic = monthTraffic / 30;         // Average per day
             
-            // Daily traffic chart (simulated data)
-            const dailyData = [];
-            for (let i = 29; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                dailyData.push({
-                    date: date.toLocaleDateString('fa-IR'),
-                    traffic: Math.random() * 10 + 5 // GB
-                });
-            }
+            document.getElementById('todayTraffic').textContent = formatBytes(todayTraffic);
+            document.getElementById('weekTraffic').textContent = formatBytes(weekTraffic);
+            document.getElementById('monthTraffic').textContent = formatBytes(monthTraffic);
+            document.getElementById('avgTraffic').textContent = formatBytes(avgTraffic);
             
-            const dailyCtx = document.getElementById('dailyTrafficChart').getContext('2d');
-            new Chart(dailyCtx, {
-                type: 'line',
+            // User traffic chart
+            if (userTrafficChartInstance) userTrafficChartInstance.destroy();
+            
+            const trafficUsers = users
+                .filter(user => user.used_traffic > 0)
+                .sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0))
+                .slice(0, 15);
+            
+            const userTrafficCtx = document.getElementById('userTrafficChart').getContext('2d');
+            userTrafficChartInstance = new Chart(userTrafficCtx, {
+                type: 'horizontalBar',
                 data: {
-                    labels: dailyData.map(item => item.date),
+                    labels: trafficUsers.map(user => user.username),
                     datasets: [{
-                        label: 'ترافیک روزانه (GB)',
-                        data: dailyData.map(item => item.traffic),
-                        borderColor: '#CC9B50',
-                        backgroundColor: 'rgba(204, 155, 80, 0.1)',
-                        tension: 0.4,
-                        fill: true
+                        label: 'ترافیک مصرفی (GB)',
+                        data: trafficUsers.map(user => ((user.used_traffic || 0) / (1024 * 1024 * 1024)).toFixed(2)),
+                        backgroundColor: '#CC9B50',
+                        borderColor: '#1a3c5e',
+                        borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     scales: {
-                        y: {
+                        x: {
                             beginAtZero: true
                         }
                     }
@@ -1873,6 +1921,7 @@
                 }
                 
                 loadUsers();
+                loadDashboardData();
                 showNotification('ترافیک همه کاربران ریست شد', 'success');
             } catch (error) {
                 showNotification('خطا در ریست ترافیک', 'error');
@@ -1896,6 +1945,7 @@
                 }
                 
                 loadUsers();
+                loadDashboardData();
                 showNotification(`${amount} GB به همه کاربران اضافه شد`, 'success');
             } catch (error) {
                 showNotification('خطا در افزودن ترافیک', 'error');
@@ -1921,6 +1971,7 @@
                 }
                 
                 loadUsers();
+                loadDashboardData();
                 showNotification(`${days} روز به انقضای همه کاربران اضافه شد`, 'success');
             } catch (error) {
                 showNotification('خطا در تمدید انقضا', 'error');
@@ -1946,7 +1997,7 @@
         function getUserStatus(user) {
             if (user.status === 'disabled') return 'غیرفعال';
             if (user.expire && new Date(user.expire * 1000) < new Date()) return 'منقضی شده';
-            if (user.data_limit && user.used_traffic >= user.data_limit) return 'ترافیک تمام شده';
+            if (user.data_limit && (user.used_traffic || 0) >= user.data_limit) return 'ترافیک تمام شده';
             return 'فعال';
         }
 
