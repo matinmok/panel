@@ -1192,6 +1192,23 @@
             font-weight: 600;
             font-size: 16px;
         }
+
+        /* Section Loading Indicator */
+        .section-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            font-size: 16px;
+            gap: 12px;
+        }
+
+        .section-loading .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border-width: 2px;
+        }
         
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -1738,15 +1755,12 @@
                     مدیریت کاربران
                 </h3>
                 
-                <div style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="userSearch" placeholder="جستجوی کاربر..." class="search-box" style="flex: 1; min-width: 250px;">
-                    <button onclick="loadUsers()" class="form-button">
-                        <i class="fas fa-sync-alt"></i> بروزرسانی
-                    </button>
+                <div id="usersContent">
+                    <div class="section-loading">
+                        <div class="loading-spinner"></div>
+                        <span>در حال بارگذاری کاربران...</span>
+                    </div>
                 </div>
-                
-                <div id="usersTable"></div>
-                <div id="usersPagination" class="pagination"></div>
             </div>
 
             <!-- Add User Section -->
@@ -1810,47 +1824,11 @@
                     گزارش ترافیک
                 </h3>
                 
-                <div class="traffic-grid">
-                    <div class="traffic-card">
-                        <div class="traffic-icon"><i class="fas fa-cloud-download-alt"></i></div>
-                        <div class="traffic-number" id="totalDownload">0 GB</div>
-                        <div class="traffic-label">کل دانلود</div>
+                <div id="trafficContent">
+                    <div class="section-loading">
+                        <div class="loading-spinner"></div>
+                        <span>در حال بارگذاری گزارش ترافیک...</span>
                     </div>
-                    
-                    <div class="traffic-card">
-                        <div class="traffic-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                        <div class="traffic-number" id="totalUpload">0 GB</div>
-                        <div class="traffic-label">کل آپلود</div>
-                    </div>
-                    
-                    <div class="traffic-card">
-                        <div class="traffic-icon"><i class="fas fa-exchange-alt"></i></div>
-                        <div class="traffic-number" id="totalBandwidth">0 GB</div>
-                        <div class="traffic-label">کل ترافیک</div>
-                    </div>
-                    
-                    <div class="traffic-card">
-                        <div class="traffic-icon"><i class="fas fa-calendar-day"></i></div>
-                        <div class="traffic-number" id="todayTraffic">0 GB</div>
-                        <div class="traffic-label">ترافیک امروز</div>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                    <div class="chart-container">
-                        <h4 class="chart-title">نمودار مصرف روزانه</h4>
-                        <canvas id="dailyTrafficChart" width="300" height="200"></canvas>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <h4 class="chart-title">توزیع مصرف کاربران</h4>
-                        <canvas id="userTrafficChart" width="300" height="200"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <h4 class="chart-title">جزئیات مصرف کاربران</h4>
-                    <div id="trafficDetails"></div>
                 </div>
             </div>
 
@@ -1891,15 +1869,10 @@
                     تحلیل آمار
                 </h3>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                    <div class="chart-container">
-                        <h4 class="chart-title">توزیع پروتکل‌ها</h4>
-                        <canvas id="protocolChart" width="300" height="200"></canvas>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <h4 class="chart-title">وضعیت انقضا</h4>
-                        <canvas id="expiryChart" width="300" height="200"></canvas>
+                <div id="analyticsContent">
+                    <div class="section-loading">
+                        <div class="loading-spinner"></div>
+                        <span>در حال بارگذاری آمار...</span>
                     </div>
                 </div>
             </div>
@@ -2063,6 +2036,12 @@
         let currentPage = 1;
         let usersPerPage = 20;
         let filteredUsers = [];
+        let sectionsLoaded = {
+            dashboard: false,
+            users: false,
+            traffic: false,
+            analytics: false
+        };
 
         // Chart instances
         let userStatusChartInstance = null;
@@ -2094,7 +2073,7 @@
                 authToken = storedToken;
                 currentUsername = storedUser;
                 showPanel();
-                loadDashboardData();
+                loadDashboardData(); // فقط داشبورد بار اول لود شود
                 startAutoUpdate();
             }
             
@@ -2109,7 +2088,6 @@
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('addUserForm').addEventListener('submit', handleAddUser);
             document.getElementById('editUserForm').addEventListener('submit', handleEditUser);
-            document.getElementById('userSearch').addEventListener('input', filterUsers);
         }
 
         // Authentication
@@ -2168,12 +2146,23 @@
             
             authToken = '';
             currentUsername = '';
+            sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false };
             
             document.getElementById('panelSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
             
             document.getElementById('loginForm').reset();
             showNotification('با موفقیت خارج شدید', 'success');
+        }
+
+        // Auto Update Function - فقط برای داشبورد
+        function startAutoUpdate() {
+            updateInterval = setInterval(() => {
+                // فقط داشبورد بروزرسانی خودکار می‌شود
+                if (document.getElementById('dashboardSection').classList.contains('active')) {
+                    loadDashboardData();
+                }
+            }, 30000); // Update every 30 seconds
         }
 
         // Panel Management
@@ -2187,9 +2176,6 @@
         }
 
         function showSection(sectionName) {
-            // Show loading for section switch
-            showLoading('در حال بارگذاری...');
-            
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
@@ -2208,22 +2194,33 @@
                 item.classList.add('active');
             });
             
-            // Load section data
+            // Lazy load section data فقط اگر قبلاً لود نشده باشد
             switch(sectionName) {
                 case 'users':
-                    loadUsers();
+                    if (!sectionsLoaded.users) {
+                        loadUsers();
+                        sectionsLoaded.users = true;
+                    }
                     break;
                 case 'dashboard':
-                    loadDashboardData();
+                    if (!sectionsLoaded.dashboard) {
+                        loadDashboardData();
+                        sectionsLoaded.dashboard = true;
+                    }
                     break;
                 case 'analytics':
-                    loadAnalytics();
+                    if (!sectionsLoaded.analytics) {
+                        loadAnalytics();
+                        sectionsLoaded.analytics = true;
+                    }
                     break;
                 case 'traffic':
-                    loadTrafficData();
+                    if (!sectionsLoaded.traffic) {
+                        loadTrafficData();
+                        sectionsLoaded.traffic = true;
+                    }
                     break;
                 default:
-                    hideLoading();
                     break;
             }
         }
@@ -2234,19 +2231,6 @@
             
             mobileNav.classList.toggle('active');
             mobileOverlay.classList.toggle('active');
-        }
-
-        // Auto Update Function
-        function startAutoUpdate() {
-            updateInterval = setInterval(() => {
-                if (document.getElementById('dashboardSection').classList.contains('active')) {
-                    loadDashboardData();
-                } else if (document.getElementById('usersSection').classList.contains('active')) {
-                    loadUsers();
-                } else if (document.getElementById('trafficSection').classList.contains('active')) {
-                    loadTrafficData();
-                }
-            }, 30000); // Update every 30 seconds
         }
 
         // API Functions
@@ -2293,11 +2277,10 @@
                     updateDashboardStats(users);
                     loadTopUsers(users);
                     updateCharts();
+                    sectionsLoaded.dashboard = true;
                 }
-                hideLoading();
             } catch (error) {
                 console.error('Dashboard Error:', error);
-                hideLoading();
             }
         }
 
@@ -2390,22 +2373,307 @@
             });
         }
 
-        // Traffic Functions
-        async function loadTrafficData() {
+        // Users Management - با حفظ pagination state
+        async function loadUsers() {
+            const usersContent = document.getElementById('usersContent');
+            
             try {
                 const usersData = await apiCall('/users');
                 
                 if (usersData && usersData.users) {
                     users = usersData.users;
-                    updateTrafficStats(users);
-                    updateTrafficCharts(users);
-                    loadTrafficDetails(users);
+                    
+                    // حفظ فیلتر جستجو
+                    const searchValue = document.getElementById('userSearch')?.value || '';
+                    filteredUsers = users.filter(user => 
+                        user.username.toLowerCase().includes(searchValue.toLowerCase())
+                    );
+                    
+                    // اگر صفحه جاری خالی باشد، به صفحه آخر برگرد
+                    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+                    if (currentPage > totalPages && totalPages > 0) {
+                        currentPage = totalPages;
+                    } else if (currentPage < 1) {
+                        currentPage = 1;
+                    }
+                    
+                    renderUsersSection();
                 }
+            } catch (error) {
+                console.error('Users Error:', error);
+                usersContent.innerHTML = '<p style="text-align: center; color: var(--danger-color); padding: 40px;">خطا در بارگذاری کاربران</p>';
+            }
+        }
+
+        function renderUsersSection() {
+            const usersContent = document.getElementById('usersContent');
+            
+            usersContent.innerHTML = `
+                <div style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="userSearch" placeholder="جستجوی کاربر..." class="search-box" style="flex: 1; min-width: 250px;" value="">
+                    <button onclick="refreshUsers()" class="form-button">
+                        <i class="fas fa-sync-alt"></i> بروزرسانی
+                    </button>
+                </div>
+                
+                <div id="usersTable"></div>
+                <div id="usersPagination" class="pagination"></div>
+            `;
+            
+            // Event listener برای جستجو
+            document.getElementById('userSearch').addEventListener('input', filterUsers);
+            
+            displayUsers();
+        }
+
+        function refreshUsers() {
+            showLoading('در حال بروزرسانی لیست کاربران...');
+            loadUsers().then(() => {
                 hideLoading();
+                showNotification('لیست کاربران بروزرسانی شد', 'success');
+            });
+        }
+
+        function displayUsers() {
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = startIndex + usersPerPage;
+            const usersToShow = filteredUsers.slice(startIndex, endIndex);
+            
+            const container = document.getElementById('usersTable');
+            
+            if (filteredUsers.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 60px; font-style: italic; font-size: 16px;">هیچ کاربری یافت نشد</p>';
+                document.getElementById('usersPagination').innerHTML = '';
+                return;
+            }
+            
+            let tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-user"></i> نام کاربری</th>
+                            <th><i class="fas fa-info-circle"></i> وضعیت</th>
+                            <th><i class="fas fa-download"></i> ترافیک</th>
+                            <th><i class="fas fa-calendar"></i> انقضا</th>
+                            <th><i class="fas fa-tools"></i> عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            usersToShow.forEach(user => {
+                const status = getUserStatus(user);
+                const statusClass = status === 'فعال' ? 'status-active' : 
+                                 status === 'منقضی شده' ? 'status-expired' : 
+                                 status === 'ترافیک تمام شده' ? 'status-limited' : 'status-inactive';
+                const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
+                const progressPercent = user.data_limit ? Math.min(((user.used_traffic || 0) / user.data_limit) * 100, 100) : 0;
+                
+                tableHTML += `
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-primary);">${user.username}</td>
+                        <td><span class="status-badge ${statusClass}">${status}</span></td>
+                        <td>
+                            <div style="margin-bottom: 6px;">
+                                ${formatBytes(user.used_traffic || 0)} / ${formatBytes(user.data_limit || 0)}
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progressPercent}%;"></div>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-secondary);">${expireDate}</td>
+                        <td>
+                            <button onclick="showUserConfigs('${user.username}')" class="form-button info" title="مشاهده کانفیگ‌ها">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <button onclick="editUser('${user.username}')" class="form-button warning" title="ویرایش کاربر">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="toggleUserStatus('${user.username}', '${user.status}')" class="form-button ${user.status === 'active' ? 'danger' : 'success'}" title="${user.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن'}">
+                                ${user.status === 'active' ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+            
+            // Generate pagination
+            generatePagination();
+        }
+
+        function generatePagination() {
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            const paginationContainer = document.getElementById('usersPagination');
+            
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `
+                <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                        onclick="changePage(${currentPage - 1})" 
+                        ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+            
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            if (startPage > 1) {
+                paginationHTML += `<button class="pagination-btn" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) {
+                    paginationHTML += `<span class="pagination-btn disabled">...</span>`;
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                            onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<span class="pagination-btn disabled">...</span>`;
+                }
+                paginationHTML += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            // Next button
+            paginationHTML += `
+                <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                        onclick="changePage(${currentPage + 1})" 
+                        ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+            
+            // Info
+            const startItem = (currentPage - 1) * usersPerPage + 1;
+            const endItem = Math.min(currentPage * usersPerPage, filteredUsers.length);
+            paginationHTML += `
+                <div class="pagination-info">
+                    ${startItem} تا ${endItem} از ${filteredUsers.length} کاربر
+                </div>
+            `;
+            
+            paginationContainer.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayUsers();
+            }
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            filteredUsers = users.filter(user => 
+                user.username.toLowerCase().includes(searchTerm)
+            );
+            currentPage = 1;
+            displayUsers();
+        }
+
+        async function toggleUserStatus(username, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
+            showLoading('در حال تغییر وضعیت...');
+            
+            try {
+                const result = await apiCall(`/user/${username}`, 'PUT', { status: newStatus });
+                
+                if (result) {
+                    loadUsers(); // بروزرسانی بدون تغییر pagination
+                    showNotification(`وضعیت کاربر ${username} تغییر کرد`, 'success');
+                }
+            } catch (error) {
+                showNotification('خطا در تغییر وضعیت کاربر', 'error');
+            }
+            hideLoading();
+        }
+
+        // Traffic Functions
+        async function loadTrafficData() {
+            const trafficContent = document.getElementById('trafficContent');
+            
+            try {
+                const usersData = await apiCall('/users');
+                
+                if (usersData && usersData.users) {
+                    users = usersData.users;
+                    renderTrafficSection();
+                }
             } catch (error) {
                 console.error('Traffic Error:', error);
-                hideLoading();
+                trafficContent.innerHTML = '<p style="text-align: center; color: var(--danger-color); padding: 40px;">خطا در بارگذاری گزارش ترافیک</p>';
             }
+        }
+
+        function renderTrafficSection() {
+            const trafficContent = document.getElementById('trafficContent');
+            
+            trafficContent.innerHTML = `
+                <div class="traffic-grid">
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-cloud-download-alt"></i></div>
+                        <div class="traffic-number" id="totalDownload">0 GB</div>
+                        <div class="traffic-label">کل دانلود</div>
+                    </div>
+                    
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <div class="traffic-number" id="totalUpload">0 GB</div>
+                        <div class="traffic-label">کل آپلود</div>
+                    </div>
+                    
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <div class="traffic-number" id="totalBandwidth">0 GB</div>
+                        <div class="traffic-label">کل ترافیک</div>
+                    </div>
+                    
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="traffic-number" id="todayTraffic">0 GB</div>
+                        <div class="traffic-label">ترافیک امروز</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <div class="chart-container">
+                        <h4 class="chart-title">نمودار مصرف روزانه</h4>
+                        <canvas id="dailyTrafficChart" width="300" height="200"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h4 class="chart-title">توزیع مصرف کاربران</h4>
+                        <canvas id="userTrafficChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h4 class="chart-title">جزئیات مصرف کاربران</h4>
+                    <div id="trafficDetails"></div>
+                </div>
+            `;
+            
+            updateTrafficStats(users);
+            updateTrafficCharts(users);
+            loadTrafficDetails(users);
         }
 
         function updateTrafficStats(users) {
@@ -2611,194 +2879,140 @@
             return date.toDateString() === today.toDateString();
         }
 
-        // Users Management
-        async function loadUsers() {
-            try {
-                const usersData = await apiCall('/users');
-                
-                if (usersData && usersData.users) {
-                    users = usersData.users;
-                    filteredUsers = users;
-                    currentPage = 1;
-                    displayUsers();
-                }
-                hideLoading();
-            } catch (error) {
-                console.error('Users Error:', error);
-                hideLoading();
-            }
-        }
-
-        function displayUsers() {
-            const startIndex = (currentPage - 1) * usersPerPage;
-            const endIndex = startIndex + usersPerPage;
-            const usersToShow = filteredUsers.slice(startIndex, endIndex);
-            
-            const container = document.getElementById('usersTable');
-            
-            if (filteredUsers.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 60px; font-style: italic; font-size: 16px;">هیچ کاربری یافت نشد</p>';
-                document.getElementById('usersPagination').innerHTML = '';
-                return;
-            }
-            
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-user"></i> نام کاربری</th>
-                            <th><i class="fas fa-info-circle"></i> وضعیت</th>
-                            <th><i class="fas fa-download"></i> ترافیک</th>
-                            <th><i class="fas fa-calendar"></i> انقضا</th>
-                            <th><i class="fas fa-tools"></i> عملیات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            usersToShow.forEach(user => {
-                const status = getUserStatus(user);
-                const statusClass = status === 'فعال' ? 'status-active' : 
-                                 status === 'منقضی شده' ? 'status-expired' : 
-                                 status === 'ترافیک تمام شده' ? 'status-limited' : 'status-inactive';
-                const expireDate = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
-                const progressPercent = user.data_limit ? Math.min(((user.used_traffic || 0) / user.data_limit) * 100, 100) : 0;
-                
-                tableHTML += `
-                    <tr>
-                        <td style="font-weight: 600; color: var(--text-primary);">${user.username}</td>
-                        <td><span class="status-badge ${statusClass}">${status}</span></td>
-                        <td>
-                            <div style="margin-bottom: 6px;">
-                                ${formatBytes(user.used_traffic || 0)} / ${formatBytes(user.data_limit || 0)}
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progressPercent}%;"></div>
-                            </div>
-                        </td>
-                        <td style="color: var(--text-secondary);">${expireDate}</td>
-                        <td>
-                            <button onclick="showUserConfigs('${user.username}')" class="form-button info" title="مشاهده کانفیگ‌ها">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button onclick="editUser('${user.username}')" class="form-button warning" title="ویرایش کاربر">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="toggleUserStatus('${user.username}', '${user.status}')" class="form-button ${user.status === 'active' ? 'danger' : 'success'}" title="${user.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن'}">
-                                ${user.status === 'active' ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'}
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
-            
-            // Generate pagination
-            generatePagination();
-        }
-
-        function generatePagination() {
-            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-            const paginationContainer = document.getElementById('usersPagination');
-            
-            if (totalPages <= 1) {
-                paginationContainer.innerHTML = '';
-                return;
-            }
-            
-            let paginationHTML = '';
-            
-            // Previous button
-            paginationHTML += `
-                <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
-                        onclick="changePage(${currentPage - 1})" 
-                        ${currentPage === 1 ? 'disabled' : ''}>
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            `;
-            
-            // Page numbers
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, currentPage + 2);
-            
-            if (startPage > 1) {
-                paginationHTML += `<button class="pagination-btn" onclick="changePage(1)">1</button>`;
-                if (startPage > 2) {
-                    paginationHTML += `<span class="pagination-btn disabled">...</span>`;
-                }
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                paginationHTML += `
-                    <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
-                            onclick="changePage(${i})">
-                        ${i}
-                    </button>
-                `;
-            }
-            
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) {
-                    paginationHTML += `<span class="pagination-btn disabled">...</span>`;
-                }
-                paginationHTML += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
-            }
-            
-            // Next button
-            paginationHTML += `
-                <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
-                        onclick="changePage(${currentPage + 1})" 
-                        ${currentPage === totalPages ? 'disabled' : ''}>
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            `;
-            
-            // Info
-            const startItem = (currentPage - 1) * usersPerPage + 1;
-            const endItem = Math.min(currentPage * usersPerPage, filteredUsers.length);
-            paginationHTML += `
-                <div class="pagination-info">
-                    ${startItem} تا ${endItem} از ${filteredUsers.length} کاربر
-                </div>
-            `;
-            
-            paginationContainer.innerHTML = paginationHTML;
-        }
-
-        function changePage(page) {
-            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-            if (page >= 1 && page <= totalPages) {
-                currentPage = page;
-                displayUsers();
-            }
-        }
-
-        function filterUsers() {
-            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-            filteredUsers = users.filter(user => 
-                user.username.toLowerCase().includes(searchTerm)
-            );
-            currentPage = 1;
-            displayUsers();
-        }
-
-        async function toggleUserStatus(username, currentStatus) {
-            const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
-            showLoading('در حال تغییر وضعیت...');
+        // Analytics Functions
+        async function loadAnalytics() {
+            const analyticsContent = document.getElementById('analyticsContent');
             
             try {
-                const result = await apiCall(`/user/${username}`, 'PUT', { status: newStatus });
+                analyticsContent.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div class="chart-container">
+                            <h4 class="chart-title">توزیع پروتکل‌ها</h4>
+                            <canvas id="protocolChart" width="300" height="200"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4 class="chart-title">وضعیت انقضا</h4>
+                            <canvas id="expiryChart" width="300" height="200"></canvas>
+                        </div>
+                    </div>
+                `;
                 
-                if (result) {
-                    loadUsers();
-                    showNotification(`وضعیت کاربر ${username} تغییر کرد`, 'success');
-                }
+                // Destroy existing charts
+                if (protocolChartInstance) protocolChartInstance.destroy();
+                if (expiryChartInstance) expiryChartInstance.destroy();
+                
+                // Protocol distribution
+                const protocolData = {};
+                users.forEach(user => {
+                    if (user.proxies) {
+                        Object.keys(user.proxies).forEach(protocol => {
+                            protocolData[protocol] = (protocolData[protocol] || 0) + 1;
+                        });
+                    }
+                });
+                
+                const protocolCtx = document.getElementById('protocolChart').getContext('2d');
+                protocolChartInstance = new Chart(protocolCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(protocolData),
+                        datasets: [{
+                            data: Object.values(protocolData),
+                            backgroundColor: ['#2C3E50', '#CC9B50', '#2e7d32', '#d32f2f', '#1976d2'],
+                            borderWidth: 3,
+                            borderColor: 'var(--card-bg)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: 'var(--text-secondary)'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Expiry analysis
+                const now = new Date();
+                const expiryData = {
+                    'فعال': 0,
+                    'منقضی شده': 0,
+                    '۷ روز آینده': 0,
+                    '۳۰ روز آینده': 0
+                };
+                
+                users.forEach(user => {
+                    if (!user.expire) {
+                        expiryData['فعال']++;
+                    } else {
+                        const expireDate = new Date(user.expire * 1000);
+                        const daysDiff = Math.ceil((expireDate - now) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysDiff < 0) {
+                            expiryData['منقضی شده']++;
+                        } else if (daysDiff <= 7) {
+                            expiryData['۷ روز آینده']++;
+                        } else if (daysDiff <= 30) {
+                            expiryData['۳۰ روز آینده']++;
+                        } else {
+                            expiryData['فعال']++;
+                        }
+                    }
+                });
+                
+                const expiryCtx = document.getElementById('expiryChart').getContext('2d');
+                expiryChartInstance = new Chart(expiryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(expiryData),
+                        datasets: [{
+                            label: 'تعداد کاربران',
+                            data: Object.values(expiryData),
+                            backgroundColor: ['#2e7d32', '#d32f2f', '#ff9800', '#1976d2'],
+                            borderWidth: 1,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'var(--border-light)'
+                                },
+                                ticks: {
+                                    color: 'var(--text-secondary)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'var(--border-light)'
+                                },
+                                ticks: {
+                                    color: 'var(--text-secondary)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: 'var(--text-secondary)'
+                                }
+                            }
+                        }
+                    }
+                });
+                
             } catch (error) {
-                showNotification('خطا در تغییر وضعیت کاربر', 'error');
+                console.error('Analytics Error:', error);
+                analyticsContent.innerHTML = '<p style="text-align: center; color: var(--danger-color); padding: 40px;">خطا در بارگذاری آمار</p>';
             }
-            hideLoading();
         }
 
         // Edit User Functions
@@ -2844,7 +3058,7 @@
                 
                 if (result) {
                     showMessage('editUserSuccess', `اطلاعات کاربر ${username} بروزرسانی شد`);
-                    loadUsers();
+                    loadUsers(); // بروزرسانی بدون تغییر pagination
                     showNotification(`کاربر ${username} بروزرسانی شد`, 'success');
                     
                     setTimeout(() => {
@@ -3057,122 +3271,6 @@
                 document.body.removeChild(textArea);
                 showNotification('متن کپی شد! 📋', 'success');
             });
-        }
-
-        // Analytics Functions
-        async function loadAnalytics() {
-            // Destroy existing charts
-            if (protocolChartInstance) protocolChartInstance.destroy();
-            if (expiryChartInstance) expiryChartInstance.destroy();
-            
-            // Protocol distribution
-            const protocolData = {};
-            users.forEach(user => {
-                if (user.proxies) {
-                    Object.keys(user.proxies).forEach(protocol => {
-                        protocolData[protocol] = (protocolData[protocol] || 0) + 1;
-                    });
-                }
-            });
-            
-            const protocolCtx = document.getElementById('protocolChart').getContext('2d');
-            protocolChartInstance = new Chart(protocolCtx, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(protocolData),
-                    datasets: [{
-                        data: Object.values(protocolData),
-                        backgroundColor: ['#2C3E50', '#CC9B50', '#2e7d32', '#d32f2f', '#1976d2'],
-                        borderWidth: 3,
-                        borderColor: 'var(--card-bg)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: 'var(--text-secondary)'
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Expiry analysis
-            const now = new Date();
-            const expiryData = {
-                'فعال': 0,
-                'منقضی شده': 0,
-                '۷ روز آینده': 0,
-                '۳۰ روز آینده': 0
-            };
-            
-            users.forEach(user => {
-                if (!user.expire) {
-                    expiryData['فعال']++;
-                } else {
-                    const expireDate = new Date(user.expire * 1000);
-                    const daysDiff = Math.ceil((expireDate - now) / (1000 * 60 * 60 * 24));
-                    
-                    if (daysDiff < 0) {
-                        expiryData['منقضی شده']++;
-                    } else if (daysDiff <= 7) {
-                        expiryData['۷ روز آینده']++;
-                    } else if (daysDiff <= 30) {
-                        expiryData['۳۰ روز آینده']++;
-                    } else {
-                        expiryData['فعال']++;
-                    }
-                }
-            });
-            
-            const expiryCtx = document.getElementById('expiryChart').getContext('2d');
-            expiryChartInstance = new Chart(expiryCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(expiryData),
-                    datasets: [{
-                        label: 'تعداد کاربران',
-                        data: Object.values(expiryData),
-                        backgroundColor: ['#2e7d32', '#d32f2f', '#ff9800', '#1976d2'],
-                        borderWidth: 1,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'var(--border-light)'
-                            },
-                            ticks: {
-                                color: 'var(--text-secondary)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'var(--border-light)'
-                            },
-                            ticks: {
-                                color: 'var(--text-secondary)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: 'var(--text-secondary)'
-                            }
-                        }
-                    }
-                }
-            });
-            
-            hideLoading();
         }
 
         // Settings Functions
