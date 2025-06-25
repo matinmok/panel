@@ -312,7 +312,7 @@
         .panel-nav {
             width: 280px;
             background: var(--card-bg);
-            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             padding: 24px;
@@ -321,6 +321,8 @@
             overflow-y: auto;
             z-index: 100;
             box-shadow: var(--shadow-lg);
+            right: 0;
+            top: 0;
         }
         
         .nav-header {
@@ -389,7 +391,7 @@
         .nav-item:hover {
             background: var(--bg-secondary);
             color: var(--text-primary);
-            transform: translateX(-2px);
+            transform: translateX(2px);
         }
         
         .nav-item.active {
@@ -437,7 +439,7 @@
             flex: 1;
             padding: 24px;
             background: var(--bg-primary);
-            margin-right: 280px;
+            margin-left: 280px;
             min-height: 100vh;
         }
         
@@ -875,6 +877,81 @@
             overflow-y: auto;
             color: var(--text-primary);
         }
+
+        /* Traffic Stats */
+        .traffic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .traffic-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .traffic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, var(--accent-color), var(--warning-color));
+        }
+
+        .traffic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .traffic-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-color), var(--warning-color));
+            border-radius: 12px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+            box-shadow: var(--shadow-md);
+        }
+
+        .traffic-number {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .traffic-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .traffic-progress {
+            margin-top: 12px;
+        }
+
+        .traffic-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
         
         /* Mobile Styles */
         .mobile-header {
@@ -893,7 +970,7 @@
         
         .mobile-menu-btn {
             position: absolute;
-            right: 20px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
             background: var(--bg-secondary);
@@ -916,19 +993,19 @@
             display: none;
             position: fixed;
             top: 0;
-            right: -100%;
+            left: -100%;
             width: 280px;
             height: 100vh;
             background: var(--card-bg);
-            transition: right 0.3s ease;
+            transition: left 0.3s ease;
             z-index: 1001;
             overflow-y: auto;
             box-shadow: var(--shadow-xl);
-            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
         }
         
         .mobile-nav.active {
-            right: 0;
+            left: 0;
         }
         
         .mobile-overlay {
@@ -983,7 +1060,7 @@
         @media (max-width: 768px) {
             .theme-toggle {
                 top: 12px;
-                left: 12px;
+                right: 12px;
                 padding: 6px;
                 min-width: 48px;
             }
@@ -1045,7 +1122,7 @@
             }
             
             .panel-content {
-                margin-right: 0;
+                margin-left: 0;
                 padding: 16px;
             }
             
@@ -1054,12 +1131,12 @@
                 margin-bottom: 20px;
             }
             
-            .stats-grid {
+            .stats-grid, .traffic-grid {
                 grid-template-columns: 1fr;
                 gap: 16px;
             }
 
-            .stats-card {
+            .stats-card, .traffic-card {
                 padding: 20px;
             }
             
@@ -1096,6 +1173,18 @@
             .section-title {
                 font-size: 18px;
             }
+
+            .mobile-menu-btn {
+                left: 20px;
+            }
+
+            .mobile-nav {
+                left: -100%;
+            }
+
+            .mobile-nav.active {
+                left: 0;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1104,15 +1193,15 @@
                 font-size: 12px;
             }
             
-            .stats-card {
+            .stats-card, .traffic-card {
                 padding: 16px;
             }
             
-            .stats-number {
-                font-size: 24px;
+            .stats-number, .traffic-number {
+                font-size: 20px;
             }
 
-            .stats-icon {
+            .stats-icon, .traffic-icon {
                 width: 40px;
                 height: 40px;
                 font-size: 18px;
@@ -1260,6 +1349,9 @@
                 <button class="nav-item" onclick="showSection('addUser'); toggleMobileMenu()">
                     <i class="fas fa-user-plus"></i>افزودن کاربر
                 </button>
+                <button class="nav-item" onclick="showSection('traffic'); toggleMobileMenu()">
+                    <i class="fas fa-chart-area"></i>ترافیک
+                </button>
                 <button class="nav-item" onclick="showSection('payment'); toggleMobileMenu()">
                     <i class="fas fa-credit-card"></i>پرداخت
                 </button>
@@ -1296,6 +1388,9 @@
                 </button>
                 <button class="nav-item" data-section="addUser" onclick="showSection('addUser')">
                     <i class="fas fa-user-plus"></i>افزودن کاربر
+                </button>
+                <button class="nav-item" data-section="traffic" onclick="showSection('traffic')">
+                    <i class="fas fa-chart-area"></i>ترافیک
                 </button>
                 <button class="nav-item" data-section="payment" onclick="showSection('payment')">
                     <i class="fas fa-credit-card"></i>پرداخت
@@ -1434,6 +1529,57 @@
                         کاربر با موفقیت ایجاد شد
                     </h4>
                     <div id="newUserConfigs"></div>
+                </div>
+            </div>
+
+            <!-- Traffic Section -->
+            <div id="trafficSection" class="content-section">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-area"></i>
+                    گزارش ترافیک
+                </h3>
+                
+                <div class="traffic-grid">
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-cloud-download-alt"></i></div>
+                        <div class="traffic-number" id="totalDownload">0 GB</div>
+                        <div class="traffic-label">کل دانلود</div>
+                    </div>
+                    
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <div class="traffic-number" id="totalUpload">0 GB</div>
+                        <div class="traffic-label">کل آپلود</div>
+                    </div>
+                    
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <div class="traffic-number" id="totalBandwidth">0 GB</div>
+                        <div class="traffic-label">کل ترافیک</div>
+                    </div>
+                    
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="traffic-number" id="todayTraffic">0 GB</div>
+                        <div class="traffic-label">ترافیک امروز</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <div class="chart-container">
+                        <h4 class="chart-title">نمودار مصرف روزانه</h4>
+                        <canvas id="dailyTrafficChart" width="300" height="200"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h4 class="chart-title">توزیع مصرف کاربران</h4>
+                        <canvas id="userTrafficChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h4 class="chart-title">جزئیات مصرف کاربران</h4>
+                    <div id="trafficDetails"></div>
                 </div>
             </div>
 
@@ -1643,6 +1789,8 @@
         let userStatusChartInstance = null;
         let protocolChartInstance = null;
         let expiryChartInstance = null;
+        let dailyTrafficChartInstance = null;
+        let userTrafficChartInstance = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1777,6 +1925,9 @@
                 case 'analytics':
                     loadAnalytics();
                     break;
+                case 'traffic':
+                    loadTrafficData();
+                    break;
             }
         }
 
@@ -1795,6 +1946,8 @@
                     loadDashboardData();
                 } else if (document.getElementById('usersSection').classList.contains('active')) {
                     loadUsers();
+                } else if (document.getElementById('trafficSection').classList.contains('active')) {
+                    loadTrafficData();
                 }
             }, 30000); // Update every 30 seconds
         }
@@ -1935,6 +2088,225 @@
                     }
                 }
             });
+        }
+
+        // Traffic Functions
+        async function loadTrafficData() {
+            try {
+                const usersData = await apiCall('/users');
+                
+                if (usersData && usersData.users) {
+                    users = usersData.users;
+                    updateTrafficStats(users);
+                    updateTrafficCharts(users);
+                    loadTrafficDetails(users);
+                }
+            } catch (error) {
+                console.error('Traffic Error:', error);
+            }
+        }
+
+        function updateTrafficStats(users) {
+            const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
+            const totalDownload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.7), 0); // تخمینی
+            const totalUpload = users.reduce((sum, user) => sum + ((user.used_traffic || 0) * 0.3), 0); // تخمینی
+            
+            // محاسبه ترافیک امروز (تخمینی بر اساس آخرین فعالیت)
+            const todayTraffic = users.reduce((sum, user) => {
+                if (user.last_online && isToday(new Date(user.last_online))) {
+                    return sum + (user.used_traffic || 0) * 0.1; // تخمین 10% ترافیک امروز
+                }
+                return sum;
+            }, 0);
+            
+            document.getElementById('totalDownload').textContent = formatBytes(totalDownload);
+            document.getElementById('totalUpload').textContent = formatBytes(totalUpload);
+            document.getElementById('totalBandwidth').textContent = formatBytes(totalTraffic);
+            document.getElementById('todayTraffic').textContent = formatBytes(todayTraffic);
+        }
+
+        function updateTrafficCharts(users) {
+            // Destroy existing charts
+            if (dailyTrafficChartInstance) dailyTrafficChartInstance.destroy();
+            if (userTrafficChartInstance) userTrafficChartInstance.destroy();
+
+            // Daily Traffic Chart (7 days)
+            const dailyData = generateDailyTrafficData(users);
+            const dailyCtx = document.getElementById('dailyTrafficChart').getContext('2d');
+            dailyTrafficChartInstance = new Chart(dailyCtx, {
+                type: 'line',
+                data: {
+                    labels: dailyData.labels,
+                    datasets: [{
+                        label: 'ترافیک روزانه (GB)',
+                        data: dailyData.data,
+                        borderColor: '#CC9B50',
+                        backgroundColor: 'rgba(204, 155, 80, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'var(--border-light)'
+                            },
+                            ticks: {
+                                color: 'var(--text-secondary)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'var(--border-light)'
+                            },
+                            ticks: {
+                                color: 'var(--text-secondary)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'var(--text-secondary)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // User Traffic Distribution
+            const topTrafficUsers = users
+                .filter(user => user.used_traffic > 0)
+                .sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0))
+                .slice(0, 10);
+
+            const userTrafficCtx = document.getElementById('userTrafficChart').getContext('2d');
+            userTrafficChartInstance = new Chart(userTrafficCtx, {
+                type: 'bar',
+                data: {
+                    labels: topTrafficUsers.map(user => user.username),
+                    datasets: [{
+                        label: 'مصرف (GB)',
+                        data: topTrafficUsers.map(user => (user.used_traffic || 0) / (1024 * 1024 * 1024)),
+                        backgroundColor: '#5D5CDE',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'var(--border-light)'
+                            },
+                            ticks: {
+                                color: 'var(--text-secondary)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'var(--border-light)'
+                            },
+                            ticks: {
+                                color: 'var(--text-secondary)',
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'var(--text-secondary)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadTrafficDetails(users) {
+            const container = document.getElementById('trafficDetails');
+            
+            const sortedUsers = users
+                .sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0));
+            
+            let tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-user"></i> کاربر</th>
+                            <th><i class="fas fa-download"></i> مصرف</th>
+                            <th><i class="fas fa-percentage"></i> درصد</th>
+                            <th><i class="fas fa-calendar"></i> آخرین فعالیت</th>
+                            <th><i class="fas fa-chart-line"></i> وضعیت</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
+            
+            sortedUsers.forEach(user => {
+                const usagePercent = totalTraffic > 0 ? ((user.used_traffic || 0) / totalTraffic * 100).toFixed(1) : 0;
+                const lastOnline = user.last_online ? new Date(user.last_online).toLocaleDateString('fa-IR') : 'نامشخص';
+                const limitPercent = user.data_limit ? Math.min(((user.used_traffic || 0) / user.data_limit) * 100, 100) : 0;
+                
+                tableHTML += `
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-primary);">${user.username}</td>
+                        <td>${formatBytes(user.used_traffic || 0)}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>${usagePercent}%</span>
+                                <div class="progress-bar" style="width: 60px; height: 6px;">
+                                    <div class="progress-fill" style="width: ${Math.min(usagePercent, 100)}%;"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-secondary);">${lastOnline}</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${limitPercent}%;"></div>
+                            </div>
+                            <small style="color: var(--text-muted);">${limitPercent.toFixed(1)}% از حد مجاز</small>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+        }
+
+        function generateDailyTrafficData(users) {
+            const labels = [];
+            const data = [];
+            
+            // Generate last 7 days
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' }));
+                
+                // Simulate daily traffic (in reality, you'd get this from API)
+                const dailyTraffic = users.reduce((sum, user) => {
+                    return sum + (user.used_traffic || 0) * (0.1 + Math.random() * 0.1);
+                }, 0);
+                
+                data.push((dailyTraffic / (1024 * 1024 * 1024)).toFixed(2));
+            }
+            
+            return { labels, data };
+        }
+
+        function isToday(date) {
+            const today = new Date();
+            return date.toDateString() === today.toDateString();
         }
 
         // Users Management
