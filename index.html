@@ -958,6 +958,54 @@
             color: var(--text-muted);
             margin-bottom: 4px;
         }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0 16px;
+            white-space: nowrap;
+        }
         
         /* Mobile Header */
         .mobile-header {
@@ -1388,6 +1436,23 @@
                 top: 75px;
                 max-width: calc(100vw - 24px);
             }
+
+            /* Mobile Pagination */
+            .pagination {
+                gap: 4px;
+                margin: 16px 0;
+            }
+
+            .pagination-btn {
+                padding: 6px 8px;
+                font-size: 12px;
+                min-width: 32px;
+            }
+
+            .pagination-info {
+                font-size: 12px;
+                margin: 0 8px;
+            }
         }
 
         /* Tablet و Desktop - هدر موبایل حذف شود */
@@ -1462,6 +1527,17 @@
 
             .section-title {
                 font-size: 14px;
+            }
+
+            .pagination-btn {
+                padding: 4px 6px;
+                font-size: 11px;
+                min-width: 28px;
+            }
+
+            .pagination-info {
+                font-size: 11px;
+                margin: 0 4px;
             }
         }
     </style>
@@ -1670,6 +1746,7 @@
                 </div>
                 
                 <div id="usersTable"></div>
+                <div id="usersPagination" class="pagination"></div>
             </div>
 
             <!-- Add User Section -->
@@ -1884,6 +1961,52 @@
         </div>
     </div>
 
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-user-edit"></i>
+                    ویرایش کاربر
+                </h3>
+                <button class="modal-close" onclick="closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editUserForm">
+                <div class="form-group">
+                    <label class="form-label">نام کاربری</label>
+                    <input type="text" id="editUsername" class="form-input" readonly style="background: var(--bg-secondary); opacity: 0.7;">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">حجم ترافیک (GB)</label>
+                    <input type="number" id="editDataLimit" class="form-input" required min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">تاریخ انقضا</label>
+                    <input type="date" id="editExpireDate" class="form-input" required>
+                </div>
+                
+                <div id="editUserError" class="error-message hidden"></div>
+                <div id="editUserSuccess" class="success-message hidden"></div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="form-button success" style="flex: 1; padding: 12px;">
+                        <span id="editUserBtnText">
+                            <i class="fas fa-save"></i> ذخیره تغییرات
+                        </span>
+                        <div id="editUserSpinner" class="loading-spinner hidden"></div>
+                    </button>
+                    <button type="button" onclick="closeEditModal()" class="form-button secondary" style="flex: 1; padding: 12px;">
+                        <i class="fas fa-times"></i> انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="loading-content">
@@ -1937,6 +2060,9 @@
         let currentUsername = '';
         let users = [];
         let updateInterval;
+        let currentPage = 1;
+        let usersPerPage = 20;
+        let filteredUsers = [];
 
         // Chart instances
         let userStatusChartInstance = null;
@@ -1982,6 +2108,7 @@
         function setupEventListeners() {
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('addUserForm').addEventListener('submit', handleAddUser);
+            document.getElementById('editUserForm').addEventListener('submit', handleEditUser);
             document.getElementById('userSearch').addEventListener('input', filterUsers);
         }
 
@@ -2162,6 +2289,7 @@
                 
                 if (usersData && usersData.users) {
                     users = usersData.users;
+                    filteredUsers = users;
                     updateDashboardStats(users);
                     loadTopUsers(users);
                     updateCharts();
@@ -2490,7 +2618,9 @@
                 
                 if (usersData && usersData.users) {
                     users = usersData.users;
-                    displayUsers(users);
+                    filteredUsers = users;
+                    currentPage = 1;
+                    displayUsers();
                 }
                 hideLoading();
             } catch (error) {
@@ -2499,11 +2629,16 @@
             }
         }
 
-        function displayUsers(usersToShow) {
+        function displayUsers() {
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = startIndex + usersPerPage;
+            const usersToShow = filteredUsers.slice(startIndex, endIndex);
+            
             const container = document.getElementById('usersTable');
             
-            if (usersToShow.length === 0) {
+            if (filteredUsers.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 60px; font-style: italic; font-size: 16px;">هیچ کاربری یافت نشد</p>';
+                document.getElementById('usersPagination').innerHTML = '';
                 return;
             }
             
@@ -2546,6 +2681,9 @@
                             <button onclick="showUserConfigs('${user.username}')" class="form-button info" title="مشاهده کانفیگ‌ها">
                                 <i class="fas fa-cog"></i>
                             </button>
+                            <button onclick="editUser('${user.username}')" class="form-button warning" title="ویرایش کاربر">
+                                <i class="fas fa-edit"></i>
+                            </button>
                             <button onclick="toggleUserStatus('${user.username}', '${user.status}')" class="form-button ${user.status === 'active' ? 'danger' : 'success'}" title="${user.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن'}">
                                 ${user.status === 'active' ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'}
                             </button>
@@ -2556,14 +2694,94 @@
             
             tableHTML += '</tbody></table>';
             container.innerHTML = tableHTML;
+            
+            // Generate pagination
+            generatePagination();
+        }
+
+        function generatePagination() {
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            const paginationContainer = document.getElementById('usersPagination');
+            
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `
+                <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                        onclick="changePage(${currentPage - 1})" 
+                        ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+            
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            if (startPage > 1) {
+                paginationHTML += `<button class="pagination-btn" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) {
+                    paginationHTML += `<span class="pagination-btn disabled">...</span>`;
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                            onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<span class="pagination-btn disabled">...</span>`;
+                }
+                paginationHTML += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            // Next button
+            paginationHTML += `
+                <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                        onclick="changePage(${currentPage + 1})" 
+                        ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+            
+            // Info
+            const startItem = (currentPage - 1) * usersPerPage + 1;
+            const endItem = Math.min(currentPage * usersPerPage, filteredUsers.length);
+            paginationHTML += `
+                <div class="pagination-info">
+                    ${startItem} تا ${endItem} از ${filteredUsers.length} کاربر
+                </div>
+            `;
+            
+            paginationContainer.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayUsers();
+            }
         }
 
         function filterUsers() {
             const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-            const filteredUsers = users.filter(user => 
+            filteredUsers = users.filter(user => 
                 user.username.toLowerCase().includes(searchTerm)
             );
-            displayUsers(filteredUsers);
+            currentPage = 1;
+            displayUsers();
         }
 
         async function toggleUserStatus(username, currentStatus) {
@@ -2581,6 +2799,73 @@
                 showNotification('خطا در تغییر وضعیت کاربر', 'error');
             }
             hideLoading();
+        }
+
+        // Edit User Functions
+        function editUser(username) {
+            const user = users.find(u => u.username === username);
+            if (!user) return;
+            
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editDataLimit').value = user.data_limit ? (user.data_limit / (1024 * 1024 * 1024)).toFixed(0) : 30;
+            
+            if (user.expire) {
+                const expireDate = new Date(user.expire * 1000);
+                document.getElementById('editExpireDate').value = expireDate.toISOString().split('T')[0];
+            } else {
+                const defaultExpire = new Date();
+                defaultExpire.setDate(defaultExpire.getDate() + 30);
+                document.getElementById('editExpireDate').value = defaultExpire.toISOString().split('T')[0];
+            }
+            
+            hideMessage('editUserError');
+            hideMessage('editUserSuccess');
+            document.getElementById('editUserModal').classList.remove('hidden');
+        }
+
+        async function handleEditUser(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('editUsername').value;
+            const dataLimit = parseFloat(document.getElementById('editDataLimit').value) * 1024 * 1024 * 1024;
+            const expireDate = new Date(document.getElementById('editExpireDate').value);
+            const expire = Math.floor(expireDate.getTime() / 1000);
+            
+            setLoadingState('editUserForm', 'editUserBtnText', 'editUserSpinner', true);
+            hideMessage('editUserError');
+            hideMessage('editUserSuccess');
+            showLoading('در حال بروزرسانی کاربر...');
+            
+            try {
+                const result = await apiCall(`/user/${username}`, 'PUT', {
+                    data_limit: dataLimit,
+                    expire: expire
+                });
+                
+                if (result) {
+                    showMessage('editUserSuccess', `اطلاعات کاربر ${username} بروزرسانی شد`);
+                    loadUsers();
+                    showNotification(`کاربر ${username} بروزرسانی شد`, 'success');
+                    
+                    setTimeout(() => {
+                        closeEditModal();
+                    }, 2000);
+                } else {
+                    showMessage('editUserError', 'خطا در بروزرسانی کاربر');
+                }
+            } catch (error) {
+                showMessage('editUserError', 'خطا در بروزرسانی کاربر');
+            }
+            
+            setLoadingState('editUserForm', 'editUserBtnText', 'editUserSpinner', false);
+            hideLoading();
+        }
+
+        function closeEditModal() {
+            document.getElementById('editUserModal').classList.add('hidden');
+            document.getElementById('editUserForm').reset();
+            hideMessage('editUserError');
+            hideMessage('editUserSuccess');
         }
 
         // Add User Functions
