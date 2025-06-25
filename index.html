@@ -94,6 +94,9 @@
         .fa-telegram:before, .fab.fa-telegram:before { content: "\f2c6" !important; }
         .fa-exclamation-circle:before, .fas.fa-exclamation-circle:before { content: "\f06a" !important; }
         .fa-exclamation-triangle:before, .fas.fa-exclamation-triangle:before { content: "\f071" !important; }
+        .fa-magic:before, .fas.fa-magic:before { content: "\f0d0" !important; }
+        .fa-robot:before, .fas.fa-robot:before { content: "\f544" !important; }
+        .fa-refresh:before, .fas.fa-refresh:before { content: "\f021" !important; }
         
         /* Enhanced Vazir Font Loading */
         @import url('https://v1.fontapi.ir/css/Vazir');
@@ -828,6 +831,16 @@
             color: var(--text-primary);
             border-color: var(--border-color);
         }
+
+        .form-button.special {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+        }
+
+        .form-button.bot-special {
+            background: linear-gradient(135deg, #059669, #10b981);
+            border: none;
+        }
         
         /* Status Badges */
         .status-badge {
@@ -1416,6 +1429,14 @@
             height: 24px;
             border-width: 2px;
         }
+
+        /* Special Buttons Row */
+        .special-buttons-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
         
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -1582,6 +1603,11 @@
             .chart-title {
                 font-size: 14px;
                 margin-bottom: 12px;
+            }
+
+            .special-buttons-row {
+                flex-direction: column;
+                gap: 8px;
             }
             
             .data-table {
@@ -1792,6 +1818,8 @@
             .fa-moon:before { content: "🌙"; }
             .fa-server:before { content: "🖥️"; }
             .fa-bars:before { content: "☰"; }
+            .fa-magic:before { content: "🪄"; }
+            .fa-robot:before { content: "🤖"; }
         }
 
         /* Force Icon Display */
@@ -1886,6 +1914,9 @@
                 <button class="nav-item" onclick="showSection('addUser'); toggleMobileMenu()">
                     <span>افزودن کاربر</span><i class="fas fa-user-plus"></i>
                 </button>
+                <button class="nav-item" onclick="showSection('manualConfig'); toggleMobileMenu()">
+                    <span>کانفیگ دستی</span><i class="fas fa-magic"></i>
+                </button>
                 <button class="nav-item" onclick="showSection('traffic'); toggleMobileMenu()">
                     <span>ترافیک</span><i class="fas fa-chart-area"></i>
                 </button>
@@ -1924,6 +1955,9 @@
                 </button>
                 <button class="nav-item" data-section="addUser" onclick="showSection('addUser')">
                     <span>افزودن کاربر</span><i class="fas fa-user-plus"></i>
+                </button>
+                <button class="nav-item" data-section="manualConfig" onclick="showSection('manualConfig')">
+                    <span>کانفیگ دستی</span><i class="fas fa-magic"></i>
                 </button>
                 <button class="nav-item" data-section="traffic" onclick="showSection('traffic')">
                     <span>ترافیک</span><i class="fas fa-chart-area"></i>
@@ -2035,6 +2069,15 @@
                         بروزرسانی
                     </button>
                 </div>
+
+                <div class="special-buttons-row">
+                    <button class="form-button special" onclick="generateManualConfig()">
+                        <i class="fas fa-magic"></i> ساخت کانفیگ دستی
+                    </button>
+                    <button class="form-button bot-special" onclick="createBotUser()">
+                        <i class="fas fa-robot"></i> BotUser
+                    </button>
+                </div>
                 
                 <form id="addUserForm">
                     <div class="form-grid">
@@ -2080,6 +2123,58 @@
                         کاربر با موفقیت ایجاد شد
                     </h4>
                     <div id="newUserConfigs"></div>
+                </div>
+            </div>
+
+            <!-- Manual Config Section -->
+            <div id="manualConfigSection" class="content-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-magic"></i>
+                        ساخت کانفیگ دستی
+                    </h3>
+                    <button class="refresh-btn" onclick="refreshManualConfigSection()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
+                
+                <form id="manualConfigForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">نام کاربری</label>
+                            <input type="text" id="manualUsername" class="form-input" placeholder="نام کاربری کانفیگ" required maxlength="50" pattern="[a-zA-Z0-9_]{3,20}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">پروتکل</label>
+                            <select id="manualProtocol" class="form-input" required>
+                                <option value="vless">VLESS</option>
+                                <option value="vmess">VMess</option>
+                                <option value="trojan">Trojan</option>
+                                <option value="shadowsocks">Shadowsocks</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="manualConfigError" class="error-message hidden"></div>
+                    <div id="manualConfigSuccess" class="success-message hidden"></div>
+                    
+                    <button type="submit" class="form-button special" style="width: 100%; padding: 16px; font-size: 16px;">
+                        <span id="manualConfigBtnText">
+                            <i class="fas fa-magic"></i> ساخت کانفیگ دستی
+                        </span>
+                        <div id="manualConfigSpinner" class="loading-spinner hidden"></div>
+                    </button>
+                </form>
+
+                <!-- Manual Config Result -->
+                <div id="manualConfigResult" class="hidden" style="margin-top: 24px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700;">
+                        <i class="fas fa-magic" style="color: var(--accent-color); margin-left: 8px;"></i>
+                        کانفیگ دستی ساخته شد
+                    </h4>
+                    <div id="manualConfigOutput"></div>
                 </div>
             </div>
 
@@ -2332,6 +2427,8 @@
                     else if (className.includes('fa-sync')) fallback = '🔄';
                     else if (className.includes('fa-download')) fallback = '⬇️';
                     else if (className.includes('fa-telegram')) fallback = '📱';
+                    else if (className.includes('fa-magic')) fallback = '🪄';
+                    else if (className.includes('fa-robot')) fallback = '🤖';
                     
                     icon.innerHTML = `<span class="icon-fallback">${fallback}</span>`;
                 }
@@ -2365,7 +2462,10 @@
                 'fa-edit': '✏️',
                 'fa-play': '▶️',
                 'fa-pause': '⏸️',
-                'fa-copy': '📋'
+                'fa-copy': '📋',
+                'fa-magic': '🪄',
+                'fa-robot': '🤖',
+                'fa-refresh': '🔄'
             };
 
             Object.keys(iconMap).forEach(className => {
@@ -2692,7 +2792,8 @@
             dashboard: false,
             users: false,
             traffic: false,
-            analytics: false
+            analytics: false,
+            manualConfig: false
         };
 
         // Chart instances
@@ -2767,6 +2868,19 @@
             }
             
             showNotification('فرم افزودن کاربر بازنشانی شد! 🔄', 'success');
+        }
+
+        function refreshManualConfigSection() {
+            const form = document.getElementById('manualConfigForm');
+            if (form) form.reset();
+            
+            const result = document.getElementById('manualConfigResult');
+            if (result) result.classList.add('hidden');
+            
+            hideMessage('manualConfigError');
+            hideMessage('manualConfigSuccess');
+            
+            showNotification('فرم کانفیگ دستی بازنشانی شد! 🔄', 'success');
         }
 
         function refreshTrafficSection() {
@@ -2878,17 +2992,21 @@
             const loginForm = document.getElementById('loginForm');
             const addUserForm = document.getElementById('addUserForm');
             const editUserForm = document.getElementById('editUserForm');
+            const manualConfigForm = document.getElementById('manualConfigForm');
             
             if (loginForm) loginForm.addEventListener('submit', handleLogin);
             if (addUserForm) addUserForm.addEventListener('submit', handleAddUser);
             if (editUserForm) editUserForm.addEventListener('submit', handleEditUser);
+            if (manualConfigForm) manualConfigForm.addEventListener('submit', handleManualConfig);
             
             // Enhanced input validation listeners
             const usernameInput = document.getElementById('username');
             const newUsernameInput = document.getElementById('newUsername');
+            const manualUsernameInput = document.getElementById('manualUsername');
             
             if (usernameInput) usernameInput.addEventListener('input', validateLoginInputs);
             if (newUsernameInput) newUsernameInput.addEventListener('input', validateAddUserInputs);
+            if (manualUsernameInput) manualUsernameInput.addEventListener('input', validateManualConfigInputs);
             
             // Prevent common XSS attempts
             document.addEventListener('paste', function(e) {
@@ -2919,6 +3037,17 @@
             const isValid = Security.validateInput(username, 'username');
             
             newUsernameInput.style.borderColor = (!isValid && username.length > 0) ? 
+                'var(--danger-color)' : 'var(--border-color)';
+        }
+
+        function validateManualConfigInputs() {
+            const manualUsernameInput = document.getElementById('manualUsername');
+            if (!manualUsernameInput) return;
+            
+            const username = manualUsernameInput.value;
+            const isValid = Security.validateInput(username, 'username');
+            
+            manualUsernameInput.style.borderColor = (!isValid && username.length > 0) ? 
                 'var(--danger-color)' : 'var(--border-color)';
         }
 
@@ -3038,7 +3167,7 @@
             
             authToken = '';
             currentUsername = '';
-            sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false };
+            sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false, manualConfig: false };
             
             // Clear any sensitive form data
             const forms = document.querySelectorAll('form');
@@ -3088,7 +3217,7 @@
 
         function showSection(sectionName) {
             // Validate section name
-            const allowedSections = ['dashboard', 'users', 'addUser', 'traffic', 'payment', 'analytics', 'settings'];
+            const allowedSections = ['dashboard', 'users', 'addUser', 'manualConfig', 'traffic', 'payment', 'analytics', 'settings'];
             if (!allowedSections.includes(sectionName)) {
                 console.warn('Invalid section name:', sectionName);
                 return;
@@ -3137,6 +3266,11 @@
                     if (!sectionsLoaded.traffic) {
                         loadTrafficData().catch(() => console.error('Failed to load traffic'));
                         sectionsLoaded.traffic = true;
+                    }
+                    break;
+                case 'manualConfig':
+                    if (!sectionsLoaded.manualConfig) {
+                        sectionsLoaded.manualConfig = true;
                     }
                     break;
                 default:
@@ -3530,6 +3664,11 @@
                 editBtn.title = 'ویرایش کاربر';
                 editBtn.onclick = () => editUser(user.username);
                 
+                const refreshSubBtn = Security.safeCreateElement('button', '', 'form-button secondary');
+                refreshSubBtn.innerHTML = '<i class="fas fa-refresh"></i>';
+                refreshSubBtn.title = 'تغییر لینک ساب';
+                refreshSubBtn.onclick = () => refreshSubLink(user.username);
+                
                 const toggleBtn = Security.safeCreateElement('button', '', `form-button ${user.status === 'active' ? 'danger' : 'success'}`);
                 toggleBtn.innerHTML = user.status === 'active' ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
                 toggleBtn.title = user.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن';
@@ -3537,6 +3676,7 @@
                 
                 actionsCell.appendChild(configBtn);
                 actionsCell.appendChild(editBtn);
+                actionsCell.appendChild(refreshSubBtn);
                 actionsCell.appendChild(toggleBtn);
                 
                 row.appendChild(usernameCell);
@@ -3553,6 +3693,81 @@
             container.appendChild(table);
             
             generatePagination();
+        }
+
+        // Enhanced Refresh Sub Link Function
+        async function refreshSubLink(username) {
+            if (!Security.validateInput(username, 'username')) {
+                showNotification('نام کاربری نامعتبر', 'error');
+                return;
+            }
+            
+            if (!Security.requestLimiter.isAllowed('refresh_sub_link')) {
+                showNotification('لطفاً کمی صبر کنید', 'error');
+                return;
+            }
+            
+            showLoading('در حال تغییر لینک ساب...');
+            
+            try {
+                // Reset subscription URL
+                const result = await apiCall(`/user/${encodeURIComponent(username)}/reset_sub`, 'POST');
+                
+                if (result) {
+                    // Get updated user data
+                    const userData = await apiCall(`/user/${encodeURIComponent(username)}`);
+                    
+                    if (userData && userData.subscription_url) {
+                        showNotification(`لینک ساب کاربر ${Security.sanitizeHtml(username)} تغییر کرد`, 'success');
+                        
+                        // Show new subscription URL
+                        const configContent = document.getElementById('configContent');
+                        if (configContent) {
+                            configContent.innerHTML = '';
+                            
+                            // User info section
+                            const userInfoDiv = document.createElement('div');
+                            userInfoDiv.style.cssText = 'margin-bottom: 20px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-light);';
+                            const userInfoContent = document.createElement('strong');
+                            userInfoContent.style.cssText = 'color: var(--text-primary); font-size: 16px;';
+                            userInfoContent.innerHTML = `<i class="fas fa-user"></i> کاربر: ${Security.sanitizeHtml(username)} - لینک ساب جدید`;
+                            userInfoDiv.appendChild(userInfoContent);
+                            configContent.appendChild(userInfoDiv);
+                            
+                            const subDiv = document.createElement('div');
+                            subDiv.className = 'config-display';
+                            
+                            const subInfo = document.createElement('div');
+                            subInfo.className = 'config-info';
+                            subInfo.innerHTML = `
+                                <strong><i class="fas fa-link"></i> لینک ساب جدید (Subscription):</strong>
+                                <button onclick="copyText('${Security.sanitizeHtml(userData.subscription_url)}')" class="form-button success">
+                                    <i class="fas fa-copy"></i> کپی
+                                </button>
+                            `;
+                            
+                            const subText = Security.safeCreateElement('div', userData.subscription_url, 'config-text');
+                            
+                            subDiv.appendChild(subInfo);
+                            subDiv.appendChild(subText);
+                            configContent.appendChild(subDiv);
+                            
+                            const configModal = document.getElementById('configModal');
+                            if (configModal) configModal.classList.remove('hidden');
+                        }
+                        
+                        await loadUsers(); // Refresh users list
+                    } else {
+                        showNotification('خطا در دریافت لینک ساب جدید', 'error');
+                    }
+                } else {
+                    showNotification('خطا در تغییر لینک ساب', 'error');
+                }
+            } catch (error) {
+                showNotification('خطا در تغییر لینک ساب', 'error');
+            }
+            
+            hideLoading();
         }
 
         function generatePagination() {
@@ -4447,6 +4662,193 @@
             }
         }
 
+        // Enhanced Manual Config Functions (کانفیگ دستی)
+        async function handleManualConfig(e) {
+            e.preventDefault();
+            
+            if (!Security.requestLimiter.isAllowed('manual_config')) {
+                showMessage('manualConfigError', 'لطفاً کمی صبر کنید');
+                return;
+            }
+            
+            const usernameInput = document.getElementById('manualUsername');
+            const protocolInput = document.getElementById('manualProtocol');
+            
+            if (!usernameInput || !protocolInput) {
+                showMessage('manualConfigError', 'خطا در فرم کانفیگ دستی');
+                return;
+            }
+            
+            const username = usernameInput.value.trim();
+            const protocol = protocolInput.value;
+            
+            // Enhanced validation
+            if (!Security.validateInput(username, 'username')) {
+                showMessage('manualConfigError', 'نام کاربری نامعتبر است (فقط حروف انگلیسی، اعداد و _ مجاز است)');
+                return;
+            }
+            
+            const allowedProtocols = ['vless', 'vmess', 'trojan', 'shadowsocks'];
+            if (!allowedProtocols.includes(protocol)) {
+                showMessage('manualConfigError', 'پروتکل انتخاب شده نامعتبر است');
+                return;
+            }
+            
+            setLoadingState('manualConfigForm', 'manualConfigBtnText', 'manualConfigSpinner', true);
+            hideMessage('manualConfigError');
+            hideMessage('manualConfigSuccess');
+            
+            const manualConfigResult = document.getElementById('manualConfigResult');
+            if (manualConfigResult) manualConfigResult.classList.add('hidden');
+            
+            showLoading('در حال ساخت کانفیگ دستی...');
+            
+            // Create manual config without inbound restrictions
+            const manualData = {
+                username,
+                data_limit: 0, // No inbound limit
+                expire: 0, // No expiration
+                proxies: {
+                    [protocol]: {}
+                },
+                manual: true // Flag for manual config
+            };
+            
+            try {
+                const result = await apiCall('/user', 'POST', manualData);
+                
+                if (result) {
+                    showMessage('manualConfigSuccess', `کانفیگ دستی ${Security.sanitizeHtml(username)} با موفقیت ساخته شد`);
+                    
+                    const manualConfigForm = document.getElementById('manualConfigForm');
+                    if (manualConfigForm) manualConfigForm.reset();
+                    
+                    await showManualConfigResult(username);
+                    
+                    showNotification(`کانفیگ دستی ${Security.sanitizeHtml(username)} ساخته شد`, 'success');
+                } else {
+                    showMessage('manualConfigError', 'خطا در ساخت کانفیگ دستی');
+                }
+            } catch (error) {
+                showMessage('manualConfigError', 'خطا در ساخت کانفیگ دستی');
+            }
+            
+            setLoadingState('manualConfigForm', 'manualConfigBtnText', 'manualConfigSpinner', false);
+            hideLoading();
+        }
+
+        async function showManualConfigResult(username) {
+            if (!Security.validateInput(username, 'username')) return;
+            
+            try {
+                const userData = await apiCall(`/user/${encodeURIComponent(username)}`);
+                if (!userData) return;
+                
+                const configsContainer = document.getElementById('manualConfigOutput');
+                if (!configsContainer) return;
+                
+                configsContainer.innerHTML = '';
+                
+                if (userData.subscription_url) {
+                    const subDiv = document.createElement('div');
+                    subDiv.className = 'config-display';
+                    
+                    const subInfo = document.createElement('div');
+                    subInfo.className = 'config-info';
+                    subInfo.innerHTML = `
+                        <strong><i class="fas fa-link"></i> لینک ساب دستی (Subscription):</strong>
+                        <button onclick="copyText('${Security.sanitizeHtml(userData.subscription_url)}')" class="form-button success">
+                            <i class="fas fa-copy"></i> کپی
+                        </button>
+                    `;
+                    
+                    const subText = Security.safeCreateElement('div', userData.subscription_url, 'config-text');
+                    
+                    subDiv.appendChild(subInfo);
+                    subDiv.appendChild(subText);
+                    configsContainer.appendChild(subDiv);
+                }
+                
+                if (userData.links && Array.isArray(userData.links) && userData.links.length > 0) {
+                    userData.links.forEach((config, index) => {
+                        const protocol = Security.sanitizeHtml(config.split('://')[0].toUpperCase());
+                        
+                        const configDiv = document.createElement('div');
+                        configDiv.className = 'config-display';
+                        
+                        const configInfo = document.createElement('div');
+                        configInfo.className = 'config-info';
+                        configInfo.innerHTML = `
+                            <strong><i class="fas fa-magic"></i> کانفیگ دستی ${protocol} #${index + 1}:</strong>
+                            <button onclick="copyText('${Security.sanitizeHtml(config)}')" class="form-button success">
+                                <i class="fas fa-copy"></i> کپی
+                            </button>
+                        `;
+                        
+                        const configText = Security.safeCreateElement('div', config, 'config-text');
+                        
+                        configDiv.appendChild(configInfo);
+                        configDiv.appendChild(configText);
+                        configsContainer.appendChild(configDiv);
+                    });
+                }
+                
+                const manualConfigResult = document.getElementById('manualConfigResult');
+                if (manualConfigResult) manualConfigResult.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error showing manual config');
+            }
+        }
+
+        // Enhanced Special Button Functions
+        function generateManualConfig() {
+            showSection('manualConfig');
+            showNotification('به بخش کانفیگ دستی منتقل شدید', 'success');
+        }
+
+        async function createBotUser() {
+            if (!Security.requestLimiter.isAllowed('create_bot_user')) {
+                showNotification('لطفاً کمی صبر کنید', 'error');
+                return;
+            }
+            
+            showLoading('در حال ساخت BotUser...');
+            
+            const botUsername = `BotUser_${currentUsername}_${Date.now()}`;
+            const dataLimit = 30 * 1024 * 1024 * 1024; // 30GB
+            const expireDate = new Date();
+            expireDate.setDate(expireDate.getDate() + 30);
+            const expire = Math.floor(expireDate.getTime() / 1000);
+            
+            const userData = {
+                username: botUsername,
+                data_limit: dataLimit,
+                expire: expire,
+                proxies: {
+                    vless: {},
+                    vmess: {}
+                }
+            };
+            
+            try {
+                const result = await apiCall('/user', 'POST', userData);
+                
+                if (result) {
+                    await showNewUserConfigs(botUsername);
+                    await loadUsers();
+                    
+                    showNotification(`BotUser ${Security.sanitizeHtml(botUsername)} با موفقیت ساخته شد`, 'success');
+                } else {
+                    showNotification('خطا در ساخت BotUser', 'error');
+                }
+            } catch (error) {
+                showNotification('خطا در ساخت BotUser', 'error');
+            }
+            
+            hideLoading();
+        }
+
         // Enhanced Config Functions (کانفیگ)
         async function showUserConfigs(username) {
             if (!Security.validateInput(username, 'username')) {
@@ -4526,7 +4928,7 @@
                         
                         configDiv.appendChild(configInfo);
                         configDiv.appendChild(configText);
-                        configContent.appendChild(configDiv);
+                        configsContainer.appendChild(configDiv);
                     });
                 } else {
                     const noConfigMsg = Security.safeCreateElement('p', 'هیچ کانفیگی یافت نشد');
