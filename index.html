@@ -1926,7 +1926,7 @@
                     <select id="serverSelect" class="form-input" required>
                         <option value="">سرور مورد نظر را انتخاب کنید</option>
                         <option value="https://admin.jozveraygan.xyz:8443">سرور نمایندگی 1</option>
-                        <option value="https://programingtrade.sbs/dashboard">سرور نمایندگی 2</option>
+                        <option value="https://programingtrade.sbs">سرور نمایندگی 2</option>
                         <option value="custom">سرور دلخواه...</option>
                     </select>
                 </div>
@@ -2634,7 +2634,7 @@
             sessionFingerprint: true,
             servers: [
                 { name: 'سرور نمایندگی 1', url: 'https://admin.jozveraygan.xyz:8443' },
-                { name: 'سرور نمایندگی 2', url: 'https://programingtrade.sbs/dashboard' }
+                { name: 'سرور نمایندگی 2', url: 'https://programingtrade.sbs' }
             ]
         };
 
@@ -2708,6 +2708,50 @@
             validateFingerprint: (stored) => Security.generateFingerprint() === stored
         };
 
+        // Server Detection and API Endpoints
+        const SERVER_CONFIGS = {
+            'admin.jozveraygan.xyz': {
+                apiPaths: ['/api'],
+                loginEndpoints: ['/api/admin/token']
+            },
+            'programingtrade.sbs': {
+                apiPaths: ['/dashboard/api', '/panel/api', '/admin/api', '/api'],
+                loginEndpoints: [
+                    '/dashboard/api/admin/token',
+                    '/panel/api/admin/token', 
+                    '/admin/api/admin/token',
+                    '/api/admin/token',
+                    '/api/token',
+                    '/token'
+                ]
+            }
+        };
+
+        function getServerConfig(serverUrl) {
+            try {
+                const url = new URL(serverUrl);
+                const hostname = url.hostname;
+                
+                // Find matching config
+                for (const [key, config] of Object.entries(SERVER_CONFIGS)) {
+                    if (hostname.includes(key)) {
+                        return config;
+                    }
+                }
+                
+                // Default config for unknown servers
+                return {
+                    apiPaths: ['/api'],
+                    loginEndpoints: ['/api/admin/token']
+                };
+            } catch (e) {
+                return {
+                    apiPaths: ['/api'],
+                    loginEndpoints: ['/api/admin/token']
+                };
+            }
+        }
+
         // Enhanced Server URL Management
         function getServerUrl() {
             const stored = sessionStorage.getItem(CONFIG.serverUrlKey);
@@ -2766,6 +2810,7 @@
         let sessionFingerprint = '';
         let templateInbounds = []; // Store template user inbounds in a structured way
         let sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false, support: false };
+        let workingApiEndpoints = {}; // Store working endpoints for each server
 
         // Chart instances
         let userStatusChartInstance = null, protocolChartInstance = null, expiryChartInstance = null, dailyTrafficChartInstance = null, userTrafficChartInstance = null;
@@ -2924,7 +2969,7 @@
             }
         }
 
-        // Enhanced Authentication
+        // Enhanced Authentication with Smart Endpoint Detection
         async function handleLogin(e) {
             e.preventDefault();
             if (!Security.requestLimiter.isAllowed('login')) return showMessage('loginError', 'تعداد تلاش‌های ورود بیش از حد مجاز');
@@ -2960,22 +3005,54 @@
             showLoading('در حال ورود...');
             
             try {
-                const response = await fetch(`${serverUrl}/api/admin/token`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
-                    body: new URLSearchParams({ 'username': username, 'password': password })
-                });
+                const serverConfig = getServerConfig(selectedServerUrl);
+                let successfulEndpoint = null;
+                let response = null;
                 
-                if (response.ok) {
+                // Try all possible login endpoints for this server
+                for (const endpoint of serverConfig.loginEndpoints) {
+                    try {
+                        console.log(`Trying login endpoint: ${selectedServerUrl}${endpoint}`);
+                        
+                        response = await fetch(`${selectedServerUrl}${endpoint}`, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/x-www-form-urlencoded', 
+                                'X-Requested-With': 'XMLHttpRequest' 
+                            },
+                            body: new URLSearchParams({ 'username': username, 'password': password })
+                        });
+                        
+                        if (response.ok) {
+                            successfulEndpoint = endpoint;
+                            console.log(`Login successful with endpoint: ${endpoint}`);
+                            break;
+                        } else {
+                            console.log(`Login failed with endpoint ${endpoint}: ${response.status}`);
+                        }
+                    } catch (err) {
+                        console.log(`Error with endpoint ${endpoint}:`, err.message);
+                        continue;
+                    }
+                }
+                
+                if (response && response.ok && successfulEndpoint) {
                     const data = await response.json();
                     const encryptedToken = Security.encryptToken(data.access_token);
                     if (encryptedToken) {
                         authToken = data.access_token;
                         currentUsername = username;
+                        
+                        // Store working API base path (remove /admin/token or /token from the endpoint)
+                        const apiBasePath = successfulEndpoint.replace(/\/(admin\/)?token$/, '');
+                        workingApiEndpoints[selectedServerUrl] = apiBasePath || '/api';
+                        sessionStorage.setItem('server_api_base', workingApiEndpoints[selectedServerUrl]);
+                        
                         sessionStorage.setItem(CONFIG.tokenKey, encryptedToken);
                         sessionStorage.setItem('azadi_username', currentUsername);
                         sessionStorage.setItem('azadi_login_time', Date.now().toString());
                         sessionStorage.setItem('azadi_fingerprint', sessionFingerprint);
+                        
                         loginAttempts = 0;
                         document.getElementById('loginForm').reset();
                         showPanel();
@@ -2989,7 +3066,7 @@
                 } else {
                     loginAttempts++;
                     const remaining = CONFIG.maxLoginAttempts - loginAttempts;
-                    showMessage('loginError', `اطلاعات ورود نامعتبر است ${remaining > 0 ? `(${remaining} تلاش باقی مانده)` : ''}`);
+                    showMessage('loginError', `اطلاعات ورود نامعتبر است یا سرور در دسترس نیست ${remaining > 0 ? `(${remaining} تلاش باقی مانده)` : ''}`);
                 }
             } catch (error) {
                 console.error('Login failed:', error);
@@ -3000,7 +3077,7 @@
             hideLoading();
         }
 
-        // --- TEMPLATE USER LOGIC (NEW & FIXED) ---
+        // --- TEMPLATE USER LOGIC ---
         function checkAndLoadTemplateUser() {
             const templateUsername = sessionStorage.getItem(CONFIG.templateUserKey);
             if (templateUsername && Security.validateInput(templateUsername, 'username')) {
@@ -3132,7 +3209,6 @@
             }
             setLoadingState('templateUserForm', 'templateUserBtnText', 'templateUserSpinner', false);
         }
-        // --- END OF TEMPLATE USER LOGIC ---
 
         function logout() {
             Object.keys(sessionStorage).forEach(key => sessionStorage.removeItem(key));
@@ -3140,6 +3216,7 @@
             authToken = '';
             currentUsername = '';
             templateInbounds = [];
+            workingApiEndpoints = {};
             sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false, support: false };
             document.querySelectorAll('form').forEach(form => form.reset());
             document.getElementById('panelSection').classList.add('hidden');
@@ -3191,6 +3268,7 @@
             document.getElementById('mobileOverlay')?.classList.toggle('active');
         }
 
+        // Enhanced API Call with Smart Endpoint Detection
         async function apiCall(endpoint, method = 'GET', data = null) {
             if (!authToken) { logout(); return null; }
             if (!Security.requestLimiter.isAllowed('api_call')) { showNotification('درخواست‌های بیش از حد', 'error'); return null; }
@@ -3202,13 +3280,50 @@
             if (data && method !== 'GET') options.body = JSON.stringify(data);
             
             try {
-                const response = await fetch(`${serverUrl}/api${endpoint}`, options);
-                if (response.status === 401) { logout(); showNotification('جلسه منقضی شده است', 'error'); return null; }
-                if (!response.ok) {
-                    console.error('API call failed:', response.status, await response.text());
-                    return null;
+                const serverConfig = getServerConfig(serverUrl);
+                let successfulResponse = null;
+                
+                // Try stored working endpoint first
+                let tryPaths = [];
+                if (workingApiEndpoints[serverUrl]) {
+                    tryPaths.push(workingApiEndpoints[serverUrl]);
                 }
-                return response.json();
+                
+                // Add all possible paths as fallback
+                tryPaths.push(...serverConfig.apiPaths.filter(path => path !== workingApiEndpoints[serverUrl]));
+                
+                for (const apiPath of tryPaths) {
+                    try {
+                        const fullUrl = `${serverUrl}${apiPath}${endpoint}`;
+                        console.log(`Trying API call: ${fullUrl}`);
+                        
+                        const response = await fetch(fullUrl, options);
+                        
+                        if (response.status === 401) { 
+                            logout(); 
+                            showNotification('جلسه منقضی شده است', 'error'); 
+                            return null; 
+                        }
+                        
+                        if (response.ok) {
+                            // Store working endpoint for future use
+                            workingApiEndpoints[serverUrl] = apiPath;
+                            sessionStorage.setItem('server_api_base', apiPath);
+                            console.log(`API call successful with path: ${apiPath}`);
+                            return response.json();
+                        } else {
+                            console.log(`API call failed with path ${apiPath}: ${response.status}`);
+                        }
+                    } catch (err) {
+                        console.log(`Error with API path ${apiPath}:`, err.message);
+                        continue;
+                    }
+                }
+                
+                // If all attempts failed
+                console.error('All API endpoints failed');
+                return null;
+                
             } catch (error) {
                 console.error('API Error:', error);
                 return null;
