@@ -99,6 +99,7 @@
         .fa-clock:before, .fas.fa-clock:before { content: "\f017" !important; }
         .fa-envelope:before, .fas.fa-envelope:before { content: "\f0e0" !important; }
         .fa-envelope-open:before, .fas.fa-envelope-open:before { content: "\f2b6" !important; }
+        .fa-bullhorn:before, .fas.fa-bullhorn:before { content: "\f0a1" !important; }
         
         /* Enhanced Vazir Font Loading */
         @import url('https://v1.fontapi.ir/css/Vazir');
@@ -608,6 +609,13 @@
             background-clip: text;
             font-family: 'Vazir', 'Vazir-Local', 'Tahoma', 'Arial', sans-serif !important;
         }
+
+        [data-theme="dark"] .content-header {
+            background: none;
+            -webkit-background-clip: initial;
+            -webkit-text-fill-color: initial;
+            color: var(--text-primary);
+        }
         
         .content-section {
             display: none;
@@ -674,6 +682,34 @@
             background: var(--primary-light);
         }
         
+        /* Announcement Card */
+        .announcement-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-right: 4px solid var(--info-color);
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .announcement-card h5 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 8px 0;
+        }
+
+        .announcement-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0;
+        }
+
         /* Stats Cards */
         .stats-grid {
             display: grid;
@@ -1887,6 +1923,7 @@
             .fa-server:before { content: "🖥️"; }
             .fa-bars:before { content: "☰"; }
             .fa-headset:before { content: "🎧"; }
+            .fa-bullhorn:before { content: "📢"; }
         }
 
         /* Force Icon Display */
@@ -2077,6 +2114,12 @@
                         <i class="fas fa-sync-alt"></i>
                         بروزرسانی
                     </button>
+                </div>
+
+                <!-- Announcement Card -->
+                <div class="announcement-card">
+                    <h5><i class="fas fa-bullhorn"></i> اطلاعیه</h5>
+                    <p>اطلاعیه ای هم اکنون منتشر نشده است!</p>
                 </div>
                 
                 <div class="stats-grid">
@@ -2609,7 +2652,8 @@
                 'fa-paper-plane': '✈️',
                 'fa-clock': '🕐',
                 'fa-envelope': '✉️',
-                'fa-envelope-open': '📭'
+                'fa-envelope-open': '📭',
+                'fa-bullhorn': '📢'
             };
 
             Object.keys(iconMap).forEach(className => {
