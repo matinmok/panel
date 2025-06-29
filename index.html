@@ -4124,6 +4124,324 @@
 
         // ======================= END OF NEW IMPLEMENTATION =======================
 
+
+// ==================== TELEGRAM WEB APP INTEGRATION ====================
+
+// Load Telegram Web App Script
+const telegramScript = document.createElement('script');
+telegramScript.src = 'https://telegram.org/js/telegram-web-app.js';
+document.head.appendChild(telegramScript);
+
+// Telegram Web App Configuration
+let tg = null;
+let telegramUser = null;
+
+// Initialize Telegram Web App
+telegramScript.onload = function() {
+    if (window.Telegram && window.Telegram.WebApp) {
+        tg = window.Telegram.WebApp;
+        
+        // Initialize Telegram WebApp
+        tg.ready();
+        tg.expand();
+        
+        // Get user info
+        telegramUser = tg.initDataUnsafe?.user;
+        
+        // Setup Telegram theme
+        setupTelegramTheme();
+        
+        // Setup Telegram buttons
+        setupTelegramButtons();
+        
+        // Setup navigation handlers
+        setupTelegramNavigation();
+        
+        // Setup haptic feedback
+        setupHapticFeedback();
+        
+        // Update user welcome with Telegram info
+        updateUserWelcome();
+        
+        console.log('Telegram Web App initialized successfully');
+    }
+};
+
+// Setup Telegram Theme Integration
+function setupTelegramTheme() {
+    if (!tg) return;
+    
+    // Apply Telegram color scheme
+    const telegramColors = tg.themeParams;
+    
+    if (telegramColors) {
+        const root = document.documentElement;
+        
+        // Set CSS variables based on Telegram theme
+        if (telegramColors.bg_color) {
+            root.style.setProperty('--bg-primary', telegramColors.bg_color);
+        }
+        if (telegramColors.secondary_bg_color) {
+            root.style.setProperty('--bg-secondary', telegramColors.secondary_bg_color);
+            root.style.setProperty('--card-bg', telegramColors.secondary_bg_color);
+        }
+        if (telegramColors.text_color) {
+            root.style.setProperty('--text-primary', telegramColors.text_color);
+        }
+        if (telegramColors.hint_color) {
+            root.style.setProperty('--text-secondary', telegramColors.hint_color);
+            root.style.setProperty('--text-muted', telegramColors.hint_color);
+        }
+        if (telegramColors.button_color) {
+            root.style.setProperty('--primary-color', telegramColors.button_color);
+        }
+        
+        // Set theme based on Telegram's color scheme
+        const isDark = tg.colorScheme === 'dark';
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        
+        // Update theme icon
+        const themeIcon = document.getElementById('themeIcon');
+        if (themeIcon) {
+            themeIcon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+        }
+    }
+    
+    // Listen for theme changes
+    tg.onEvent('themeChanged', function() {
+        setupTelegramTheme();
+    });
+}
+
+// Setup Telegram Main Button
+function setupTelegramButtons() {
+    if (!tg) return;
+    
+    // Setup main button
+    tg.MainButton.setText('ورود به پنل');
+    tg.MainButton.setParams({
+        color: '#2C3E50',
+        text_color: '#FFFFFF'
+    });
+    
+    // Handle main button click
+    tg.MainButton.onClick(function() {
+        const loginSection = document.getElementById('loginSection');
+        const panelSection = document.getElementById('panelSection');
+        
+        if (!loginSection.classList.contains('hidden')) {
+            // If on login page, try to login
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.dispatchEvent(new Event('submit'));
+            }
+        } else if (!panelSection.classList.contains('hidden')) {
+            // If in panel, show context-specific action
+            handleContextAction();
+        }
+    });
+    
+    // Show main button initially
+    tg.MainButton.show();
+}
+
+// Setup Telegram Navigation (Back Button)
+function setupTelegramNavigation() {
+    if (!tg) return;
+    
+    // Handle back button
+    tg.BackButton.onClick(function() {
+        const loginSection = document.getElementById('loginSection');
+        const panelSection = document.getElementById('panelSection');
+        
+        if (!panelSection.classList.contains('hidden')) {
+            // In panel - go to dashboard or logout
+            const activeSection = document.querySelector('.content-section.active');
+            if (activeSection && activeSection.id !== 'dashboardSection') {
+                showSection('dashboard');
+                tg.HapticFeedback.impactOccurred('light');
+            } else {
+                // Show confirmation to exit
+                showExitConfirmation();
+            }
+        } else {
+            // On login page - close app
+            tg.close();
+        }
+    });
+    
+    // Show back button initially
+    tg.BackButton.show();
+}
+
+// Setup Haptic Feedback
+function setupHapticFeedback() {
+    if (!tg || !tg.HapticFeedback) return;
+    
+    // Add haptic feedback to buttons
+    document.addEventListener('click', function(e) {
+        const button = e.target.closest('button, .nav-item, .form-button, .login-btn');
+        if (button && !button.disabled) {
+            tg.HapticFeedback.impactOccurred('light');
+        }
+    });
+    
+    // Add haptic feedback to form submissions
+    document.addEventListener('submit', function(e) {
+        tg.HapticFeedback.impactOccurred('medium');
+    });
+}
+
+// Update user welcome with Telegram info
+function updateUserWelcome() {
+    if (!telegramUser) return;
+    
+    const firstName = telegramUser.first_name || '';
+    const lastName = telegramUser.last_name || '';
+    const username = telegramUser.username || '';
+    
+    let welcomeText = 'خوش آمدید';
+    if (firstName) {
+        welcomeText = `خوش آمدید، ${firstName}`;
+    } else if (username) {
+        welcomeText = `خوش آمدید، @${username}`;
+    }
+    
+    // Update welcome text elements
+    const navWelcome = document.getElementById('navWelcome');
+    const navWelcomeMobile = document.getElementById('navWelcomeMobile');
+    
+    if (navWelcome) navWelcome.textContent = welcomeText;
+    if (navWelcomeMobile) navWelcomeMobile.textContent = welcomeText;
+}
+
+// Handle context-specific main button actions
+function handleContextAction() {
+    const activeSection = document.querySelector('.content-section.active');
+    if (!activeSection) return;
+    
+    switch(activeSection.id) {
+        case 'dashboardSection':
+            refreshDashboard();
+            break;
+        case 'usersSection':
+            refreshUsersSection();
+            break;
+        case 'addUserSection':
+            const addUserForm = document.getElementById('addUserForm');
+            if (addUserForm) addUserForm.dispatchEvent(new Event('submit'));
+            break;
+        case 'trafficSection':
+            refreshTrafficSection();
+            break;
+        case 'analyticsSection':
+            refreshAnalyticsSection();
+            break;
+        default:
+            tg.HapticFeedback.impactOccurred('light');
+    }
+}
+
+// Show exit confirmation
+function showExitConfirmation() {
+    if (!tg) return;
+    
+    tg.showConfirm('آیا می‌خواهید از پنل خارج شوید؟', function(confirmed) {
+        if (confirmed) {
+            logout();
+            tg.close();
+        }
+    });
+}
+
+// Update main button based on current section
+function updateMainButton(sectionName) {
+    if (!tg) return;
+    
+    const buttonConfig = {
+        'dashboard': { text: 'بروزرسانی داشبورد', show: true },
+        'users': { text: 'بروزرسانی کاربران', show: true },
+        'addUser': { text: 'افزودن کاربر', show: true },
+        'traffic': { text: 'بروزرسانی ترافیک', show: true },
+        'analytics': { text: 'بروزرسانی آمار', show: true },
+        'support': { text: '', show: false },
+        'payment': { text: '', show: false },
+        'settings': { text: '', show: false }
+    };
+    
+    const config = buttonConfig[sectionName];
+    if (config) {
+        if (config.show) {
+            tg.MainButton.setText(config.text);
+            tg.MainButton.show();
+        } else {
+            tg.MainButton.hide();
+        }
+    }
+}
+
+// Override some functions for Telegram integration
+const originalShowSection = window.showSection;
+window.showSection = function(sectionName) {
+    if (originalShowSection) {
+        originalShowSection(sectionName);
+    }
+    
+    // Update main button for new section
+    updateMainButton(sectionName);
+    
+    // Add haptic feedback
+    if (tg && tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+    }
+    
+    // Update Telegram navigation
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.getElementById(`${sectionName}Section`)?.classList.add('active');
+    document.querySelectorAll(`[data-section="${sectionName}"]`).forEach(i => i.classList.add('active'));
+};
+
+// Override logout for Telegram
+const originalLogout = window.logout;
+window.logout = function() {
+    if (originalLogout) {
+        originalLogout();
+    }
+    
+    // Update main button for login
+    if (tg) {
+        tg.MainButton.setText('ورود به پنل');
+        tg.MainButton.show();
+    }
+};
+
+// Override showNotification for Telegram haptic feedback
+const originalShowNotification = window.showNotification;
+window.showNotification = function(message, type = 'success') {
+    if (originalShowNotification) {
+        originalShowNotification(message, type);
+    }
+    
+    if (tg && tg.HapticFeedback) {
+        switch(type) {
+            case 'success':
+                tg.HapticFeedback.notificationOccurred('success');
+                break;
+            case 'error':
+                tg.HapticFeedback.notificationOccurred('error');
+                break;
+            case 'warning':
+                tg.HapticFeedback.notificationOccurred('warning');
+                break;
+            default:
+                tg.HapticFeedback.impactOccurred('light');
+        }
+    }
+};
+
+// ==================== END TELEGRAM WEB APP INTEGRATION ====================
+
         window.addEventListener('error', (e) => {
             console.error('Application error:', e.error);
             showNotification('خطای غیرمنتظره رخ داد', 'error');
