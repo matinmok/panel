@@ -3848,7 +3848,7 @@
                 }
             } catch (error) {
                 console.error('Add user failed:', error);
-                showMessage('addUserError', 'خطای غیرمنتظره رخ داد.');
+                showMessage('addUserError', '');
             }
 
             setLoadingState('addUserForm', 'addUserBtnText', 'addUserSpinner', false);
@@ -3953,7 +3953,7 @@
                 }
             } catch (error) {
                 console.error('Create test account failed:', error);
-                showMessage('testAccountError', 'خطای غیرمنتظره رخ داد.');
+                showMessage('testAccountError', '');
             }
 
             setLoadingState('testAccountForm', 'testAccountBtnText', 'testAccountSpinner', false);
@@ -4522,7 +4522,7 @@
 
         window.addEventListener('error', (e) => {
             console.error('Application error:', e.error);
-            showNotification('خطای غیرمنتظره رخ داد', 'error');
+            showNotification('', 'error');
         });
         window.addEventListener('unhandledrejection', (e) => {
             console.error('Unhandled promise rejection:', e.reason);
