@@ -372,6 +372,38 @@
             color: var(--text-muted);
             line-height: 1.5;
         }
+
+        /* Terms Agreement Box */
+        .terms-agreement {
+            text-align: center;
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(44, 62, 80, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(44, 62, 80, 0.2);
+        }
+
+        [data-theme="dark"] .terms-agreement {
+            background: rgba(248, 250, 252, 0.1);
+            border-color: rgba(248, 250, 252, 0.2);
+        }
+
+        .terms-link {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .terms-link:hover {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
         
         .form-group {
             margin-bottom: 20px;
@@ -999,6 +1031,19 @@
             box-shadow: var(--shadow-xl);
             border: 1px solid var(--border-color);
         }
+
+        /* Terms Modal - Larger for better readability */
+        .terms-modal-content {
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+        }
         
         .modal-header {
             display: flex;
@@ -1035,6 +1080,56 @@
             background: var(--danger-color);
             color: #fff;
             border-color: var(--danger-color);
+        }
+
+        /* Terms Modal Content Styling */
+        .terms-content {
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .terms-content h3 {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 700;
+            margin: 24px 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terms-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .terms-content ul {
+            margin: 16px 0;
+            padding-right: 20px;
+        }
+
+        .terms-content li {
+            margin: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .terms-content .highlight {
+            background: rgba(44, 62, 80, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            border-right: 4px solid var(--primary-color);
+            margin: 16px 0;
+        }
+
+        .terms-content .warning-highlight {
+            background: rgba(211, 47, 47, 0.1);
+            border-right-color: var(--danger-color);
+        }
+
+        .terms-content .success-highlight {
+            background: rgba(46, 125, 50, 0.1);
+            border-right-color: var(--success-color);
         }
         
         /* Payment Section */
@@ -1650,6 +1745,12 @@
                 font-size: 15px;
             }
 
+            .terms-modal-content {
+                max-width: calc(100vw - 24px);
+                padding: 20px;
+                max-height: 90vh;
+            }
+
             /* Mobile Panel Layout */
             .panel-nav {
                 display: none !important;
@@ -2067,6 +2168,15 @@
                     <div id="loginSpinner" class="loading-spinner hidden"></div>
                 </button>
             </form>
+
+            <!-- Terms Agreement -->
+            <div class="terms-agreement">
+                <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin: 0;">
+                    استفاده از پنل نمایندگی به منزله رعایت 
+                    <button onclick="showTermsModal()" class="terms-link">قوانین</button>
+                    است
+                </p>
+            </div>
 
             <div class="login-footer">
                 <div class="login-copyright">
@@ -2645,6 +2755,100 @@
         </div>
     </div>
 
+    <!-- Terms Modal -->
+    <div id="termsModal" class="modal hidden">
+        <div class="terms-modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-file-contract"></i>
+                    قوانین و شرایط استفاده از پنل نمایندگان آزادی VPN
+                </h3>
+                <button class="modal-close" onclick="closeTermsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="terms-content">
+                <div class="highlight warning-highlight">
+                    <h3><i class="fas fa-exclamation-triangle"></i> ⚠️ لطفاً موارد زیر را با دقت مطالعه کنید:</h3>
+                </div>
+
+                <h3><i class="fas fa-ban"></i> 🚫 ممنوعیت‌های شدید:</h3>
+                <ul>
+                    <li>• ریست ترافیک کاربران اکیداً ممنوع</li>
+                    <li>• حذف کاربران اکیداً ممنوع</li>
+                    <li>• استفاده غیرمجاز از اکانت‌های تست ممنوع</li>
+                    <li>• ساخت کاربران جعلی یا آزمایشی ممنوع</li>
+                </ul>
+
+                <h3><i class="fas fa-money-bill-wave"></i> 💰 شرایط مالی:</h3>
+                <ul>
+                    <li>• ترافیک باید قبل از شروع کار پرداخت شود.</li>
+                    <li>• هیچ‌گونه اعتبار یا امانت تعریف نمی‌شود.</li>
+                    <li>• تمام هزینه‌های ترافیک بر عهده نماینده است.</li>
+                    <li>• مسئولیت مدیریت مالی با نماینده است.</li>
+                </ul>
+
+                <h3><i class="fas fa-shield-alt"></i> 🔒 امنیت و مسئولیت:</h3>
+                <ul>
+                    <li>• محافظت از اطلاعات لاگین حیاتی است.</li>
+                    <li>• استفاده مشترک اکانت نمایندگی ممنوع</li>
+                    <li>• گزارش فوری مشکلات امنیتی الزامی است.</li>
+                </ul>
+
+                <h3><i class="fas fa-users-cog"></i> 📊 مدیریت کاربران:</h3>
+                <ul>
+                    <li>• ایجاد کاربر فقط برای مشتریان واقعی</li>
+                    <li>• ثبت دقیق اطلاعات مشتریان الزامی است.</li>
+                    <li>• رعایت حد مجاز ترافیک و کاربران</li>
+                    <li>• استفاده عادلانه از منابع سرور</li>
+                </ul>
+
+                <h3><i class="fas fa-gavel"></i> ⚖️ عواقب تخلف:</h3>
+                <ul>
+                    <li>• مسدودی فوری اکانت نمایندگی</li>
+                    <li>• قطع دسترسی به تمام خدمات</li>
+                    <li>• عدم بازگردانی هزینه‌های پرداختی</li>
+                </ul>
+
+                <h3><i class="fas fa-bullseye"></i> 🎯 اهداف نمایندگی:</h3>
+                <ul>
+                    <li>• ارائه سرویس باکیفیت به مشتریان</li>
+                    <li>• حفظ اعتماد و اعتبار برند آزادی VPN</li>
+                    <li>• رشد پایدار و درازمدت</li>
+                    <li>• رضایت‌مندی همه طرف‌ها</li>
+                </ul>
+
+                <h3><i class="fas fa-headset"></i> 📞 پشتیبانی:</h3>
+                <ul>
+                    <li>• مراجعه فوری در صورت مشکل: @Mykalikal</li>
+                    <li>• گزارش موارد مشکوک الزامی است.</li>
+                    <li>• همکاری در حل مسائل فنی</li>
+                </ul>
+
+                <div class="highlight success-highlight">
+                    <h3><i class="fas fa-check-circle"></i> ✅ با تأیید این قوانین، شما:</h3>
+                    <ul>
+                        <li>• متعهد به رعایت کامل موارد فوق هستید.</li>
+                        <li>• مسئولیت کامل استفاده از پنل را می‌پذیرید.</li>
+                        <li>• در صورت تخلف، عواقب آن را خواهید پذیرفت.</li>
+                    </ul>
+                </div>
+
+                <div class="highlight warning-highlight">
+                    <h3><i class="fas fa-times-circle"></i> ❌ در صورت عدم پذیرش:</h3>
+                    <ul>
+                        <li>• امکان استفاده از پنل وجود ندارد.</li>
+                        <li>• باید با پشتیبانی تماس بگیرید.</li>
+                    </ul>
+                </div>
+
+                <div class="highlight" style="text-align: center; margin-top: 32px;">
+                    <h3><i class="fas fa-question-circle"></i> آیا تمام قوانین فوق را مطالعه کردید و می‌پذیرید؟</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Config Modal -->
     <div id="configModal" class="modal hidden">
         <div class="modal-content">
@@ -2847,6 +3051,17 @@
                     icon.innerHTML = `<span class="icon-fallback">${iconMap[className]}</span>`;
                 });
             });
+        }
+
+        // Terms Modal Functions
+        function showTermsModal() {
+            const modal = document.getElementById('termsModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeTermsModal() {
+            const modal = document.getElementById('termsModal');
+            if (modal) modal.classList.add('hidden');
         }
 
         // Enhanced Security Configuration
