@@ -56,7 +56,6 @@
         /* Fallback icons using Unicode */
         .fa-user:before, .fas.fa-user:before { content: "\f007" !important; }
         .fa-users:before, .fas.fa-users:before { content: "\f0c0" !important; }
-        .fa-users-cog:before, .fas.fa-users-cog:before { content: "\f509" !important; }
         .fa-shield-alt:before, .fas.fa-shield-alt:before { content: "\f3ed" !important; }
         .fa-tachometer-alt:before, .fas.fa-tachometer-alt:before { content: "\f3f4" !important; }
         .fa-user-plus:before, .fas.fa-user-plus:before { content: "\f234" !important; }
@@ -105,10 +104,6 @@
         .fa-history:before, .fas.fa-history:before { content: "\f1da" !important; }
         .fa-plus:before, .fas.fa-plus:before { content: "\f067" !important; }
         .fa-trash:before, .fas.fa-trash:before { content: "\f1f8" !important; }
-        .fa-random:before, .fas.fa-random:before { content: "\f074" !important; }
-        .fa-file-alt:before, .fas.fa-file-alt:before { content: "\f15c" !important; }
-        .fa-magic:before, .fas.fa-magic:before { content: "\f0d0" !important; }
-        .fa-eye:before, .fas.fa-eye:before { content: "\f06e" !important; }
         
         /* Enhanced Vazir Font Loading */
         @import url('https://v1.fontapi.ir/css/Vazir');
@@ -1464,263 +1459,6 @@
             width: 16px;
             color: #90EE90;
         }
-
-        /* Bulk Users Styles */
-        .bulk-info-card {
-            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-            color: #fff;
-            padding: 24px;
-            border-radius: 16px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .bulk-info-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/></svg>');
-            animation: float 20s infinite linear;
-        }
-
-        .bulk-info-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .bulk-info-features {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .bulk-info-features li {
-            padding: 4px 0;
-            font-size: 14px;
-            opacity: 0.95;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .bulk-info-features li i {
-            width: 16px;
-            color: #90EE90;
-        }
-
-        .username-preview {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 16px;
-        }
-
-        .username-preview h5 {
-            color: var(--text-primary);
-            margin-bottom: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .username-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .username-tag {
-            background: var(--primary-color);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 500;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        }
-
-        /* Bulk Progress */
-        .bulk-progress {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .bulk-progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .bulk-progress-title {
-            color: var(--text-primary);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .bulk-progress-counter {
-            background: var(--primary-color);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .bulk-progress-bar {
-            background: var(--border-light);
-            border-radius: 10px;
-            height: 12px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .bulk-progress-fill {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-            position: relative;
-        }
-
-        .bulk-progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background-image: linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0.2) 25%,
-                transparent 25%,
-                transparent 50%,
-                rgba(255, 255, 255, 0.2) 50%,
-                rgba(255, 255, 255, 0.2) 75%,
-                transparent 75%,
-                transparent
-            );
-            background-size: 20px 20px;
-            animation: progress-animation 1s linear infinite;
-        }
-
-        @keyframes progress-animation {
-            0% { background-position: 0 0; }
-            100% { background-position: 20px 0; }
-        }
-
-        .bulk-log {
-            max-height: 200px;
-            overflow-y: auto;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .bulk-log-entry {
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .bulk-log-entry.success {
-            color: var(--success-color);
-        }
-
-        .bulk-log-entry.error {
-            color: var(--danger-color);
-        }
-
-        .bulk-log-entry.info {
-            color: var(--text-secondary);
-        }
-
-        /* Bulk Results */
-        .bulk-results {
-            margin-top: 24px;
-        }
-
-        .bulk-results-summary {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .bulk-results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .bulk-stat {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .bulk-stat-number {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .bulk-stat-label {
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .bulk-export-section {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .bulk-export-title {
-            color: var(--text-primary);
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
         
         /* Mobile Header */
         .mobile-header {
@@ -2148,7 +1886,7 @@
                 width: 100%;
             }
 
-            .payment-card, .bulk-info-card {
+            .payment-card {
                 padding: 20px;
                 margin-bottom: 16px;
                 width: 100%;
@@ -2156,7 +1894,7 @@
                 box-sizing: border-box;
             }
 
-            .payment-title, .bulk-info-title {
+            .payment-title {
                 font-size: 18px;
             }
 
@@ -2251,37 +1989,6 @@
             .test-account-features li {
                 font-size: 12px;
             }
-
-            /* Bulk Users Mobile Styles */
-            .bulk-results-grid {
-                grid-template-columns: 1fr !important;
-                gap: 12px;
-            }
-
-            .bulk-progress {
-                padding: 16px;
-                margin: 16px 0;
-            }
-
-            .bulk-log {
-                max-height: 150px;
-                font-size: 11px;
-            }
-
-            .username-preview {
-                padding: 12px;
-                margin-top: 12px;
-            }
-
-            .username-list {
-                max-height: 150px;
-                gap: 6px;
-            }
-
-            .username-tag {
-                padding: 3px 8px;
-                font-size: 11px;
-            }
         }
 
         @media (min-width: 769px) {
@@ -2367,25 +2074,12 @@
                 font-size: 11px;
                 margin: 0 4px;
             }
-
-            .bulk-stat {
-                padding: 12px;
-            }
-
-            .bulk-stat-number {
-                font-size: 20px;
-            }
-
-            .bulk-export-section {
-                padding: 16px;
-            }
         }
 
         /* Icon Backup System - If Font Awesome fails, show Unicode */
         @supports not (font-family: "Font Awesome 6 Free") {
             .fa-user:before { content: "👤"; }
             .fa-users:before { content: "👥"; }
-            .fa-users-cog:before { content: "👥⚙️"; }
             .fa-shield-alt:before { content: "🛡️"; }
             .fa-tachometer-alt:before { content: "⚡"; }
             .fa-user-plus:before { content: "➕"; }
@@ -2408,10 +2102,6 @@
             .fa-history:before { content: "📝"; }
             .fa-plus:before { content: "➕"; }
             .fa-trash:before { content: "🗑️"; }
-            .fa-random:before { content: "🎲"; }
-            .fa-file-alt:before { content: "📄"; }
-            .fa-magic:before { content: "✨"; }
-            .fa-eye:before { content: "👁️"; }
         }
 
         /* Force Icon Display */
@@ -2530,9 +2220,6 @@
                 <button class="nav-item" onclick="showSection('addUser'); toggleMobileMenu()">
                     <span>افزودن کاربر</span><i class="fas fa-user-plus"></i>
                 </button>
-                <button class="nav-item" onclick="showSection('bulkUsers'); toggleMobileMenu()">
-                    <span>ساخت کاربر انبوه</span><i class="fas fa-users-cog"></i>
-                </button>
                 <button class="nav-item" onclick="showSection('testAccount'); toggleMobileMenu()">
                     <span>اکانت تست</span><i class="fas fa-user-clock"></i>
                 </button>
@@ -2577,9 +2264,6 @@
                 </button>
                 <button class="nav-item" data-section="addUser" onclick="showSection('addUser')">
                     <span>افزودن کاربر</span><i class="fas fa-user-plus"></i>
-                </button>
-                <button class="nav-item" data-section="bulkUsers" onclick="showSection('bulkUsers')">
-                    <span>ساخت کاربر انبوه</span><i class="fas fa-users-cog"></i>
                 </button>
                 <button class="nav-item" data-section="testAccount" onclick="showSection('testAccount')">
                     <span>اکانت تست</span><i class="fas fa-user-clock"></i>
@@ -2758,160 +2442,6 @@
                         کاربر با موفقیت ایجاد شد
                     </h4>
                     <div id="newUserConfigs"></div>
-                </div>
-            </div>
-
-            <!-- Bulk Users Section -->
-            <div id="bulkUsersSection" class="content-section">
-                <div class="section-header">
-                    <h3 class="section-title">
-                        <i class="fas fa-users-cog"></i>
-                        ساخت کاربر انبوه
-                    </h3>
-                    <button class="refresh-btn" onclick="refreshBulkUsersSection()">
-                        <i class="fas fa-sync-alt"></i>
-                        بروزرسانی
-                    </button>
-                </div>
-
-                <!-- Bulk Info Card -->
-                <div class="bulk-info-card">
-                    <div class="bulk-info-title">
-                        <i class="fas fa-magic"></i>
-                        امکانات ساخت کاربر انبوه
-                    </div>
-                    <ul class="bulk-info-features">
-                        <li><i class="fas fa-users"></i>ساخت ۱ تا ۳۰ کاربر در یک بار</li>
-                        <li><i class="fas fa-random"></i>تولید نام کاربری تصادفی یا دلخواه</li>
-                        <li><i class="fas fa-eye"></i>پیش‌نمایش اسم کاربران قبل از ساخت</li>
-                        <li><i class="fas fa-chart-line"></i>نمایش پیشرفت ساخت کاربران</li>
-                        <li><i class="fas fa-file-alt"></i>دانلود فایل متنی کانفیگ‌ها</li>
-                        <li><i class="fas fa-cog"></i>استفاده از اینباندهای کاربر الگو</li>
-                    </ul>
-                </div>
-                
-                <!-- Bulk Creation Form -->
-                <form id="bulkUsersForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">تعداد کاربر (۱-۳۰)</label>
-                            <input type="number" id="bulkUserCount" class="form-input" min="1" max="30" value="5" placeholder="5" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">حجم ترافیک (GB)</label>
-                            <input type="number" id="bulkDataLimit" class="form-input" required min="1" max="1000" value="30" placeholder="30">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">تاریخ انقضا</label>
-                            <input type="date" id="bulkExpireDate" class="form-input" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">نوع نام‌گذاری</label>
-                            <select id="bulkNamingType" class="form-input" onchange="toggleNamingOptions()">
-                                <option value="random">نام‌های تصادفی</option>
-                                <option value="prefix">پیشوند + شماره</option>
-                                <option value="custom">پیشوند دلخواه + شماره</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group" id="bulkPrefixGroup" style="display: none;">
-                            <label class="form-label">پیشوند نام کاربری</label>
-                            <input type="text" id="bulkUsernamePrefix" class="form-input" placeholder="user" maxlength="15" pattern="[a-zA-Z0-9_]{1,15}">
-                        </div>
-                        
-                        <div class="form-group">
-                            <button type="button" onclick="previewUsernames()" class="form-button info" style="width: 100%; padding: 12px;">
-                                <i class="fas fa-eye"></i>
-                                پیش‌نمایش نام کاربران
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Username Preview -->
-                    <div id="usernamePreview" class="username-preview hidden">
-                        <h5><i class="fas fa-eye"></i> پیش‌نمایش نام کاربران:</h5>
-                        <div id="usernameList" class="username-list"></div>
-                    </div>
-                    
-                    <div id="bulkUsersError" class="error-message hidden"></div>
-                    <div id="bulkUsersSuccess" class="success-message hidden"></div>
-                    
-                    <button type="submit" class="form-button" style="width: 100%; padding: 16px; font-size: 16px; margin-top: 20px;">
-                        <span id="bulkUsersBtnText">
-                            <i class="fas fa-users-cog"></i>
-                            شروع ساخت کاربران انبوه
-                        </span>
-                        <div id="bulkUsersSpinner" class="loading-spinner hidden"></div>
-                    </button>
-                </form>
-
-                <!-- Bulk Progress -->
-                <div id="bulkProgress" class="bulk-progress hidden">
-                    <div class="bulk-progress-header">
-                        <div class="bulk-progress-title">
-                            <i class="fas fa-chart-line"></i>
-                            پیشرفت ساخت کاربران
-                        </div>
-                        <div class="bulk-progress-counter" id="bulkProgressCounter">0 / 0</div>
-                    </div>
-                    <div class="bulk-progress-bar">
-                        <div class="bulk-progress-fill" id="bulkProgressFill" style="width: 0%;"></div>
-                    </div>
-                    <div class="bulk-log" id="bulkLog"></div>
-                </div>
-
-                <!-- Bulk Results -->
-                <div id="bulkResults" class="bulk-results hidden">
-                    <div class="bulk-results-summary">
-                        <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700;">
-                            <i class="fas fa-check-circle" style="color: var(--success-color); margin-left: 8px;"></i>
-                            نتایج ساخت کاربران انبوه
-                        </h4>
-                        <div class="bulk-results-grid">
-                            <div class="bulk-stat">
-                                <div class="bulk-stat-number" id="bulkSuccessCount">0</div>
-                                <div class="bulk-stat-label">موفق</div>
-                            </div>
-                            <div class="bulk-stat">
-                                <div class="bulk-stat-number" id="bulkFailCount">0</div>
-                                <div class="bulk-stat-label">ناموفق</div>
-                            </div>
-                            <div class="bulk-stat">
-                                <div class="bulk-stat-number" id="bulkTotalTime">0</div>
-                                <div class="bulk-stat-label">زمان کل (ثانیه)</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bulk-export-section">
-                        <div class="bulk-export-title">
-                            <i class="fas fa-download"></i>
-                            دانلود نتایج
-                        </div>
-                        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                            <button onclick="downloadBulkConfigs('subscription')" class="form-button success">
-                                <i class="fas fa-link"></i>
-                                دانلود لینک‌های ساب
-                            </button>
-                            <button onclick="downloadBulkConfigs('configs')" class="form-button info">
-                                <i class="fas fa-cog"></i>
-                                دانلود کانفیگ‌ها
-                            </button>
-                            <button onclick="downloadBulkConfigs('usernames')" class="form-button warning">
-                                <i class="fas fa-user"></i>
-                                دانلود نام کاربران
-                            </button>
-                            <button onclick="downloadBulkConfigs('summary')" class="form-button secondary">
-                                <i class="fas fa-file-alt"></i>
-                                دانلود خلاصه کامل
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -3478,7 +3008,6 @@
             const iconMap = {
                 'fa-user': '👤',
                 'fa-users': '👥', 
-                'fa-users-cog': '👥⚙️',
                 'fa-shield-alt': '🛡️',
                 'fa-tachometer-alt': '⚡',
                 'fa-user-plus': '➕',
@@ -3513,11 +3042,7 @@
                 'fa-history': '📝',
                 'fa-plus': '➕',
                 'fa-trash': '🗑️',
-                'fa-flask': '🧪',
-                'fa-random': '🎲',
-                'fa-file-alt': '📄',
-                'fa-magic': '✨',
-                'fa-eye': '👁️'
+                'fa-flask': '🧪'
             };
 
             Object.keys(iconMap).forEach(className => {
@@ -3729,15 +3254,8 @@
         let loginAttempts = 0;
         let sessionFingerprint = '';
         let templateInbounds = []; // Store template user inbounds in a structured way
-        let sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false, support: false, testAccount: false, bulkUsers: false };
+        let sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false, support: false, testAccount: false };
         let workingApiEndpoints = {}; // Store working endpoints for each server
-
-        // Bulk Users Variables
-        let bulkUsersData = [];
-        let bulkCreationStartTime = 0;
-        let bulkCurrentIndex = 0;
-        let bulkSuccessCount = 0;
-        let bulkFailCount = 0;
 
         // Chart instances
         let userStatusChartInstance = null, protocolChartInstance = null, expiryChartInstance = null, dailyTrafficChartInstance = null, userTrafficChartInstance = null;
@@ -3787,27 +3305,6 @@
             }
             loadInboundsFromTemplateUser(sessionStorage.getItem(CONFIG.templateUserKey));
             showNotification('فرم افزودن کاربر بازنشانی شد! 🔄', 'success');
-        }
-
-        function refreshBulkUsersSection() {
-            document.getElementById('bulkUsersForm')?.reset();
-            document.getElementById('usernamePreview')?.classList.add('hidden');
-            document.getElementById('bulkProgress')?.classList.add('hidden');
-            document.getElementById('bulkResults')?.classList.add('hidden');
-            hideMessage('bulkUsersError');
-            hideMessage('bulkUsersSuccess');
-            const expireDateInput = document.getElementById('bulkExpireDate');
-            if (expireDateInput) {
-                const expireDate = new Date();
-                expireDate.setDate(expireDate.getDate() + 30);
-                expireDateInput.value = expireDate.toISOString().split('T')[0];
-            }
-            // Reset bulk variables
-            bulkUsersData = [];
-            bulkCurrentIndex = 0;
-            bulkSuccessCount = 0;
-            bulkFailCount = 0;
-            showNotification('فرم ساخت کاربر انبوه بازنشانی شد! 🔄', 'success');
         }
 
         function refreshTestAccountSection() {
@@ -3886,13 +3383,6 @@
                     expireDate.setDate(expireDate.getDate() + 30);
                     expireDateInput.value = expireDate.toISOString().split('T')[0];
                 }
-
-                const bulkExpireDateInput = document.getElementById('bulkExpireDate');
-                if (bulkExpireDateInput) {
-                    const expireDate = new Date();
-                    expireDate.setDate(expireDate.getDate() + 30);
-                    bulkExpireDateInput.value = expireDate.toISOString().split('T')[0];
-                }
             } catch (error) {
                 console.error('Initialization failed:', error);
                 showNotification('خطا در بارگذاری اولیه', 'error');
@@ -3906,13 +3396,10 @@
             document.getElementById('editUserForm')?.addEventListener('submit', handleEditUser);
             document.getElementById('templateUserForm')?.addEventListener('submit', handleSetTemplateUser);
             document.getElementById('testAccountForm')?.addEventListener('submit', handleCreateTestAccount);
-            document.getElementById('bulkUsersForm')?.addEventListener('submit', handleBulkUsers);
             document.getElementById('serverSelect')?.addEventListener('change', handleServerChange);
             
             document.getElementById('username')?.addEventListener('input', () => validateInputStyle('username', 'username'));
             document.getElementById('newUsername')?.addEventListener('input', () => validateInputStyle('newUsername', 'username'));
-            document.getElementById('bulkUsernamePrefix')?.addEventListener('input', () => validateInputStyle('bulkUsernamePrefix', 'username'));
-            document.getElementById('bulkUserCount')?.addEventListener('input', previewUsernames);
         }
 
         function validateInputStyle(inputId, validationType) {
@@ -4185,9 +3672,8 @@
             currentUsername = '';
             templateInbounds = [];
             testAccounts = [];
-            bulkUsersData = [];
             workingApiEndpoints = {};
-            sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false, support: false, testAccount: false, bulkUsers: false };
+            sectionsLoaded = { dashboard: false, users: false, traffic: false, analytics: false, support: false, testAccount: false };
             document.querySelectorAll('form').forEach(form => form.reset());
             document.getElementById('panelSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
@@ -4224,8 +3710,7 @@
                     'dashboard': loadDashboardData,
                     'analytics': loadAnalytics,
                     'traffic': loadTrafficData,
-                    'testAccount': loadTestAccounts,
-                    'bulkUsers': () => Promise.resolve() // No initial loading needed for bulk users
+                    'testAccount': loadTestAccounts
                 }[sectionName];
                 
                 if (loadFunction) {
@@ -4619,366 +4104,6 @@
             document.getElementById('userCreationResult').classList.remove('hidden');
         }
 
-        // === BULK USERS FUNCTIONS ===
-        function toggleNamingOptions() {
-            const namingType = document.getElementById('bulkNamingType').value;
-            const prefixGroup = document.getElementById('bulkPrefixGroup');
-            const prefixInput = document.getElementById('bulkUsernamePrefix');
-            
-            if (namingType === 'custom' || namingType === 'prefix') {
-                prefixGroup.style.display = 'block';
-                prefixInput.required = true;
-                if (namingType === 'prefix') {
-                    prefixInput.value = 'user';
-                    prefixInput.placeholder = 'user';
-                } else {
-                    prefixInput.value = '';
-                    prefixInput.placeholder = 'مثال: client';
-                }
-            } else {
-                prefixGroup.style.display = 'none';
-                prefixInput.required = false;
-                prefixInput.value = '';
-            }
-            
-            // Update preview if it's visible
-            if (!document.getElementById('usernamePreview').classList.contains('hidden')) {
-                previewUsernames();
-            }
-        }
-
-        function generateRandomUsername() {
-            const adjectives = ['fast', 'smart', 'cool', 'great', 'super', 'mega', 'ultra', 'pro', 'top', 'best'];
-            const nouns = ['user', 'client', 'member', 'player', 'guest', 'admin', 'vip', 'star', 'hero', 'king'];
-            const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-            const noun = nouns[Math.floor(Math.random() * nouns.length)];
-            const number = Math.floor(Math.random() * 9999) + 1;
-            return `${adjective}${noun}${number}`;
-        }
-
-        function generateBulkUsernames(count, namingType, prefix = '') {
-            const usernames = [];
-            const existingUsernames = users.map(u => u.username.toLowerCase());
-            
-            for (let i = 0; i < count; i++) {
-                let username;
-                let attempts = 0;
-                
-                do {
-                    switch (namingType) {
-                        case 'random':
-                            username = generateRandomUsername();
-                            break;
-                        case 'prefix':
-                            username = `user${String(i + 1).padStart(2, '0')}`;
-                            break;
-                        case 'custom':
-                            username = `${prefix}${String(i + 1).padStart(2, '0')}`;
-                            break;
-                        default:
-                            username = `user${i + 1}`;
-                    }
-                    attempts++;
-                } while (existingUsernames.includes(username.toLowerCase()) && attempts < 10);
-                
-                if (attempts >= 10) {
-                    username = `${username}_${Math.floor(Math.random() * 1000)}`;
-                }
-                
-                usernames.push(username);
-            }
-            
-            return usernames;
-        }
-
-        function previewUsernames() {
-            const count = parseInt(document.getElementById('bulkUserCount').value) || 0;
-            const namingType = document.getElementById('bulkNamingType').value;
-            const prefix = document.getElementById('bulkUsernamePrefix').value.trim();
-            
-            if (count < 1 || count > 30) {
-                document.getElementById('usernamePreview').classList.add('hidden');
-                return;
-            }
-            
-            if ((namingType === 'custom' || namingType === 'prefix') && !prefix) {
-                document.getElementById('usernamePreview').classList.add('hidden');
-                return;
-            }
-            
-            const usernames = generateBulkUsernames(count, namingType, prefix);
-            const container = document.getElementById('usernameList');
-            
-            container.innerHTML = usernames.map(username => 
-                `<div class="username-tag">${Security.sanitizeHtml(username)}</div>`
-            ).join('');
-            
-            document.getElementById('usernamePreview').classList.remove('hidden');
-        }
-
-        async function handleBulkUsers(e) {
-            e.preventDefault();
-            if (!Security.requestLimiter.isAllowed('bulk_users')) return showMessage('bulkUsersError', 'لطفاً کمی صبر کنید');
-            
-            const count = parseInt(document.getElementById('bulkUserCount').value);
-            const dataLimitGB = parseFloat(document.getElementById('bulkDataLimit').value);
-            const expireDateStr = document.getElementById('bulkExpireDate').value;
-            const namingType = document.getElementById('bulkNamingType').value;
-            const prefix = document.getElementById('bulkUsernamePrefix').value.trim();
-
-            // Validation
-            if (!Security.validateInput(count, 'number', { min: 1, max: 30 })) {
-                return showMessage('bulkUsersError', 'تعداد کاربر باید بین ۱ تا ۳۰ باشد');
-            }
-            if (!Security.validateInput(dataLimitGB, 'number', { min: 1, max: 1000 })) {
-                return showMessage('bulkUsersError', 'حجم ترافیک نامعتبر است');
-            }
-            if (!Security.validateInput(expireDateStr, 'date')) {
-                return showMessage('bulkUsersError', 'تاریخ انقضا نامعتبر است');
-            }
-            if ((namingType === 'custom' || namingType === 'prefix') && !Security.validateInput(prefix, 'username', { maxLength: 15 })) {
-                return showMessage('bulkUsersError', 'پیشوند نام کاربری نامعتبر است');
-            }
-            if (templateInbounds.length === 0) {
-                return showMessage('bulkUsersError', 'هیچ اینباند الگویی تنظیم نشده است. لطفاً از بخش تنظیمات یک کاربر الگو انتخاب کنید.');
-            }
-
-            // Generate usernames
-            const usernames = generateBulkUsernames(count, namingType, prefix);
-            
-            // Check for conflicts with existing users
-            const existingUsernames = users.map(u => u.username.toLowerCase());
-            const conflicts = usernames.filter(username => existingUsernames.includes(username.toLowerCase()));
-            if (conflicts.length > 0) {
-                return showMessage('bulkUsersError', `این نام‌های کاربری از قبل وجود دارند: ${conflicts.join(', ')}`);
-            }
-
-            // Setup bulk creation
-            bulkUsersData = usernames.map(username => ({
-                username,
-                dataLimit: dataLimitGB,
-                expireDate: expireDateStr,
-                status: 'pending',
-                configs: []
-            }));
-
-            bulkCurrentIndex = 0;
-            bulkSuccessCount = 0;
-            bulkFailCount = 0;
-            bulkCreationStartTime = Date.now();
-
-            // Show progress and start creation
-            setLoadingState('bulkUsersForm', 'bulkUsersBtnText', 'bulkUsersSpinner', true);
-            hideMessage('bulkUsersError');
-            hideMessage('bulkUsersSuccess');
-            showBulkProgress();
-            
-            // Start bulk creation process
-            await processBulkUsers();
-        }
-
-        function showBulkProgress() {
-            const progressContainer = document.getElementById('bulkProgress');
-            const counter = document.getElementById('bulkProgressCounter');
-            const progressFill = document.getElementById('bulkProgressFill');
-            const log = document.getElementById('bulkLog');
-            
-            progressContainer.classList.remove('hidden');
-            counter.textContent = `${bulkCurrentIndex} / ${bulkUsersData.length}`;
-            progressFill.style.width = '0%';
-            log.innerHTML = '<div class="bulk-log-entry info"><i class="fas fa-info-circle"></i> شروع ساخت کاربران انبوه...</div>';
-        }
-
-        function updateBulkProgress(username, success, message = '') {
-            const counter = document.getElementById('bulkProgressCounter');
-            const progressFill = document.getElementById('bulkProgressFill');
-            const log = document.getElementById('bulkLog');
-            
-            if (success) {
-                bulkSuccessCount++;
-            } else {
-                bulkFailCount++;
-            }
-            
-            const progress = (bulkCurrentIndex / bulkUsersData.length) * 100;
-            counter.textContent = `${bulkCurrentIndex} / ${bulkUsersData.length}`;
-            progressFill.style.width = `${progress}%`;
-            
-            const statusClass = success ? 'success' : 'error';
-            const icon = success ? 'fa-check-circle' : 'fa-times-circle';
-            const logEntry = `<div class="bulk-log-entry ${statusClass}"><i class="fas ${icon}"></i> ${Security.sanitizeHtml(username)}: ${Security.sanitizeHtml(message || (success ? 'موفق' : 'ناموفق'))}</div>`;
-            
-            log.innerHTML += logEntry;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        async function processBulkUsers() {
-            // Format inbounds and proxies for the API
-            const inboundsForAPI = {};
-            const proxiesForAPI = {};
-            templateInbounds.forEach(inbound => {
-                if (!inboundsForAPI[inbound.protocol]) inboundsForAPI[inbound.protocol] = [];
-                inboundsForAPI[inbound.protocol].push(inbound.tag);
-                if (!proxiesForAPI[inbound.protocol]) proxiesForAPI[inbound.protocol] = {};
-            });
-
-            for (let i = 0; i < bulkUsersData.length; i++) {
-                bulkCurrentIndex = i + 1;
-                const userData = bulkUsersData[i];
-                
-                try {
-                    const apiData = {
-                        username: userData.username,
-                        proxies: proxiesForAPI,
-                        inbounds: inboundsForAPI,
-                        expire: Math.floor(new Date(userData.expireDate).getTime() / 1000),
-                        data_limit: userData.dataLimit * 1024 * 1024 * 1024,
-                    };
-
-                    const result = await apiCall('/user', 'POST', apiData);
-                    
-                    if (result) {
-                        userData.status = 'success';
-                        updateBulkProgress(userData.username, true, 'ایجاد شد');
-                        
-                        // Get user configs
-                        try {
-                            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait a bit
-                            const userConfigs = await apiCall(`/user/${encodeURIComponent(userData.username)}`);
-                            if (userConfigs && userConfigs.links) {
-                                userData.configs = userConfigs.links;
-                                userData.subscription_url = userConfigs.subscription_url;
-                            }
-                        } catch (configError) {
-                            console.error(`Failed to get configs for ${userData.username}:`, configError);
-                        }
-                    } else {
-                        userData.status = 'failed';
-                        updateBulkProgress(userData.username, false, 'خطا در ایجاد');
-                    }
-                } catch (error) {
-                    userData.status = 'failed';
-                    updateBulkProgress(userData.username, false, 'خطا در اتصال');
-                }
-                
-                // Small delay between requests to avoid overwhelming the server
-                if (i < bulkUsersData.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-            }
-            
-            // Finish bulk creation
-            finishBulkCreation();
-        }
-
-        function finishBulkCreation() {
-            const totalTime = Math.round((Date.now() - bulkCreationStartTime) / 1000);
-            
-            setLoadingState('bulkUsersForm', 'bulkUsersBtnText', 'bulkUsersSpinner', false);
-            
-            // Update results
-            document.getElementById('bulkSuccessCount').textContent = bulkSuccessCount;
-            document.getElementById('bulkFailCount').textContent = bulkFailCount;
-            document.getElementById('bulkTotalTime').textContent = totalTime;
-            
-            // Show results section
-            document.getElementById('bulkResults').classList.remove('hidden');
-            
-            // Show success message
-            if (bulkSuccessCount > 0) {
-                showMessage('bulkUsersSuccess', `${bulkSuccessCount} کاربر با موفقیت ایجاد شد!`);
-            }
-            
-            if (bulkFailCount > 0) {
-                showMessage('bulkUsersError', `${bulkFailCount} کاربر ایجاد نشد.`);
-            }
-            
-            // Refresh users list
-            loadUsers();
-            
-            // Update log
-            const log = document.getElementById('bulkLog');
-            log.innerHTML += `<div class="bulk-log-entry info"><i class="fas fa-check-circle"></i> تکمیل شد. موفق: ${bulkSuccessCount}, ناموفق: ${bulkFailCount}, زمان: ${totalTime}s</div>`;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        function downloadBulkConfigs(type) {
-            if (bulkUsersData.length === 0) {
-                showNotification('هیچ داده‌ای برای دانلود وجود ندارد', 'error');
-                return;
-            }
-            
-            const successfulUsers = bulkUsersData.filter(u => u.status === 'success');
-            if (successfulUsers.length === 0) {
-                showNotification('هیچ کاربر موفقی برای دانلود وجود ندارد', 'error');
-                return;
-            }
-            
-            let content = '';
-            let filename = '';
-            
-            switch (type) {
-                case 'subscription':
-                    content = successfulUsers
-                        .filter(u => u.subscription_url)
-                        .map(u => `${u.username}: ${u.subscription_url}`)
-                        .join('\n');
-                    filename = 'bulk_subscriptions.txt';
-                    break;
-                
-                case 'configs':
-                    content = successfulUsers.map(u => {
-                        const configs = u.configs || [];
-                        return `=== ${u.username} ===\n${configs.join('\n')}\n`;
-                    }).join('\n');
-                    filename = 'bulk_configs.txt';
-                    break;
-                
-                case 'usernames':
-                    content = successfulUsers.map(u => u.username).join('\n');
-                    filename = 'bulk_usernames.txt';
-                    break;
-                
-                case 'summary':
-                    content = `=== خلاصه ساخت کاربران انبوه ===
-تاریخ: ${new Date().toLocaleDateString('fa-IR')}
-تعداد کل: ${bulkUsersData.length}
-موفق: ${bulkSuccessCount}
-ناموفق: ${bulkFailCount}
-زمان کل: ${Math.round((Date.now() - bulkCreationStartTime) / 1000)} ثانیه
-
-=== کاربران موفق ===
-${successfulUsers.map(u => `${u.username} - ${u.dataLimit}GB - ${new Date(u.expireDate).toLocaleDateString('fa-IR')}`).join('\n')}
-
-=== لینک‌های سابسکریپشن ===
-${successfulUsers.filter(u => u.subscription_url).map(u => `${u.username}: ${u.subscription_url}`).join('\n')}`;
-                    filename = 'bulk_summary.txt';
-                    break;
-                
-                default:
-                    showNotification('نوع دانلود نامعتبر است', 'error');
-                    return;
-            }
-            
-            if (!content.trim()) {
-                showNotification('محتوایی برای دانلود وجود ندارد', 'error');
-                return;
-            }
-            
-            // Create and download file
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showNotification(`فایل ${filename} دانلود شد! 📁`, 'success');
-        }
-
         // TEST ACCOUNT FUNCTIONS
         function generateTestAccountUsername() {
             const timestamp = Date.now().toString().slice(-6);
@@ -5348,4 +4473,277 @@ ${successfulUsers.filter(u => u.subscription_url).map(u => `${u.username}: ${u.s
                         <div class="traffic-label">کل دانلود</div>
                     </div>
                     <div class="traffic-card">
-                        <div class="traffic-icon"><i class
+                        <div class="traffic-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <div class="traffic-number" id="totalUpload">0 GB</div>
+                        <div class="traffic-label">کل آپلود</div>
+                    </div>
+                    <div class="traffic-card">
+                        <div class="traffic-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <div class="traffic-number" id="totalBandwidth">0 GB</div>
+                        <div class="traffic-label">کل ترافیک مصرفی</div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <div class="chart-container">
+                        <h4 class="chart-title">نمودار مصرف روزانه</h4>
+                        <canvas id="dailyTrafficChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4 class="chart-title">توزیع مصرف کاربران</h4>
+                        <canvas id="userTrafficChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h4 class="chart-title">جزئیات مصرف کاربران</h4>
+                    <div id="trafficDetails"></div>
+                </div>
+            `;
+
+            updateTrafficStats(users);
+            updateTrafficCharts(users);
+            loadTrafficDetails(users);
+        }
+
+        function updateTrafficStats(users) {
+            if (!Array.isArray(users)) return;
+            
+            const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
+            // Simulate download/upload split as seen in reference code
+            const totalDownload = totalTraffic * 0.7;
+            const totalUpload = totalTraffic * 0.3;
+            
+            Security.safeSetContent(document.getElementById('totalDownload'), formatBytes(totalDownload));
+            Security.safeSetContent(document.getElementById('totalUpload'), formatBytes(totalUpload));
+            Security.safeSetContent(document.getElementById('totalBandwidth'), formatBytes(totalTraffic));
+        }
+
+        function updateTrafficCharts(users) {
+            if (!Array.isArray(users)) return;
+
+            if (dailyTrafficChartInstance) dailyTrafficChartInstance.destroy();
+            if (userTrafficChartInstance) userTrafficChartInstance.destroy();
+
+            // Daily Traffic Chart (Simulated)
+            const dailyData = generateDailyTrafficData(users);
+            const dailyCanvas = document.getElementById('dailyTrafficChart');
+            if (dailyCanvas) {
+                dailyTrafficChartInstance = new Chart(dailyCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: dailyData.labels,
+                        datasets: [{
+                            label: 'ترافیک روزانه (GB)',
+                            data: dailyData.data,
+                            borderColor: 'var(--accent-color)',
+                            backgroundColor: 'rgba(204, 155, 80, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { ticks: { color: 'var(--text-secondary)' } }, x: { ticks: { color: 'var(--text-secondary)' } } } }
+                });
+            }
+
+            // User Traffic Distribution Chart
+            const topTrafficUsers = users.filter(u => u.used_traffic > 0).sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0)).slice(0, 10);
+            const userTrafficCanvas = document.getElementById('userTrafficChart');
+            if (userTrafficCanvas) {
+                userTrafficChartInstance = new Chart(userTrafficCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: topTrafficUsers.map(user => Security.sanitizeHtml(user.username)),
+                        datasets: [{
+                            label: 'مصرف (GB)',
+                            data: topTrafficUsers.map(user => (user.used_traffic || 0) / (1024 * 1024 * 1024)),
+                            backgroundColor: 'var(--primary-color)',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { ticks: { color: 'var(--text-secondary)' } }, x: { ticks: { color: 'var(--text-secondary)' } } } }
+                });
+            }
+        }
+
+        function generateDailyTrafficData(users) {
+            const labels = [];
+            const data = [];
+            const totalUsedGB = users.reduce((sum, u) => sum + (u.used_traffic || 0), 0) / (1024*1024*1024);
+            let remainingTraffic = totalUsedGB;
+
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' }));
+                
+                let dailyUsage;
+                if (i === 0) {
+                    dailyUsage = remainingTraffic > 0 ? remainingTraffic : 0;
+                } else {
+                    const randomFactor = Math.random() * 0.2 + 0.05; 
+                    dailyUsage = Math.min(remainingTraffic, totalUsedGB * randomFactor);
+                }
+                data.push(dailyUsage.toFixed(2));
+                remainingTraffic -= dailyUsage;
+            }
+            return { labels, data };
+        }
+
+        function loadTrafficDetails(users) {
+            if (!Array.isArray(users)) return;
+            const container = document.getElementById('trafficDetails');
+            if (!container) return;
+
+            const sortedUsers = [...users].sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0));
+            const totalTraffic = users.reduce((sum, user) => sum + (user.used_traffic || 0), 0);
+
+            container.innerHTML = '';
+            const table = document.createElement('table');
+            table.className = 'data-table';
+            table.innerHTML = `<thead><tr>
+                <th><i class="fas fa-user"></i> کاربر</th>
+                <th><i class="fas fa-download"></i> مصرف</th>
+                <th><i class="fas fa-percentage"></i> درصد از کل</th>
+                <th><i class="fas fa-chart-line"></i> درصد از سهمیه</th>
+            </tr></thead>`;
+            const tbody = document.createElement('tbody');
+
+            sortedUsers.forEach(user => {
+                const usagePercentOfTotal = totalTraffic > 0 ? ((user.used_traffic || 0) / totalTraffic * 100) : 0;
+                const usagePercentOfLimit = user.data_limit > 0 ? ((user.used_traffic || 0) / user.data_limit * 100) : 0;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 600;">${Security.sanitizeHtml(user.username)}</td>
+                    <td>${formatBytes(user.used_traffic || 0)}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span>${usagePercentOfTotal.toFixed(1)}%</span>
+                            <div class="progress-bar" style="width: 60px;"><div class="progress-fill" style="width: ${usagePercentOfTotal.toFixed(1)}%;"></div></div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span>${usagePercentOfLimit.toFixed(1)}%</span>
+                            <div class="progress-bar" style="width: 60px;"><div class="progress-fill" style="width: ${usagePercentOfLimit.toFixed(1)}%; background: var(--accent-color);"></div></div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+
+        async function loadAnalytics() {
+            const container = document.getElementById('analyticsContent');
+            if (!container) return;
+            container.innerHTML = `<div class="section-loading"><div class="loading-spinner"></div><span>در حال بارگذاری آمار...</span></div>`;
+
+            if (users.length === 0) {
+                const usersData = await apiCall('/users');
+                if (usersData && usersData.users) {
+                    users = usersData.users;
+                } else {
+                    container.innerHTML = `<p style="text-align: center; color: var(--danger-color); padding: 40px;">خطا در بارگذاری اطلاعات کاربران</p>`;
+                    return;
+                }
+            }
+
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <div class="chart-container">
+                        <h4 class="chart-title">توزیع پروتکل‌ها</h4>
+                        <canvas id="protocolChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4 class="chart-title">وضعیت انقضای کاربران</h4>
+                        <canvas id="expiryChart"></canvas>
+                    </div>
+                </div>
+            `;
+
+            renderProtocolChart();
+            renderExpiryChart();
+        }
+
+        function renderProtocolChart() {
+            if (protocolChartInstance) protocolChartInstance.destroy();
+            const protocolCanvas = document.getElementById('protocolChart');
+            if (!protocolCanvas) return;
+
+            const protocolCounts = {};
+            users.forEach(user => {
+                // This part is adapted for your 'inbounds' structure
+                if (user.inbounds && typeof user.inbounds === 'object') {
+                    Object.keys(user.inbounds).forEach(protocol => {
+                        if (Array.isArray(user.inbounds[protocol]) && user.inbounds[protocol].length > 0) {
+                            const sanitizedProtocol = Security.sanitizeHtml(protocol);
+                            protocolCounts[sanitizedProtocol] = (protocolCounts[sanitizedProtocol] || 0) + 1;
+                        }
+                    });
+                }
+            });
+
+            protocolChartInstance = new Chart(protocolCanvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(protocolCounts),
+                    datasets: [{
+                        data: Object.values(protocolCounts),
+                        backgroundColor: ['#2C3E50', '#4A6741', '#CC9B50', '#34495E', '#1976d2', '#d32f2f'],
+                        borderWidth: 3,
+                        borderColor: 'var(--card-bg)'
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: 'var(--text-secondary)' } } } }
+            });
+        }
+
+        function renderExpiryChart() {
+            if (expiryChartInstance) expiryChartInstance.destroy();
+            const expiryCanvas = document.getElementById('expiryChart');
+            if (!expiryCanvas) return;
+
+            const now = new Date();
+            const expiryData = { 'منقضی شده': 0, 'کمتر از ۷ روز': 0, 'کمتر از ۳۰ روز': 0, 'بیش از ۳۰ روز': 0, 'نامحدود': 0 };
+            users.forEach(user => {
+                if (!user.expire || user.expire === 0) {
+                    expiryData['نامحدود']++;
+                } else {
+                    const expireDate = new Date(user.expire * 1000);
+                    const diffDays = (expireDate - now) / (1000 * 60 * 60 * 24);
+                    if (diffDays < 0) expiryData['منقضی شده']++;
+                    else if (diffDays <= 7) expiryData['کمتر از ۷ روز']++;
+                    else if (diffDays <= 30) expiryData['کمتر از ۳۰ روز']++;
+                    else expiryData['بیش از ۳۰ روز']++;
+                }
+            });
+
+            expiryChartInstance = new Chart(expiryCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(expiryData),
+                    datasets: [{
+                        label: 'تعداد کاربران',
+                        data: Object.values(expiryData),
+                        backgroundColor: ['#d32f2f', '#ff9800', '#1976d2', '#2e7d32', '#64748B'],
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: 'var(--text-secondary)' } }, x: { ticks: { color: 'var(--text-secondary)' } } } }
+            });
+        }
+
+        // ======================= END OF IMPLEMENTATION =======================
+
+        window.addEventListener('error', (e) => {
+            console.error('Application error:', e.error);
+            showNotification('', 'error');
+        });
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            showNotification('خطای غیرمنتظره در سرور رخ داد', 'error');
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>
