@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پنل نمایندگان آزادی VPN</title>
     
+    <!-- Favicon - Rocket Icon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    
     <!-- Enhanced Font Awesome with Multiple CDNs -->
-    <link rel="preconnect" href="https://pro.x2.goooooooozoooo.sbs">
-    <link rel="preconnect" href="https://pro.x2.goooooooozoooo.sbs">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://use.fontawesome.com">
     <link rel="preconnect" href="https://pro.x2.goooooooozoooo.sbs">
     
     <!-- Primary Font Awesome Sources -->
@@ -104,6 +107,10 @@
         .fa-history:before, .fas.fa-history:before { content: "\f1da" !important; }
         .fa-plus:before, .fas.fa-plus:before { content: "\f067" !important; }
         .fa-trash:before, .fas.fa-trash:before { content: "\f1f8" !important; }
+        .fa-sort:before, .fas.fa-sort:before { content: "\f0dc" !important; }
+        .fa-filter:before, .fas.fa-filter:before { content: "\f0b0" !important; }
+        .fa-file-export:before, .fas.fa-file-export:before { content: "\f56e" !important; }
+        .fa-rocket:before, .fas.fa-rocket:before { content: "\f135" !important; }
         
         /* Enhanced Vazir Font Loading */
         @import url('https://v1.fontapi.ir/css/Vazir');
@@ -644,6 +651,10 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-family: 'Vazir', 'Vazir-Local', 'Tahoma', 'Arial', sans-serif !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
 
         [data-theme="dark"] .content-header {
@@ -809,6 +820,72 @@
             font-weight: 500;
             font-family: 'Vazir', 'Vazir-Local', 'Tahoma', 'Arial', sans-serif !important;
         }
+
+        /* Users Control Bar */
+        .users-control-bar {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .sort-select, .filter-select {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .sort-select:focus, .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+        }
+
+        .export-btn {
+            background: var(--success-color);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .export-btn:hover {
+            background: #388e3c;
+            transform: translateY(-1px);
+        }
         
         /* Table Styles */
         .data-table {
@@ -909,6 +986,10 @@
             background: var(--bg-secondary);
             color: var(--text-primary);
             border-color: var(--border-color);
+        }
+
+        .form-button.purple {
+            background: #9c27b0;
         }
         
         /* Status Badges */
@@ -1030,6 +1111,269 @@
             overflow-y: auto;
             box-shadow: var(--shadow-xl);
             border: 1px solid var(--border-color);
+        }
+
+        /* Enhanced Edit User Modal */
+        .edit-user-modal-content {
+            background: var(--card-bg);
+            padding: 0;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+        }
+
+        .edit-modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 24px 28px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .edit-modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .edit-modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .edit-modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .edit-modal-body {
+            padding: 28px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .user-info-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-light);
+        }
+
+        .user-info-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-color), var(--warning-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-info-details {
+            flex: 1;
+        }
+
+        .user-info-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .user-info-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .user-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .user-stat-item {
+            text-align: center;
+            padding: 12px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+
+        .user-stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .user-stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .edit-form-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .edit-tab {
+            flex: 1;
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .edit-tab.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .edit-tab:hover:not(.active) {
+            background: var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .edit-tab-content {
+            display: none;
+        }
+
+        .edit-tab-content.active {
+            display: block;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .quick-action-btn {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quick-action-btn.danger:hover {
+            border-color: var(--danger-color);
+            background: var(--danger-color);
+        }
+
+        .quick-action-btn.success:hover {
+            border-color: var(--success-color);
+            background: var(--success-color);
+        }
+
+        .advanced-field {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-light);
+        }
+
+        .advanced-field-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .field-description {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .input-addon {
+            background: var(--border-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px 0 0 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            min-width: 60px;
+            justify-content: center;
+        }
+
+        .form-input.with-addon {
+            border-radius: 0 8px 8px 0;
+            border-left: none;
         }
 
         /* Terms Modal - Larger for better readability */
@@ -1382,6 +1726,72 @@
             width: 16px;
             color: #90EE90;
         }
+
+        /* Confirm Dialog */
+        .confirm-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+            padding: 20px;
+        }
+
+        .confirm-dialog-content {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .confirm-dialog-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+        }
+
+        .confirm-dialog-icon.warning {
+            background: var(--warning-color);
+        }
+
+        .confirm-dialog-icon.danger {
+            background: var(--danger-color);
+        }
+
+        .confirm-dialog-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .confirm-dialog-message {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .confirm-dialog-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
         
         /* Mobile Header */
         .mobile-header {
@@ -1674,6 +2084,40 @@
                 max-height: 90vh;
             }
 
+            .edit-user-modal-content {
+                max-width: calc(100vw - 16px);
+                max-height: 95vh;
+            }
+
+            .edit-modal-header {
+                padding: 20px 24px;
+            }
+
+            .edit-modal-body {
+                padding: 20px;
+            }
+
+            .users-control-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                min-width: auto;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .user-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .edit-form-tabs {
+                flex-direction: column;
+            }
+
             /* Mobile Panel Layout */
             .panel-nav {
                 display: none !important;
@@ -1699,6 +2143,8 @@
             .content-header {
                 font-size: 20px;
                 margin-bottom: 16px;
+                flex-direction: column;
+                gap: 8px;
             }
             
             .section-header {
@@ -2025,6 +2471,11 @@
             .fa-history:before { content: "📝"; }
             .fa-plus:before { content: "➕"; }
             .fa-trash:before { content: "🗑️"; }
+            .fa-flask:before { content: "🧪"; }
+            .fa-sort:before { content: "📊"; }
+            .fa-filter:before { content: "🔍"; }
+            .fa-file-export:before { content: "📤"; }
+            .fa-rocket:before { content: "🚀"; }
         }
 
         /* Force Icon Display */
@@ -2033,6 +2484,27 @@
             width: 1em;
             height: 1em;
             text-align: center;
+        }
+
+        /* Keyboard Shortcuts */
+        @media (min-width: 769px) {
+            .shortcut-hint {
+                position: absolute;
+                bottom: -20px;
+                right: 0;
+                font-size: 10px;
+                color: var(--text-muted);
+                background: var(--card-bg);
+                padding: 2px 6px;
+                border-radius: 4px;
+                border: 1px solid var(--border-light);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .form-button:hover .shortcut-hint {
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -2053,7 +2525,7 @@
         <div class="login-background"></div>
         <div class="login-card">
             <div class="login-header">
-                <div class="login-logo">⚡</div>
+                <div class="login-logo">🚀</div>
                 <h1 class="login-title">پنل نمایندگان</h1>
                 <p class="login-subtitle">آزادی VPN</p>
             </div>
@@ -2128,7 +2600,7 @@
         <!-- Mobile Navigation -->
         <div id="mobileNav" class="mobile-nav">
             <div class="nav-header">
-                <div class="nav-logo">⚡</div>
+                <div class="nav-logo">🚀</div>
                 <div class="nav-title">پنل نمایندگان</div>
                 <div class="nav-subtitle" id="navWelcomeMobile">خوش آمدید</div>
             </div>
@@ -2167,7 +2639,7 @@
         <!-- Side Navigation -->
         <div class="panel-nav">
             <div class="nav-header">
-                <div class="nav-logo">⚡</div>
+                <div class="nav-logo">🚀</div>
                 <div class="nav-title">پنل نمایندگان</div>
                 <div class="nav-subtitle" id="navWelcome">خوش آمدید</div>
             </div>
@@ -2205,7 +2677,10 @@
 
         <!-- Content -->
         <div class="panel-content">
-            <h1 class="content-header">پنل نمایندگان آزادی VPN</h1>
+            <h1 class="content-header">
+                <i class="fas fa-rocket"></i>
+                پنل نمایندگان آزادی VPN
+            </h1>
             
             <!-- Dashboard Section -->
             <div id="dashboardSection" class="content-section active">
@@ -2721,49 +3196,163 @@
         </div>
     </div>
 
-    <!-- Edit User Modal -->
+    <!-- Enhanced Edit User Modal -->
     <div id="editUserModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">
+        <div class="edit-user-modal-content">
+            <div class="edit-modal-header">
+                <h3 class="edit-modal-title">
                     <i class="fas fa-user-edit"></i>
-                    ویرایش کاربر
+                    ویرایش پیشرفته کاربر
                 </h3>
-                <button class="modal-close" onclick="closeEditModal()">
+                <button class="edit-modal-close" onclick="closeEditModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <form id="editUserForm">
-                <div class="form-group">
-                    <label class="form-label">نام کاربری</label>
-                    <input type="text" id="editUsername" class="form-input" readonly style="background: var(--bg-secondary); opacity: 0.7;">
+            <div class="edit-modal-body">
+                <!-- User Info Card -->
+                <div class="user-info-card">
+                    <div class="user-info-header">
+                        <div class="user-avatar" id="editUserAvatar">👤</div>
+                        <div class="user-info-details">
+                            <div class="user-info-name" id="editUserInfoName">کاربر</div>
+                            <div class="user-info-meta" id="editUserInfoMeta">اطلاعات بارگذاری...</div>
+                        </div>
+                        <button class="form-button info" title="کپی اطلاعات کاربر" onclick="copyUserInfo()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="user-stats-grid">
+                        <div class="user-stat-item">
+                            <div class="user-stat-value" id="editUserUsage">-</div>
+                            <div class="user-stat-label">ترافیک مصرفی</div>
+                        </div>
+                        <div class="user-stat-item">
+                            <div class="user-stat-value" id="editUserLimit">-</div>
+                            <div class="user-stat-label">سهمیه کل</div>
+                        </div>
+                        <div class="user-stat-item">
+                            <div class="user-stat-value" id="editUserStatus">-</div>
+                            <div class="user-stat-label">وضعیت</div>
+                        </div>
+                        <div class="user-stat-item">
+                            <div class="user-stat-value" id="editUserExpiry">-</div>
+                            <div class="user-stat-label">انقضا</div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label">حجم ترافیک (GB)</label>
-                    <input type="number" id="editDataLimit" class="form-input" required min="1" max="1000">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">تاریخ انقضا</label>
-                    <input type="date" id="editExpireDate" class="form-input" required>
-                </div>
-                
-                <div id="editUserError" class="error-message hidden"></div>
-                <div id="editUserSuccess" class="success-message hidden"></div>
-                
-                <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="submit" class="form-button success" style="flex: 1; padding: 12px;">
-                        <span id="editUserBtnText">
-                            <i class="fas fa-save"></i> ذخیره تغییرات
-                        </span>
-                        <div id="editUserSpinner" class="loading-spinner hidden"></div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="showUserConfigs(currentEditUser.username)">
+                        <i class="fas fa-cog"></i>
+                        مشاهده کانفیگ
                     </button>
-                    <button type="button" onclick="closeEditModal()" class="form-button secondary" style="flex: 1; padding: 12px;">
-                        <i class="fas fa-times"></i> انصراف
+                    <button class="quick-action-btn success" onclick="extendUserTime()">
+                        <i class="fas fa-clock"></i>
+                        تمدید زمان
+                    </button>
+                    <button class="quick-action-btn" onclick="addUserTraffic()">
+                        <i class="fas fa-plus"></i>
+                        افزودن ترافیک
+                    </button>
+                    <button class="quick-action-btn danger" onclick="confirmUserAction('reset', 'ریست ترافیک کاربر', 'آیا از ریست کردن ترافیک این کاربر اطمینان دارید؟')">
+                        <i class="fas fa-redo"></i>
+                        ریست ترافیک
                     </button>
                 </div>
-            </form>
+
+                <!-- Form Tabs -->
+                <div class="edit-form-tabs">
+                    <button class="edit-tab active" onclick="switchEditTab('basic')">
+                        <i class="fas fa-edit"></i>
+                        ویرایش اصلی
+                    </button>
+                    <button class="edit-tab" onclick="switchEditTab('advanced')">
+                        <i class="fas fa-cogs"></i>
+                        تنظیمات پیشرفته
+                    </button>
+                </div>
+
+                <!-- Basic Edit Tab -->
+                <div class="edit-tab-content active" id="basicEditTab">
+                    <form id="editUserForm">
+                        <div class="form-group">
+                            <label class="form-label">نام کاربری</label>
+                            <input type="text" id="editUsername" class="form-input" readonly style="background: var(--bg-secondary); opacity: 0.7;">
+                        </div>
+                        
+                        <div class="advanced-field">
+                            <div class="advanced-field-label">
+                                <i class="fas fa-download"></i>
+                                حجم ترافیک
+                            </div>
+                            <div class="field-description">تنظیم کل حجم ترافیک قابل استفاده برای این کاربر</div>
+                            <div class="input-group">
+                                <div class="input-addon">GB</div>
+                                <input type="number" id="editDataLimit" class="form-input with-addon" required min="1" max="1000">
+                            </div>
+                        </div>
+                        
+                        <div class="advanced-field">
+                            <div class="advanced-field-label">
+                                <i class="fas fa-calendar"></i>
+                                تاریخ انقضا
+                            </div>
+                            <div class="field-description">تاریخ انقضای سرویس کاربر</div>
+                            <input type="date" id="editExpireDate" class="form-input" required>
+                        </div>
+                        
+                        <div id="editUserError" class="error-message hidden"></div>
+                        <div id="editUserSuccess" class="success-message hidden"></div>
+                        
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <button type="submit" class="form-button success" style="flex: 1; padding: 12px;">
+                                <span id="editUserBtnText">
+                                    <i class="fas fa-save"></i> ذخیره تغییرات
+                                </span>
+                                <div id="editUserSpinner" class="loading-spinner hidden"></div>
+                            </button>
+                            <button type="button" onclick="previewChanges()" class="form-button info" style="padding: 12px;">
+                                <i class="fas fa-eye"></i> پیش‌نمایش
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Advanced Edit Tab -->
+                <div class="edit-tab-content" id="advancedEditTab">
+                    <div class="advanced-field">
+                        <div class="advanced-field-label">
+                            <i class="fas fa-user-tag"></i>
+                            اطلاعات تکمیلی
+                        </div>
+                        <div class="field-description">یادداشت‌ها و اطلاعات اضافی کاربر</div>
+                        <textarea id="editUserNotes" class="form-input" rows="3" placeholder="یادداشت‌های شخصی درباره این کاربر..."></textarea>
+                    </div>
+                    
+                    <div class="advanced-field">
+                        <div class="advanced-field-label">
+                            <i class="fas fa-history"></i>
+                            تاریخچه تغییرات
+                        </div>
+                        <div class="field-description">آخرین تغییرات اعمال شده روی این کاربر</div>
+                        <div id="editUserHistory" style="background: var(--card-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border-light); min-height: 80px; color: var(--text-secondary); font-size: 13px;">
+                            در حال بارگذاری تاریخچه...
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+                        <button class="form-button warning" onclick="backupUserData()">
+                            <i class="fas fa-download"></i>
+                            پشتیبان‌گیری
+                        </button>
+                        <button class="form-button purple" onclick="generateNewConfigs()">
+                            <i class="fas fa-sync"></i>
+                            تولید کانفیگ جدید
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2807,6 +3396,12 @@
     </div>
 
     <script>
+        // Enhanced Global Variables
+        let currentEditUser = null;
+        let currentSortBy = 'username';
+        let currentFilterBy = 'all';
+        let isFilterReversed = false;
+
         // Icon Fallback Script - Ensures icons load
         document.addEventListener('DOMContentLoaded', function() {
             // Check if Font Awesome loaded properly
@@ -2827,6 +3422,9 @@
                 
                 document.body.removeChild(testIcon);
             }, 1000);
+            
+            // Setup keyboard shortcuts
+            setupKeyboardShortcuts();
             
             // Apply immediate fallbacks for critical icons
             const criticalIcons = document.querySelectorAll('i[class*="fa-"]');
@@ -2854,6 +3452,7 @@
                     else if (className.includes('fa-paper-plane')) fallback = '✈️';
                     else if (className.includes('fa-clock')) fallback = '🕐';
                     else if (className.includes('fa-envelope')) fallback = '✉️';
+                    else if (className.includes('fa-rocket')) fallback = '🚀';
                     
                     icon.innerHTML = `<span class="icon-fallback">${fallback}</span>`;
                 }
@@ -2898,7 +3497,11 @@
                 'fa-history': '📝',
                 'fa-plus': '➕',
                 'fa-trash': '🗑️',
-                'fa-flask': '🧪'
+                'fa-flask': '🧪',
+                'fa-sort': '📊',
+                'fa-filter': '🔍',
+                'fa-file-export': '📤',
+                'fa-rocket': '🚀'
             };
 
             Object.keys(iconMap).forEach(className => {
@@ -2907,6 +3510,531 @@
                     icon.innerHTML = `<span class="icon-fallback">${iconMap[className]}</span>`;
                 });
             });
+        }
+
+        // Keyboard Shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+R: Refresh current section
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    const activeSection = document.querySelector('.content-section.active');
+                    if (activeSection) {
+                        const sectionId = activeSection.id.replace('Section', '');
+                        const refreshFunctions = {
+                            'dashboard': refreshDashboard,
+                            'users': refreshUsersSection,
+                            'addUser': refreshAddUserSection,
+                            'testAccount': refreshTestAccountSection,
+                            'support': refreshSupportSection,
+                            'payment': refreshPaymentSection,
+                            'settings': refreshSettingsSection
+                        };
+                        if (refreshFunctions[sectionId]) {
+                            refreshFunctions[sectionId]();
+                        }
+                    }
+                }
+
+                // Ctrl+T: Toggle theme
+                if (e.ctrlKey && e.key === 't') {
+                    e.preventDefault();
+                    toggleTheme();
+                }
+
+                // Escape: Close modals
+                if (e.key === 'Escape') {
+                    const modals = document.querySelectorAll('.modal:not(.hidden)');
+                    modals.forEach(modal => {
+                        if (modal.id === 'editUserModal') closeEditModal();
+                        else if (modal.id === 'configModal') closeConfigModal();
+                        else if (modal.id === 'templateUserModal') closeTemplateUserModal();
+                        else if (modal.id === 'termsModal') closeTermsModal();
+                    });
+                }
+
+                // Number keys 1-7: Switch sections
+                if (e.key >= '1' && e.key <= '7' && !e.ctrlKey && !e.altKey) {
+                    const sections = ['dashboard', 'users', 'addUser', 'testAccount', 'support', 'payment', 'settings'];
+                    const sectionIndex = parseInt(e.key) - 1;
+                    if (sections[sectionIndex]) {
+                        showSection(sections[sectionIndex]);
+                    }
+                }
+            });
+        }
+
+        // Enhanced Edit User Functions
+        function editUser(username) {
+            const user = users.find(u => u.username === username);
+            if (!user) return showNotification('کاربر یافت نشد', 'error');
+            
+            currentEditUser = user;
+            
+            // Populate basic fields
+            document.getElementById('editUsername').value = Security.sanitizeHtml(username);
+            document.getElementById('editDataLimit').value = user.data_limit ? (user.data_limit / (1024 * 1024 * 1024)).toFixed(0) : 30;
+            const expireDate = user.expire ? new Date(user.expire * 1000) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+            document.getElementById('editExpireDate').value = expireDate.toISOString().split('T')[0];
+            
+            // Populate user info
+            updateUserInfoCard(user);
+            
+            // Load user history
+            loadUserHistory(username);
+            
+            // Reset form state
+            hideMessage('editUserError');
+            hideMessage('editUserSuccess');
+            switchEditTab('basic');
+            
+            document.getElementById('editUserModal').classList.remove('hidden');
+        }
+
+        function updateUserInfoCard(user) {
+            // User avatar with first letter
+            const avatar = document.getElementById('editUserAvatar');
+            avatar.textContent = user.username.charAt(0).toUpperCase();
+            
+            // User info
+            document.getElementById('editUserInfoName').textContent = Security.sanitizeHtml(user.username);
+            document.getElementById('editUserInfoMeta').textContent = `ایجاد شده: ${user.created_at ? new Date(user.created_at).toLocaleDateString('fa-IR') : 'نامشخص'}`;
+            
+            // User stats
+            document.getElementById('editUserUsage').textContent = formatBytes(user.used_traffic || 0);
+            document.getElementById('editUserLimit').textContent = formatBytes(user.data_limit || 0);
+            document.getElementById('editUserStatus').textContent = getUserStatus(user);
+            document.getElementById('editUserExpiry').textContent = user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود';
+            
+            // Load existing notes
+            const notes = sessionStorage.getItem(`user_notes_${user.username}`) || '';
+            document.getElementById('editUserNotes').value = notes;
+        }
+
+        function loadUserHistory(username) {
+            const historyContainer = document.getElementById('editUserHistory');
+            const history = JSON.parse(sessionStorage.getItem(`user_history_${username}`) || '[]');
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = 'هیچ تاریخچه‌ای موجود نیست.';
+                return;
+            }
+            
+            historyContainer.innerHTML = history.slice(-5).reverse().map(entry => `
+                <div style="padding: 8px; border-bottom: 1px solid var(--border-light); margin-bottom: 8px;">
+                    <div style="font-weight: 600; color: var(--text-primary);">${entry.action}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">${new Date(entry.timestamp).toLocaleString('fa-IR')}</div>
+                </div>
+            `).join('');
+        }
+
+        function addUserHistory(username, action) {
+            const history = JSON.parse(sessionStorage.getItem(`user_history_${username}`) || '[]');
+            history.push({
+                action,
+                timestamp: Date.now(),
+                user: currentUsername
+            });
+            
+            // Keep only last 50 entries
+            if (history.length > 50) {
+                history.splice(0, history.length - 50);
+            }
+            
+            sessionStorage.setItem(`user_history_${username}`, JSON.stringify(history));
+        }
+
+        function switchEditTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.edit-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.edit-tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            document.querySelector(`.edit-tab[onclick="switchEditTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}EditTab`).classList.add('active');
+        }
+
+        function copyUserInfo() {
+            if (!currentEditUser) return;
+            
+            const info = `نام کاربری: ${currentEditUser.username}
+ترافیک مصرفی: ${formatBytes(currentEditUser.used_traffic || 0)}
+سهمیه کل: ${formatBytes(currentEditUser.data_limit || 0)}
+وضعیت: ${getUserStatus(currentEditUser)}
+انقضا: ${currentEditUser.expire ? new Date(currentEditUser.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود'}`;
+            
+            copyText(info);
+        }
+
+        function previewChanges() {
+            if (!currentEditUser) return;
+            
+            const newDataLimit = parseFloat(document.getElementById('editDataLimit').value);
+            const newExpireDate = document.getElementById('editExpireDate').value;
+            
+            showConfirmDialog(
+                'پیش‌نمایش تغییرات',
+                `تغییرات زیر اعمال خواهد شد:
+                
+• حجم ترافیک: ${formatBytes(currentEditUser.data_limit || 0)} ← ${formatBytes(newDataLimit * 1024 * 1024 * 1024)}
+• تاریخ انقضا: ${currentEditUser.expire ? new Date(currentEditUser.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود'} ← ${new Date(newExpireDate).toLocaleDateString('fa-IR')}`,
+                'info',
+                () => {
+                    document.querySelector('#editUserForm button[type="submit"]').click();
+                }
+            );
+        }
+
+        function extendUserTime() {
+            if (!currentEditUser) return;
+            
+            showPromptDialog('تمدید زمان', 'چند روز به انقضای کاربر اضافه شود؟', '30', (days) => {
+                const daysNum = parseInt(days);
+                if (isNaN(daysNum) || daysNum <= 0) {
+                    showNotification('تعداد روز نامعتبر است', 'error');
+                    return;
+                }
+                
+                const currentExpire = currentEditUser.expire ? new Date(currentEditUser.expire * 1000) : new Date();
+                const newExpire = new Date(currentExpire.getTime() + (daysNum * 24 * 60 * 60 * 1000));
+                
+                document.getElementById('editExpireDate').value = newExpire.toISOString().split('T')[0];
+                showNotification(`${daysNum} روز به انقضای کاربر اضافه شد`, 'success');
+            });
+        }
+
+        function addUserTraffic() {
+            if (!currentEditUser) return;
+            
+            showPromptDialog('افزودن ترافیک', 'چند گیگابایت به ترافیک کاربر اضافه شود؟', '10', (gb) => {
+                const gbNum = parseFloat(gb);
+                if (isNaN(gbNum) || gbNum <= 0) {
+                    showNotification('مقدار ترافیک نامعتبر است', 'error');
+                    return;
+                }
+                
+                const currentLimit = parseFloat(document.getElementById('editDataLimit').value);
+                const newLimit = currentLimit + gbNum;
+                
+                document.getElementById('editDataLimit').value = newLimit;
+                showNotification(`${gbNum} گیگابایت به ترافیک کاربر اضافه شد`, 'success');
+            });
+        }
+
+        async function confirmUserAction(action, title, message) {
+            if (!currentEditUser) return;
+            
+            showConfirmDialog(title, message, 'warning', async () => {
+                if (action === 'reset') {
+                    showLoading('در حال ریست ترافیک...');
+                    const result = await apiCall(`/user/${encodeURIComponent(currentEditUser.username)}/reset`, 'POST');
+                    hideLoading();
+                    
+                    if (result) {
+                        showNotification('ترافیک کاربر با موفقیت ریست شد', 'success');
+                        addUserHistory(currentEditUser.username, 'ریست ترافیک');
+                        await loadUsers();
+                        closeEditModal();
+                    } else {
+                        showNotification('خطا در ریست ترافیک', 'error');
+                    }
+                }
+            });
+        }
+
+        function backupUserData() {
+            if (!currentEditUser) return;
+            
+            const userData = {
+                username: currentEditUser.username,
+                data_limit: currentEditUser.data_limit,
+                used_traffic: currentEditUser.used_traffic,
+                expire: currentEditUser.expire,
+                status: currentEditUser.status,
+                created_at: currentEditUser.created_at,
+                notes: document.getElementById('editUserNotes').value,
+                history: JSON.parse(sessionStorage.getItem(`user_history_${currentEditUser.username}`) || '[]')
+            };
+            
+            const dataStr = JSON.stringify(userData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `user_backup_${currentEditUser.username}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showNotification('پشتیبان‌گیری از اطلاعات کاربر انجام شد', 'success');
+        }
+
+        function generateNewConfigs() {
+            if (!currentEditUser) return;
+            showNotification('این قابلیت در نسخه‌های آینده اضافه خواهد شد', 'info');
+        }
+
+        // Enhanced Users Section with Sorting and Filtering
+        function renderUsersSection() {
+            const usersContent = document.getElementById('usersContent');
+            if (!usersContent) return;
+            
+            usersContent.innerHTML = `
+                <!-- Users Control Bar -->
+                <div class="users-control-bar">
+                    <div class="control-group">
+                        <div class="control-label">
+                            <i class="fas fa-sort"></i>
+                            مرتب‌سازی:
+                        </div>
+                        <select id="sortSelect" class="sort-select" onchange="handleSortChange()">
+                            <option value="username">نام کاربری (الفبایی)</option>
+                            <option value="usage_desc">پرمصرف‌ترین‌ها</option>
+                            <option value="usage_asc">کم‌مصرف‌ترین‌ها</option>
+                            <option value="expire_asc">منقضی شده‌ها</option>
+                            <option value="created_desc">جدید به قدیم</option>
+                            <option value="created_asc">قدیم به جدید</option>
+                            <option value="status">وضعیت</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <i class="fas fa-filter"></i>
+                            فیلتر:
+                        </div>
+                        <select id="filterSelect" class="filter-select" onchange="handleFilterChange()">
+                            <option value="all">همه کاربران</option>
+                            <option value="active">فعال</option>
+                            <option value="inactive">غیرفعال</option>
+                            <option value="expired">منقضی شده</option>
+                            <option value="limited">ترافیک تمام شده</option>
+                        </select>
+                    </div>
+                    <button class="export-btn" onclick="exportUsersList()">
+                        <i class="fas fa-file-export"></i>
+                        اکسپورت
+                    </button>
+                </div>
+
+                <div style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="userSearch" placeholder="جستجوی کاربر..." class="search-box" style="flex: 1; min-width: 250px;" maxlength="50">
+                    <button onclick="refreshUsers()" class="form-button"><i class="fas fa-sync-alt"></i> بروزرسانی</button>
+                </div>
+                <div id="usersTable"></div>
+                <div id="usersPagination" class="pagination"></div>`;
+            
+            document.getElementById('userSearch')?.addEventListener('input', filterUsers);
+            
+            // Set current sort and filter values
+            document.getElementById('sortSelect').value = currentSortBy;
+            document.getElementById('filterSelect').value = currentFilterBy;
+            
+            applySortingAndFiltering();
+            displayUsers();
+        }
+
+        function handleSortChange() {
+            currentSortBy = document.getElementById('sortSelect').value;
+            sessionStorage.setItem('users_sort_by', currentSortBy);
+            applySortingAndFiltering();
+            displayUsers();
+        }
+
+        function handleFilterChange() {
+            currentFilterBy = document.getElementById('filterSelect').value;
+            sessionStorage.setItem('users_filter_by', currentFilterBy);
+            applySortingAndFiltering();
+            currentPage = 1;
+            displayUsers();
+        }
+
+        function applySortingAndFiltering() {
+            let workingUsers = [...users];
+            
+            // Apply filtering first
+            switch (currentFilterBy) {
+                case 'active':
+                    workingUsers = workingUsers.filter(u => getUserStatus(u) === 'فعال');
+                    break;
+                case 'inactive':
+                    workingUsers = workingUsers.filter(u => u.status === 'disabled');
+                    break;
+                case 'expired':
+                    workingUsers = workingUsers.filter(u => u.expire && new Date(u.expire * 1000) < new Date());
+                    break;
+                case 'limited':
+                    workingUsers = workingUsers.filter(u => u.data_limit && (u.used_traffic || 0) >= u.data_limit);
+                    break;
+            }
+            
+            // Apply search
+            const searchTerm = document.getElementById('userSearch')?.value.toLowerCase().trim() || '';
+            if (searchTerm) {
+                workingUsers = workingUsers.filter(u => u.username.toLowerCase().includes(searchTerm));
+            }
+            
+            // Apply sorting
+            switch (currentSortBy) {
+                case 'username':
+                    workingUsers.sort((a, b) => a.username.localeCompare(b.username));
+                    break;
+                case 'usage_desc':
+                    workingUsers.sort((a, b) => (b.used_traffic || 0) - (a.used_traffic || 0));
+                    break;
+                case 'usage_asc':
+                    workingUsers.sort((a, b) => (a.used_traffic || 0) - (b.used_traffic || 0));
+                    break;
+                case 'expire_asc':
+                    workingUsers.sort((a, b) => {
+                        if (!a.expire && !b.expire) return 0;
+                        if (!a.expire) return 1;
+                        if (!b.expire) return -1;
+                        return a.expire - b.expire;
+                    });
+                    break;
+                case 'created_desc':
+                    workingUsers.sort((a, b) => {
+                        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+                        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+                        return bTime - aTime;
+                    });
+                    break;
+                case 'created_asc':
+                    workingUsers.sort((a, b) => {
+                        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+                        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+                        return aTime - bTime;
+                    });
+                    break;
+                case 'status':
+                    workingUsers.sort((a, b) => getUserStatus(a).localeCompare(getUserStatus(b)));
+                    break;
+            }
+            
+            filteredUsers = workingUsers;
+        }
+
+        function exportUsersList() {
+            if (filteredUsers.length === 0) {
+                showNotification('هیچ کاربری برای اکسپورت موجود نیست', 'warning');
+                return;
+            }
+            
+            const csvContent = [
+                ['نام کاربری', 'وضعیت', 'ترافیک مصرفی (GB)', 'سهمیه کل (GB)', 'تاریخ انقضا', 'درصد مصرف'],
+                ...filteredUsers.map(user => [
+                    user.username,
+                    getUserStatus(user),
+                    ((user.used_traffic || 0) / (1024 * 1024 * 1024)).toFixed(2),
+                    ((user.data_limit || 0) / (1024 * 1024 * 1024)).toFixed(2),
+                    user.expire ? new Date(user.expire * 1000).toLocaleDateString('fa-IR') : 'نامحدود',
+                    user.data_limit ? Math.min(((user.used_traffic || 0) / user.data_limit) * 100, 100).toFixed(1) + '%' : '0%'
+                ])
+            ].map(row => row.join(',')).join('\n');
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            
+            showNotification(`${filteredUsers.length} کاربر اکسپورت شد`, 'success');
+        }
+
+        // Enhanced Confirmation Dialogs
+        function showConfirmDialog(title, message, type = 'warning', onConfirm, onCancel) {
+            const overlay = document.createElement('div');
+            overlay.className = 'confirm-dialog';
+            
+            const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : 
+                             type === 'info' ? 'fa-info-circle' : 'fa-exclamation-triangle';
+            
+            overlay.innerHTML = `
+                <div class="confirm-dialog-content">
+                    <div class="confirm-dialog-icon ${type}">
+                        <i class="fas ${iconClass}"></i>
+                    </div>
+                    <h3 class="confirm-dialog-title">${Security.sanitizeHtml(title)}</h3>
+                    <p class="confirm-dialog-message">${Security.sanitizeHtml(message)}</p>
+                    <div class="confirm-dialog-buttons">
+                        <button class="form-button secondary" onclick="closeConfirmDialog(this)">انصراف</button>
+                        <button class="form-button ${type === 'danger' ? 'danger' : 'primary'}" onclick="confirmAction(this)">تأیید</button>
+                    </div>
+                </div>
+            `;
+            
+            overlay.querySelector('.form-button.secondary').onclick = () => {
+                overlay.remove();
+                if (onCancel) onCancel();
+            };
+            
+            overlay.querySelector('.form-button:last-child').onclick = () => {
+                overlay.remove();
+                if (onConfirm) onConfirm();
+            };
+            
+            document.body.appendChild(overlay);
+        }
+
+        function showPromptDialog(title, message, defaultValue = '', onConfirm) {
+            const overlay = document.createElement('div');
+            overlay.className = 'confirm-dialog';
+            
+            overlay.innerHTML = `
+                <div class="confirm-dialog-content">
+                    <div class="confirm-dialog-icon info">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3 class="confirm-dialog-title">${Security.sanitizeHtml(title)}</h3>
+                    <p class="confirm-dialog-message">${Security.sanitizeHtml(message)}</p>
+                    <input type="text" class="form-input" style="margin: 16px 0;" value="${Security.sanitizeHtml(defaultValue)}" placeholder="مقدار را وارد کنید...">
+                    <div class="confirm-dialog-buttons">
+                        <button class="form-button secondary" onclick="closePromptDialog(this)">انصراف</button>
+                        <button class="form-button primary" onclick="confirmPrompt(this)">تأیید</button>
+                    </div>
+                </div>
+            `;
+            
+            const input = overlay.querySelector('.form-input');
+            const confirmBtn = overlay.querySelector('.form-button.primary');
+            
+            overlay.querySelector('.form-button.secondary').onclick = () => overlay.remove();
+            
+            confirmBtn.onclick = () => {
+                const value = input.value.trim();
+                if (value) {
+                    overlay.remove();
+                    if (onConfirm) onConfirm(value);
+                } else {
+                    input.style.borderColor = 'var(--danger-color)';
+                    input.focus();
+                }
+            };
+            
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') confirmBtn.click();
+            });
+            
+            document.body.appendChild(overlay);
+            input.focus();
+            input.select();
+        }
+
+        function closeConfirmDialog(btn) {
+            btn.closest('.confirm-dialog').remove();
+        }
+
+        function confirmAction(btn) {
+            btn.closest('.confirm-dialog').remove();
+        }
+
+        function closePromptDialog(btn) {
+            btn.closest('.confirm-dialog').remove();
+        }
+
+        function confirmPrompt(btn) {
+            btn.click();
         }
 
         // Terms Modal Functions
@@ -3095,6 +4223,7 @@
             sessionStorage.setItem('azadi_theme', newTheme);
             const themeIcon = document.getElementById('themeIcon');
             if (themeIcon) themeIcon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            showNotification(`حالت ${newTheme === 'dark' ? 'تاریک' : 'روشن'} فعال شد`, 'success');
         }
 
         // Global Variables
@@ -3189,6 +4318,10 @@
                 setupEventListeners();
                 serverUrl = getServerUrl();
                 sessionFingerprint = Security.generateFingerprint();
+                
+                // Load saved preferences
+                currentSortBy = sessionStorage.getItem('users_sort_by') || 'username';
+                currentFilterBy = sessionStorage.getItem('users_filter_by') || 'all';
                 
                 const storedToken = sessionStorage.getItem(CONFIG.tokenKey);
                 const storedUser = sessionStorage.getItem('azadi_username');
@@ -3702,27 +4835,12 @@
             const usersData = await apiCall('/users');
             if (usersData && usersData.users) {
                 users = usersData.users;
-                const searchValue = document.getElementById('userSearch')?.value || '';
-                filteredUsers = Security.validateInput(searchValue) ? users.filter(u => u.username.toLowerCase().includes(searchValue.toLowerCase())) : users;
+                applySortingAndFiltering();
                 currentPage = 1;
                 renderUsersSection();
             } else {
                 document.getElementById('usersContent').innerHTML = `<p style="text-align: center; color: var(--danger-color); padding: 40px;">خطا در بارگذاری کاربران</p>`;
             }
-        }
-
-        function renderUsersSection() {
-            const usersContent = document.getElementById('usersContent');
-            if (!usersContent) return;
-            usersContent.innerHTML = `
-                <div style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="userSearch" placeholder="جستجوی کاربر..." class="search-box" style="flex: 1; min-width: 250px;" maxlength="50">
-                    <button onclick="refreshUsers()" class="form-button"><i class="fas fa-sync-alt"></i> بروزرسانی</button>
-                </div>
-                <div id="usersTable"></div>
-                <div id="usersPagination" class="pagination"></div>`;
-            document.getElementById('userSearch')?.addEventListener('input', filterUsers);
-            displayUsers();
         }
 
         function refreshUsers() {
@@ -3820,8 +4938,7 @@
         }
 
         function filterUsers() {
-            const searchTerm = document.getElementById('userSearch').value.toLowerCase().trim();
-            filteredUsers = searchTerm ? users.filter(u => u.username.toLowerCase().includes(searchTerm)) : users;
+            applySortingAndFiltering();
             currentPage = 1;
             displayUsers();
         }
@@ -3834,6 +4951,7 @@
             hideLoading();
             if (result) {
                 showNotification(`وضعیت کاربر ${Security.sanitizeHtml(username)} تغییر کرد`, 'success');
+                addUserHistory(username, `تغییر وضعیت به ${newStatus === 'active' ? 'فعال' : 'غیرفعال'}`);
                 loadUsers();
             } else {
                 showNotification('خطا در تغییر وضعیت کاربر', 'error');
@@ -3890,6 +5008,7 @@
                         expireDate.setDate(expireDate.getDate() + 30);
                         expireDateInput.value = expireDate.toISOString().split('T')[0];
                     }
+                    addUserHistory(username, 'ایجاد کاربر');
                     await showNewUserConfigs(username);
                     await loadUsers();
                 } else {
@@ -4133,26 +5252,13 @@
                 showNotification('خطا در حذف اکانت تست', 'error');
             }
         }
-        
-        function editUser(username) {
-            const user = users.find(u => u.username === username);
-            if (!user) return showNotification('کاربر یافت نشد', 'error');
-            
-            document.getElementById('editUsername').value = Security.sanitizeHtml(username);
-            document.getElementById('editDataLimit').value = user.data_limit ? (user.data_limit / (1024 * 1024 * 1024)).toFixed(0) : 30;
-            const expireDate = user.expire ? new Date(user.expire * 1000) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-            document.getElementById('editExpireDate').value = expireDate.toISOString().split('T')[0];
-            
-            hideMessage('editUserError');
-            hideMessage('editUserSuccess');
-            document.getElementById('editUserModal').classList.remove('hidden');
-        }
 
         async function handleEditUser(e) {
             e.preventDefault();
             const username = document.getElementById('editUsername').value;
             const dataLimitGB = parseFloat(document.getElementById('editDataLimit').value);
             const expireDateStr = document.getElementById('editExpireDate').value;
+            const notes = document.getElementById('editUserNotes').value;
             
             setLoadingState('editUserForm', 'editUserBtnText', 'editUserSpinner', true);
             showLoading('در حال بروزرسانی...');
@@ -4166,7 +5272,13 @@
             setLoadingState('editUserForm', 'editUserBtnText', 'editUserSpinner', false);
 
             if (result) {
+                // Save notes locally
+                if (notes.trim()) {
+                    sessionStorage.setItem(`user_notes_${username}`, notes.trim());
+                }
+                
                 showMessage('editUserSuccess', 'کاربر با موفقیت بروزرسانی شد.');
+                addUserHistory(username, `ویرایش اطلاعات - حجم: ${dataLimitGB}GB، انقضا: ${new Date(expireDateStr).toLocaleDateString('fa-IR')}`);
                 await loadUsers();
                 setTimeout(closeEditModal, 1500);
             } else {
@@ -4177,6 +5289,7 @@
         function closeEditModal() {
             document.getElementById('editUserModal').classList.add('hidden');
             document.getElementById('editUserForm').reset();
+            currentEditUser = null;
         }
 
         async function showUserConfigs(username) {
